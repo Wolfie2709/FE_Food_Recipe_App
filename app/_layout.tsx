@@ -2,6 +2,9 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
+import { Poppins, Sf_Pro_Text } from "next/font/google";
+import "./globals.css";
+
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
@@ -22,3 +25,14 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  variable: "--font-poppins",
+});
+const sFProText = Sf_Pro_Text({
+  subsets: ["latin"],
+  weight: ["600"],
+  variable: "--font-sf-pro-text",
+});
