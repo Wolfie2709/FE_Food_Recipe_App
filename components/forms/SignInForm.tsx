@@ -10,7 +10,7 @@ export default function Login() {
 
   return (
     <ImageBackground
-      source={require("@/assets/images/burger-bg.png")}
+      source={require("@/components/figma_images/image1.png")}
       style={styles.background}
     >
       <View style={styles.overlay}>
