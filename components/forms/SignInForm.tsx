@@ -1,28 +1,56 @@
-import Button from "@/components/ui/button";
-import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  ImageBackground,
-  StyleSheet,
+  View,
   Text,
   TextInput,
-  View,
+  StyleSheet,
+  ImageBackground,
+  Alert,
 } from "react-native";
+import Button from "@/components/ui/button";
+import { useRouter } from "expo-router";
+import { API_BASE_URL } from "@/utils/apiConfig"; // <-- your config file
 
-export default function SignInForm() {
+export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
 
+  const handleLogin = async () => {
+    console.log("Login pressed");
+    const payload = { username: username.trim(), password: password.trim() };
+  
+    console.log("Request payload:", JSON.stringify(payload));
+    try {
+      const response = await fetch("http://192.168.1.107:5103/api/Auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        Alert.alert("Login failed", "Invalid username or password");
+        return;
+      }
+  
+      const data = await response.json();
+      console.log("Access token:", data.accessToken); 
+  
+      router.push("/"); // <-- valid route
+    } catch (error) {
+      console.error("Login error:", error);
+      Alert.alert("Error", "Could not connect to server");
+    }
+  };
+  
   return (
     <ImageBackground
-      source={require("@/assets/images/figma_images/Image1.png")}
+      source={require("../../assets/images/figma_images/Image1.png")}
       style={styles.background}
     >
       <View style={styles.overlay}>
         <Text style={styles.title}>⭐ 60k+ Premium recipes</Text>
 
-        {/* Rectangle → Username Input */}
         <Text style={styles.label}>Username</Text>
         <TextInput
           style={styles.input}
@@ -31,7 +59,6 @@ export default function SignInForm() {
           onChangeText={setUsername}
         />
 
-        {/* Rectangle → Password Input */}
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
@@ -41,12 +68,14 @@ export default function SignInForm() {
           secureTextEntry
         />
 
-        {/* Rectangle → Login Button */}
-        <Button title="Sign in" onPress={() => router.push("/login")} />
+        <Button title="Login" onPress={handleLogin} />
 
-        <Link push href="/register" style={styles.link}>
+        <Text
+          style={styles.link}
+          onPress={() => router.push("/(auth)/register")}
+        >
           New here? Signup
-        </Link>
+        </Text>
       </View>
     </ImageBackground>
   );
@@ -63,7 +92,7 @@ const styles = StyleSheet.create({
   title: { color: "#fff", fontSize: 18, marginBottom: 20, textAlign: "center" },
   label: { color: "#fff", marginBottom: 5 },
   input: {
-    backgroundColor: "#D9D9D9", // 👈 matches your rectangle color
+    backgroundColor: "#D9D9D9",
     borderRadius: 8,
     padding: 12,
     marginBottom: 15,
