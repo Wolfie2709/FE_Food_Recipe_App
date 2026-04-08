@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 // import { Poppins, Sf_Pro_Text } from "next/font/google";
-import "./globals.css";
+// import "./globals.css";
 
 
 import { useColorScheme } from '@/hooks/use-color-scheme';

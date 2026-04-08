@@ -10,7 +10,7 @@ export default function Login() {
 
   return (
     <ImageBackground
-      source={require("@/components/figma_images/image1.png")}
+      source={require("@/assets/images/figma_images/image1.png")}
       style={styles.background}
     >
       <View style={styles.overlay}>
@@ -38,7 +38,7 @@ export default function Login() {
         {/* Rectangle → Login Button */}
         <Button title="Login" onPress={() => router.push("/(main)/home")} />
 
-        <Text style={styles.link} onPress={() => router.push("/SignUp")}>
+        <Text style={styles.link} onPress={() => router.push("/(main)/(auth)/SignUp")}>
           New here? Signup
         </Text>
       </View>

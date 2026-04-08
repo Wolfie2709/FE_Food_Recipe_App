@@ -12,7 +12,7 @@ export default function Home() {
         <View style={styles.creatorRow}>
           <View style={styles.creator}>
             <Image
-              source={require("@/components/figma_images/Unsplashsfdbi7p47xe.png")}
+              source={require("@/assets/images/figma_images/Unsplashsfdbi7p47xe.png")}
               style={styles.avatar}
             />
             <Text style={styles.creatorName}>Roberta Anny</Text>
@@ -20,7 +20,7 @@ export default function Home() {
 
           <View style={styles.creator}>
             <Image
-              source={require("@\components\figma_images\Unsplashij24uq1smwm.png")}
+              source={require("@/assets/images/figma_images/Unsplashij24uq1smwm.png")}
               style={styles.avatar}
             />
             <Text style={styles.creatorName}>Niki Samantha</Text>
@@ -28,7 +28,7 @@ export default function Home() {
 
           <View style={styles.creator}>
             <Image
-              source={require("@\components\figma_images\Unsplashwnolnjo7ts8.png")}
+              source={require("@/assets/images/figma_images/Unsplashwnolnjo7ts8.png")}
               style={styles.avatar}
             />
             <Text style={styles.creatorName}>James Wolden</Text>
@@ -36,7 +36,7 @@ export default function Home() {
 
           <View style={styles.creator}>
             <Image
-              source={require("@\components\figma_images\Unsplash243q39dzm3m.png")}
+              source={require("@/assets/images/figma_images/Unsplash243q39dzm3m.png")}
               style={styles.avatar}
             />
             <Text style={styles.creatorName}>Troyan Smith</Text>
