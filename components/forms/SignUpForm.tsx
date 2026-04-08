@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 
-export default function SignInForm() {
+export function SignUpForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
@@ -20,8 +20,6 @@ export default function SignInForm() {
       style={styles.background}
     >
       <View style={styles.overlay}>
-        <Text style={styles.title}>⭐ 60k+ Premium recipes</Text>
-
         {/* Rectangle → Username Input */}
         <Text style={styles.label}>Username</Text>
         <TextInput
@@ -42,10 +40,10 @@ export default function SignInForm() {
         />
 
         {/* Rectangle → Login Button */}
-        <Button title="Sign in" onPress={() => router.push("/login")} />
+        <Button title="Sign up" onPress={() => router.push("/login")} />
 
-        <Link push href="/register" style={styles.link}>
-          New here? Signup
+        <Link push href="/login" style={styles.link}>
+          Already have account? Login
         </Link>
       </View>
     </ImageBackground>
