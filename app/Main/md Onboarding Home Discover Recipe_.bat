@@ -1,1 +1,0 @@
-md Onboarding Home Discover Recipe_Detail Create_Recipe Profile_Page

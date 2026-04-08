@@ -2,10 +2,14 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "module": "esnext",          
+    "baseUrl": ".",              
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["*"],              
+      "@/components/*": ["components/*"],
+      "@/lib/*": ["lib/*"],
+      "@/store/*": ["Store/*"],
+      "@/types/*": ["types/*"]
     }
   },
   "include": [
