@@ -1,86 +1,61 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
-import { useAuthStore } from "@/components/Store/authStore";
-import { LoginRequest, LoginResponse } from "@/types";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { RootStackParamList } from "@/components/navigations/types";
+import { View, Text, TextInput, StyleSheet, ImageBackground } from "react-native";
+import Button from "@/components/ui/button";
+import { useRouter } from "expo-router";
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
-
-export default function SignInForm() {
+export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const login = useAuthStore((state) => state.login);
-  const navigation = useNavigation<NavigationProp>();
-
-  const handleSubmit = async () => {
-    try {
-      const payload: LoginRequest = { username, password };
-      const res = await fetch("https://localhost:7240/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) throw new Error("Login failed");
-
-      const response: LoginResponse = await res.json();
-      login(response);
-
-      if (response.role === "admin") {
-        navigation.navigate("Dashboard");
-      } else {
-        navigation.navigate("Home");
-      }
-    } catch (err) {
-      setError("Invalid credentials or server error.");
-    }
-  };
+  const router = useRouter();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sign In</Text>
+    <ImageBackground
+      source={require("@/assets/images/burger-bg.png")}
+      style={styles.background}
+    >
+      <View style={styles.overlay}>
+        <Text style={styles.title}>⭐ 60k+ Premium recipes</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+        {/* Rectangle → Username Input */}
+        <Text style={styles.label}>Username</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your username"
+          value={username}
+          onChangeText={setUsername}
+        />
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+        {/* Rectangle → Password Input */}
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Sign In</Text>
-      </TouchableOpacity>
+        {/* Rectangle → Login Button */}
+        <Button title="Login" onPress={() => router.push("/(main)/home")} />
 
-      <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-        <Text style={styles.link}>Don’t have an account? Sign Up</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
-        <Text style={styles.link}>Forgot Password? Tap here</Text>
-      </TouchableOpacity>
-    </View>
+        <Text style={styles.link} onPress={() => router.push("/SignUp")}>
+          New here? Signup
+        </Text>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20, backgroundColor: "#f9f9f9" },
-  title: { fontSize: 28, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
-  input: { borderWidth: 1, borderColor: "#ccc", padding: 12, borderRadius: 8, marginBottom: 15 },
-  button: { backgroundColor: "#E23E3E", padding: 15, borderRadius: 8, alignItems: "center", marginTop: 10 },
-  buttonText: { color: "#fff", fontWeight: "bold", fontSize: 16 },
-  link: { color: "#007bff", textAlign: "center", marginTop: 15 },
-  error: { color: "red", marginBottom: 10, textAlign: "center" },
+  background: { flex: 1, resizeMode: "cover" },
+  overlay: { flex: 1, justifyContent: "center", padding: 20, backgroundColor: "rgba(0,0,0,0.4)" },
+  title: { color: "#fff", fontSize: 18, marginBottom: 20, textAlign: "center" },
+  label: { color: "#fff", marginBottom: 5 },
+  input: {
+    backgroundColor: "#D9D9D9", // 👈 matches your rectangle color
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
+  },
+  link: { color: "#fff", textAlign: "center", marginTop: 15 },
 });
