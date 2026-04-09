@@ -1,125 +1,149 @@
+import { Link } from "expo-router";
 import React from "react";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
-type Creator = { name: string; image: string };
-type Recipe = { title: string; author: string; image: string; time?: string };
+type Creator = { name: string; image: any };
+type Recipe = { title: string; author: string; image: any; time?: string };
 
 const creators: Creator[] = [
-  { name: "Troyan Smith", image: "/Unsplashgewnwhggxls.png" },
-  { name: "James Wolden", image: "/Unsplashwnolnjo7ts8.png" },
-  { name: "Niki Samantha", image: "/Unsplashsfdbi7p47xe.png" },
-  { name: "Roberta Anny", image: "/Unsplashij24uq1smwm.png" },
+  { name: "Troyan Smith", image: require("@/assets/images/figma_images/Unsplashwnolnjo7ts8.png") },
+  { name: "James Wolden", image: require("@/assets/images/figma_images/Unsplashgewnwhggxls.png") },
+  { name: "Niki Samantha", image: require("@/assets/images/figma_images/Unsplashij24uq1smwm.png") },
+  { name: "Roberta Anny", image: require("@/assets/images/figma_images/Unsplashsfdbi7p47xe.png") },
 ];
 
 const recentRecipes: Recipe[] = [
-  { title: "Indonesian chicken burger", author: "Adrianna Curl", image: "/Image7.png" },
-  { title: "Home made cute pancake", author: "James Wolden", image: "/Image9.png" },
-  { title: "Seafood fried rice", author: "Roberta Anny", image: "/Image10.png" },
+  { title: "Indonesian chicken burger", author: "Adrianna Curl", image: require("@/assets/images/figma_images/Image7.png") },
+  { title: "Home made cute pancake", author: "James Wolden", image: require("@/assets/images/figma_images/Image9.png") },
+  { title: "Seafood fried rice", author: "Roberta Anny", image: require("@/assets/images/figma_images/Image10.png") },
 ];
 
 const trendingRecipes: Recipe[] = [
-  { title: "How to make sushi at home", author: "Niki Samantha", image: "/Image4.png" },
-  { title: "How to make sandwich", author: "Troyan Smith", image: "/Image6.png" },
+  { title: "How to make sushi at home", author: "Niki Samantha", image: require("@/assets/images/figma_images/Image4.png") },
+  { title: "How to make sandwich", author: "Troyan Smith", image: require("@/assets/images/figma_images/Image6.png") },
 ];
 
 function CreatorCard({ name, image }: Creator) {
   return (
-    <div className="flex flex-col items-center">
-      <img src={image} alt={name} className="rounded-full w-20 h-20 object-cover" />
-      <p className="text-gray-800 font-semibold text-xs mt-2 text-center">{name}</p>
-    </div>
+    <View style={styles.creator}>
+      <Image source={image} style={styles.avatar} />
+      <Text style={styles.creatorName}>{name}</Text>
+    </View>
   );
 }
 
 function RecipeCard({ title, author, image, time }: Recipe) {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden w-40">
-      <img src={image} alt={title} className="w-full h-24 object-cover" />
-      <div className="p-2">
-        <p className="text-gray-800 font-semibold text-sm">{title}</p>
-        <p className="text-gray-500 text-xs">By {author}</p>
-        {time && <p className="text-gray-700 text-xs font-medium">⏱ {time}</p>}
-      </div>
-    </div>
+    <View style={styles.recipeCard}>
+      <Image source={image} style={styles.recipeImage} />
+      <Text style={styles.recipeTitle}>{title}</Text>
+      <Text style={styles.recipeAuthor}>By {author}</Text>
+      {time && <Text style={styles.recipeTime}>⏱ {time}</Text>}
+    </View>
   );
 }
 
 export default function Home() {
   return (
-    <div className="flex flex-col bg-white min-h-screen">
+    <ScrollView style={styles.container}>
       {/* Popular creators */}
-      <section className="p-5">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Popular creators</h2>
-          <button className="text-red-500 text-sm font-semibold">See all</button>
-        </div>
-        <div className="flex gap-4">
+      <View style={styles.section}>
+      <Link push style={styles.link} href="/login">
+          Login
+        </Link>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Popular creators</Text>
+          <Text style={styles.link}>See all</Text>
+        </View>
+        <View style={styles.creatorRow}>
           {creators.map((c) => (
             <CreatorCard key={c.name} {...c} />
           ))}
-        </div>
-      </section>
+        </View>
+      </View>
 
       {/* Recent recipes */}
-      <section className="p-5">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Recent recipes</h2>
-          <button className="text-red-500 text-sm font-semibold">See all</button>
-        </div>
-        <div className="flex gap-4">
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recent recipes</Text>
+          <Text style={styles.link}>See all</Text>
+        </View>
+        <View style={styles.recipeRow}>
           {recentRecipes.map((r) => (
             <RecipeCard key={r.title} {...r} />
           ))}
-        </div>
-      </section>
+        </View>
+      </View>
 
       {/* Categories */}
-      <section className="p-5">
-        <h2 className="text-xl font-semibold text-gray-800 mb-3">Popular categories</h2>
-        <div className="flex gap-2 flex-wrap">
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Popular categories</Text>
+        <View style={styles.categoryRow}>
           {["Salad", "Breakfast", "Appetizer", "Noodle", "Lunch"].map((cat) => (
-            <span
+            <Text
               key={cat}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold ${
-                cat === "Breakfast" ? "bg-red-500 text-white" : "bg-white text-red-400 border"
-              }`}
+              style={[
+                styles.category,
+                cat === "Breakfast" && styles.categoryActive,
+              ]}
             >
               {cat}
-            </span>
+            </Text>
           ))}
-        </div>
-      </section>
+        </View>
+      </View>
 
       {/* Trending */}
-      <section className="p-5">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">Trending now 🔥</h2>
-          <button className="text-red-500 text-sm font-semibold">See all</button>
-        </div>
-        <div className="flex gap-4">
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Trending now 🔥</Text>
+          <Text style={styles.link}>See all</Text>
+        </View>
+        <View style={styles.recipeRow}>
           {trendingRecipes.map((r) => (
             <RecipeCard key={r.title} {...r} />
           ))}
-        </div>
-      </section>
+        </View>
+      </View>
 
       {/* Search bar */}
-      <section className="p-5">
-        <div className="flex items-center gap-2 border rounded-lg px-3 py-2 bg-white shadow">
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
-          </svg>
-          <input
-            type="text"
-            placeholder="Search recipes"
-            className="flex-1 text-sm text-gray-500 focus:outline-none"
-          />
-        </div>
-      </section>
+      <View style={styles.section}>
+        <View style={styles.searchBar}>
+          <Text style={styles.searchPlaceholder}>Search recipes</Text>
+        </View>
+      </View>
 
       {/* Hero tagline */}
-      <section className="p-5">
-        <h2 className="text-2xl font-semibold text-gray-800">Find best recipes for cooking</h2>
-      </section>
-    </div>
+      <View style={styles.section}>
+        <Text style={styles.heroText}>Find best recipes for cooking</Text>
+        <Link push style={styles.link} href="/login">
+          Login
+        </Link>
+      </View>
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#fff" },
+  section: { padding: 16 },
+  sectionHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
+  sectionTitle: { fontSize: 18, fontWeight: "600", color: "#303030" },
+  link: { color: "#E23E3E", fontSize: 14, fontWeight: "500" },
+  creatorRow: { flexDirection: "row", gap: 12 },
+  creator: { alignItems: "center", marginRight: 12 },
+  avatar: { width: 60, height: 60, borderRadius: 30 },
+  creatorName: { marginTop: 4, fontSize: 12, fontWeight: "500", color: "#303030" },
+  recipeRow: { flexDirection: "row", gap: 12 },
+  recipeCard: { width: 120, marginRight: 12 },
+  recipeImage: { width: "100%", height: 80, borderRadius: 8 },
+  recipeTitle: { fontSize: 14, fontWeight: "600", color: "#303030", marginTop: 4 },
+  recipeAuthor: { fontSize: 12, color: "#A9A9A9" },
+  recipeTime: { fontSize: 12, color: "#303030", fontWeight: "500" },
+  categoryRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 },
+  category: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, borderWidth: 1, borderColor: "#E23E3E", color: "#E23E3E", fontSize: 12, fontWeight: "500" },
+  categoryActive: { backgroundColor: "#E23E3E", color: "#fff" },
+  searchBar: { borderWidth: 1, borderColor: "#D9D9D9", borderRadius: 8, padding: 10 },
+  searchPlaceholder: { color: "#C1C1C1", fontSize: 14 },
+  heroText: { fontSize: 20, fontWeight: "600", color: "#303030", marginBottom: 8 },
+});
