@@ -7,7 +7,7 @@
     "paths": {
       "@/*": ["*"],              
       "@/components/*": ["components/*"]
-    }
+    } 
   },
   "include": [
     "**/*.ts",

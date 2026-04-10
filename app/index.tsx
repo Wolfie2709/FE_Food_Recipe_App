@@ -8,7 +8,7 @@ export default function Onboarding() {
     <ScrollView contentContainerStyle={styles.container}>
       {/* Background image */}
       <Image
-        source={require("../assets/Image1.png")}
+        source={require("../assets/images/figma_images/Image1.png")}
         style={styles.backgroundImage}
         resizeMode="cover"
       />
@@ -29,7 +29,7 @@ export default function Onboarding() {
       </View>
 
       {/* Button */}
-      <Link href="./(main)/home" asChild>
+      <Link href="./(auth)/login" asChild>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Start cooking</Text>
         </TouchableOpacity>
