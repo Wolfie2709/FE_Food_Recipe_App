@@ -10,6 +10,7 @@ import {
 import Button from "@/components/ui/button";
 import { useRouter } from "expo-router";
 import { API_BASE_URL } from "@/utils/apiConfig"; // <-- your config file
+import { authStyles as styles } from "@/theme";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -80,22 +81,3 @@ export default function Login() {
     </ImageBackground>
   );
 }
-
-const styles = StyleSheet.create({
-  background: { flex: 1, resizeMode: "cover" },
-  overlay: {
-    flex: 1,
-    justifyContent: "center",
-    padding: 20,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-  title: { color: "#fff", fontSize: 18, marginBottom: 20, textAlign: "center" },
-  label: { color: "#fff", marginBottom: 5 },
-  input: {
-    backgroundColor: "#D9D9D9",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 15,
-  },
-  link: { color: "#fff", textAlign: "center", marginTop: 15 },
-});
