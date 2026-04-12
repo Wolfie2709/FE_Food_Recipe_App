@@ -1,18 +1,14 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "strict": true,
-    "module": "esnext",          
-    "baseUrl": ".",              
+    "module": "esnext",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["*"],              
+      "@/*": ["*"],
       "@/components/*": ["components/*"]
     }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
 }

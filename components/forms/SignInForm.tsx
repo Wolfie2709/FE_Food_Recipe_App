@@ -1,15 +1,14 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  ImageBackground,
-  Alert,
-} from "react-native";
 import Button from "@/components/ui/button";
 import { useRouter } from "expo-router";
-import { API_BASE_URL } from "@/utils/apiConfig"; // <-- your config file
+import React, { useState } from "react";
+import {
+  Alert,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -19,30 +18,30 @@ export default function Login() {
   const handleLogin = async () => {
     console.log("Login pressed");
     const payload = { username: username.trim(), password: password.trim() };
-  
+
     console.log("Request payload:", JSON.stringify(payload));
     try {
-      const response = await fetch("http://192.168.1.107:5103/api/Auth/login", {
+      const response = await fetch("http://10.106.38.207:5103/api/Auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) {
         Alert.alert("Login failed", "Invalid username or password");
         return;
       }
-  
+
       const data = await response.json();
-      console.log("Access token:", data.accessToken); 
-  
+      console.log("Access token:", data.accessToken);
+
       router.push("/"); // <-- valid route
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Error", "Could not connect to server");
     }
   };
-  
+
   return (
     <ImageBackground
       source={require("../../assets/images/figma_images/Image1.png")}

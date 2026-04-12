@@ -1,14 +1,14 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  ImageBackground,
-  Alert,
-} from "react-native";
 import Button from "@/components/ui/button";
 import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  Alert,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 
 export default function Register() {
@@ -33,25 +33,25 @@ export default function Register() {
       phonenumber: phonenumber.trim(),
       sex: sex.trim(),
     };
-  
+
     console.log("Request payload:", JSON.stringify(payload));
-  
+
     try {
-      const response = await fetch("http://192.168.1.107:5103/api/Auth/register", {
+      const response = await fetch("http://10.106.38.207:5103/api/Auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-  
+
       // Read the body once
       const text = await response.text();
-  
+
       if (!response.ok) {
         console.error("Registration failed:", text);
         Alert.alert("Registration failed", text || "Please check your details");
         return;
       }
-  
+
       // Try to parse JSON if possible
       let data;
       try {
@@ -62,21 +62,21 @@ export default function Register() {
         router.push("/(auth)/login");
         return;
       }
-  
+
       console.log("Registration response:", data);
-  
+
       if (data.accessToken) {
         console.log("Access token:", data.accessToken);
         // Save token in AsyncStorage or context
       }
-  
+
       router.push("/(auth)/login");
     } catch (error) {
       console.error("Registration error:", error);
       Alert.alert("Error", "Could not connect to server");
     }
   };
-  
+
   return (
     <ImageBackground
       source={require("../../assets/images/figma_images/Image1.png")}
@@ -100,7 +100,7 @@ export default function Register() {
           value={lastname}
           onChangeText={setLastname}
         />
-        
+
         <Text style={styles.label}>Username</Text>
         <TextInput
           style={styles.input}
@@ -117,15 +117,15 @@ export default function Register() {
           onChangeText={setEmail}
         />
 
-      <Text style={styles.label}>Phone number</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your phone number"
-        keyboardType="phone-pad"   // shows number pad
-        value={phonenumber}
-        onChangeText={setPhonenumber}
-        maxLength={10}             // optional limit
-      />
+        <Text style={styles.label}>Phone number</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your phone number"
+          keyboardType="phone-pad"   // shows number pad
+          value={phonenumber}
+          onChangeText={setPhonenumber}
+          maxLength={10}             // optional limit
+        />
 
         <Text style={styles.label}>Sex</Text>
         <TextInput
@@ -134,7 +134,7 @@ export default function Register() {
           value={sex}
           onChangeText={setSex}
         />
-        
+
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
