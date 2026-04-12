@@ -1,13 +1,13 @@
 import Button from "@/components/ui/button";
+import { authStyles as styles } from "@/theme";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
   ImageBackground,
-  StyleSheet,
   Text,
   TextInput,
-  View,
+  View
 } from "react-native";
 
 export default function Login() {
@@ -21,7 +21,7 @@ export default function Login() {
 
     console.log("Request payload:", JSON.stringify(payload));
     try {
-      const response = await fetch("http://10.106.38.207:5103/api/Auth/login", {
+      const response = await fetch("http://192.168.1.126:5103/api/Auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -79,22 +79,3 @@ export default function Login() {
     </ImageBackground>
   );
 }
-
-const styles = StyleSheet.create({
-  background: { flex: 1, resizeMode: "cover" },
-  overlay: {
-    flex: 1,
-    justifyContent: "center",
-    padding: 20,
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
-  title: { color: "#fff", fontSize: 18, marginBottom: 20, textAlign: "center" },
-  label: { color: "#fff", marginBottom: 5 },
-  input: {
-    backgroundColor: "#D9D9D9",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 15,
-  },
-  link: { color: "#fff", textAlign: "center", marginTop: 15 },
-});
