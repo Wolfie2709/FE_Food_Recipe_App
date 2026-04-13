@@ -35,7 +35,7 @@ export default function Login() {
       const data = await response.json();
       console.log("Access token:", data.accessToken);
 
-      router.push("/"); // <-- valid route
+      router.push("/(main)/home"); // <-- valid route
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Error", "Could not connect to server");
