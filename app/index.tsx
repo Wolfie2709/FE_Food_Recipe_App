@@ -1,6 +1,6 @@
-import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import { Link } from "expo-router";
+import React from "react";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { onboardingStyles as styles } from "../theme";
 
 export default function Onboarding() {
