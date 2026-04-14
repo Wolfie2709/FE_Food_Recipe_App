@@ -1,7 +1,12 @@
 import { Link } from "expo-router";
-import React from "react";
-import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, Dimensions, FlatList, Image, ScrollView, Text, View } from "react-native";
 import { homeStyles as styles } from "../../theme";
+import { RecipeBox, RecipePagination } from "../../types";
+
+const screenWidth = Dimensions.get("window").width;
+const spacing = 10;
+const itemWidth = screenWidth / 3 - spacing;
 
 type Creator = { name: string; image: any };
 type Recipe = { title: string; author: string; image: any; time?: string };
@@ -33,23 +38,70 @@ function CreatorCard({ name, image }: Creator) {
   );
 }
 
-function RecipeCard({ title, author, image, time }: Recipe) {
+function RecipeCard({ name, addedBy, rating, imageDirectory }: RecipeBox) {
   return (
     <View style={styles.recipeCard}>
-      <Image source={image} style={styles.recipeImage} />
-      <Text style={styles.recipeTitle}>{title}</Text>
-      <Text style={styles.recipeAuthor}>By {author}</Text>
-      {time && <Text style={styles.recipeTime}>⏱ {time}</Text>}
+      <Image
+        source={imageDirectory ? { uri: imageDirectory } : undefined}
+        style={styles.recipeImage}
+      />
+      <Text style={styles.recipeTitle}>{name}</Text>
+      <Text style={styles.recipeAuthor}>By {addedBy}</Text>
+      {rating && <Text style={styles.recipeTime}>star: {rating}</Text>}
     </View>
   );
 }
 
 export default function Home() {
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState<RecipeBox[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loadData = async (pageToLoad: number) => {
+    if (isLoading) return;
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(
+        `http://10.0.2.2:5103/api/Recipes/home?page=${pageToLoad}&pageSize=15`
+      );
+
+      const res: RecipePagination = await response.json();
+
+      setData(prev => {
+        const newItems = res.recipeList.filter(
+          item => !prev.some(p => p.recipeId === item.recipeId)
+        );
+        return [...prev, ...newItems];
+      }); // 🔥 append
+      setTotalPages(res.totalPages);
+
+    } catch (error) {
+      Alert.alert("Error", "Could not connect to server");
+    }
+
+    setIsLoading(false);
+  };
+
+  const hasLoaded = useRef(false);
+
+  useEffect(() => {
+    if (hasLoaded.current) return;
+
+    hasLoaded.current = true;
+
+    setData([]);
+    setPage(1);
+    loadData(1);
+  }, []);
+
   return (
     <ScrollView style={styles.container}>
       {/* Popular creators */}
       <View style={styles.section}>
-      <Link push style={styles.link} href="/login">
+        <Link push style={styles.link} href="/login">
           Login
         </Link>
         <View style={styles.sectionHeader}>
@@ -69,11 +121,44 @@ export default function Home() {
           <Text style={styles.sectionTitle}>Recent recipes</Text>
           <Text style={styles.link}>See all</Text>
         </View>
-        <View style={styles.recipeRow}>
-          {recentRecipes.map((r) => (
-            <RecipeCard key={r.title} {...r} />
-          ))}
-        </View>
+        <FlatList
+          data={data}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item.recipeId.toString()}
+
+          // ✅ SNAP PER ITEM
+          snapToInterval={itemWidth + spacing}
+          decelerationRate="fast"
+
+          contentContainerStyle={{ paddingHorizontal: spacing }}
+
+          renderItem={({ item }) => (
+            <View style={{ width: itemWidth }}>
+              <RecipeCard {...item} />
+            </View>
+          )}
+
+          ItemSeparatorComponent={() => <View style={{ width: spacing }} />}
+
+          onMomentumScrollEnd={(event) => {
+            const offsetX = event.nativeEvent.contentOffset.x;
+
+            // ✅ Correct index calculation (includes spacing)
+            const currentIndex = Math.floor(offsetX / (itemWidth + spacing));
+
+            // 🔥 Trigger when near end
+            if (
+              currentIndex >= data.length - 4 &&
+              page < totalPages &&
+              !isLoading
+            ) {
+              const nextPage = page + 1;
+              setPage(nextPage);
+              loadData(nextPage);
+            }
+          }}
+        />
       </View>
 
       {/* Categories */}
@@ -100,11 +185,44 @@ export default function Home() {
           <Text style={styles.sectionTitle}>Trending now 🔥</Text>
           <Text style={styles.link}>See all</Text>
         </View>
-        <View style={styles.recipeRow}>
-          {trendingRecipes.map((r) => (
-            <RecipeCard key={r.title} {...r} />
-          ))}
-        </View>
+        <FlatList
+          data={data}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item) => item.recipeId.toString()}
+
+          // ✅ SNAP PER ITEM
+          snapToInterval={itemWidth + spacing}
+          decelerationRate="fast"
+
+          contentContainerStyle={{ paddingHorizontal: spacing }}
+
+          renderItem={({ item }) => (
+            <View style={{ width: itemWidth }}>
+              <RecipeCard {...item} />
+            </View>
+          )}
+
+          ItemSeparatorComponent={() => <View style={{ width: spacing }} />}
+
+          onMomentumScrollEnd={(event) => {
+            const offsetX = event.nativeEvent.contentOffset.x;
+
+            // ✅ Correct index calculation (includes spacing)
+            const currentIndex = Math.floor(offsetX / (itemWidth + spacing));
+
+            // 🔥 Trigger when near end
+            if (
+              currentIndex >= data.length - 4 &&
+              page < totalPages &&
+              !isLoading
+            ) {
+              const nextPage = page + 1;
+              setPage(nextPage);
+              loadData(nextPage);
+            }
+          }}
+        />
       </View>
 
       {/* Search bar */}
