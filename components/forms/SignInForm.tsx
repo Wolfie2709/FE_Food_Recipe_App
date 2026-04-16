@@ -9,6 +9,7 @@ import {
   TextInput,
   View
 } from "react-native";
+import { API_BASE_URL } from "@/utils/apiConfig";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -21,7 +22,7 @@ export default function Login() {
 
     console.log("Request payload:", JSON.stringify(payload));
     try {
-      const response = await fetch("http://10.0.2.2:5103/api/Auth/login", {
+      const response = await fetch("${API_BASE_URL}/api/Auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
