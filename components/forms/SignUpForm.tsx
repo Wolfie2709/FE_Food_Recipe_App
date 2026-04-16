@@ -38,7 +38,7 @@ export default function Register() {
     console.log("Request payload:", JSON.stringify(payload));
 
     try {
-      const response = await fetch("${API_BASE_URL}/api/Auth/register", {
+      const response = await fetch(`${API_BASE_URL}api/Auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
