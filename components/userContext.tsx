@@ -1,5 +1,6 @@
 // UserContext.tsx
-import React, { createContext, useContext, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 type User = { username: string; role: "user" | "admin"; token: string };
 
@@ -9,7 +10,29 @@ const UserContext = createContext<{
 }>({ user: null, setUser: () => {} });
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUserState] = useState<User | null>(null);
+
+  // Load user from storage on app start
+  useEffect(() => {
+    const loadUser = async () => {
+      const stored = await AsyncStorage.getItem("user");
+      if (stored) {
+        setUserState(JSON.parse(stored));
+      }
+    };
+    loadUser();
+  }, []);
+
+  // Save user whenever it changes
+  const setUser = async (u: User | null) => {
+    setUserState(u);
+    if (u) {
+      await AsyncStorage.setItem("user", JSON.stringify(u));
+    } else {
+      await AsyncStorage.removeItem("user");
+    }
+  };
+
   return (
     <UserContext.Provider value={{ user, setUser }}>
       {children}

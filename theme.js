@@ -102,3 +102,59 @@ export const authStyles = StyleSheet.create({
   input: { backgroundColor: "#D9D9D9", borderRadius: 8, padding: 12, marginBottom: 15 },
   link: { color: "#fff", textAlign: "center", marginTop: 15 },
 });
+
+export const ManagementStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    padding: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 20,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontWeight: "300",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  searchBar: {
+    borderWidth: 1,
+    borderColor: "#000",
+    backgroundColor: "#FFF",
+    padding: 12,
+    marginBottom: 20,
+  },
+  searchText: {
+    fontSize: 14,
+    color: "#000",
+  },
+  tableHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderColor: "#000",
+    paddingVertical: 8,
+  },
+  tableHeaderText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#000",
+  },
+  tableRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+  },
+  tableCell: {
+    fontSize: 13,
+    color: "#000",
+  },
+  section: { padding: 16 },
+  link: { color: "#E23E3E", fontSize: 14, fontWeight: "500" },
+});

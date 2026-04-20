@@ -1,4 +1,5 @@
-import { Link } from "expo-router";
+import { useUser } from "@/components/userContext";
+import { API_BASE_URL } from "@/utils/apiConfig";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Dimensions, FlatList, Image, ScrollView, Text, View } from "react-native";
 import { homeStyles as styles } from "../../theme";
@@ -53,21 +54,21 @@ function RecipeCard({ name, addedBy, rating, imageDirectory }: RecipeBox) {
 }
 
 export default function Home() {
+  const { user } = useUser(); 
   const [page, setPage] = useState(1);
   const [data, setData] = useState<RecipeBox[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  console.log("Home sees user:", user);
 
   const loadData = async (pageToLoad: number) => {
     if (isLoading) return;
-
     setIsLoading(true);
 
     try {
       const response = await fetch(
-        `http://10.0.2.2:5103/api/Recipes/home?page=${pageToLoad}&pageSize=15`
+        `${API_BASE_URL}api/Recipes/home?page=${pageToLoad}&pageSize=15`
       );
-
       const res: RecipePagination = await response.json();
 
       setData(prev => {
@@ -75,12 +76,13 @@ export default function Home() {
           item => !prev.some(p => p.recipeId === item.recipeId)
         );
         return [...prev, ...newItems];
-      }); // 🔥 append
+      });
       setTotalPages(res.totalPages);
-
+      
     } catch (error) {
       Alert.alert("Error", "Could not connect to server");
     }
+    
 
     setIsLoading(false);
   };
@@ -89,9 +91,7 @@ export default function Home() {
 
   useEffect(() => {
     if (hasLoaded.current) return;
-
     hasLoaded.current = true;
-
     setData([]);
     setPage(1);
     loadData(1);
@@ -99,19 +99,24 @@ export default function Home() {
 
   return (
     <ScrollView style={styles.container}>
+      {/* Greeting */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>
+        Welcome {user?.username ?? "Guest"}
+        </Text>
+        <Text style={styles.sectionSubtitle}>
+          Find best recipes for cooking
+        </Text>
+      </View>
+
       {/* Popular creators */}
       <View style={styles.section}>
-        <Link push style={styles.link} href="/login">
-          Login
-        </Link>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Popular creators</Text>
           <Text style={styles.link}>See all</Text>
         </View>
         <View style={styles.creatorRow}>
-          {creators.map((c) => (
-            <CreatorCard key={c.name} {...c} />
-          ))}
+          {/* map creators here */}
         </View>
       </View>
 
@@ -126,28 +131,18 @@ export default function Home() {
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item) => item.recipeId.toString()}
-
-          // ✅ SNAP PER ITEM
           snapToInterval={itemWidth + spacing}
           decelerationRate="fast"
-
           contentContainerStyle={{ paddingHorizontal: spacing }}
-
           renderItem={({ item }) => (
             <View style={{ width: itemWidth }}>
               <RecipeCard {...item} />
             </View>
           )}
-
           ItemSeparatorComponent={() => <View style={{ width: spacing }} />}
-
           onMomentumScrollEnd={(event) => {
             const offsetX = event.nativeEvent.contentOffset.x;
-
-            // ✅ Correct index calculation (includes spacing)
             const currentIndex = Math.floor(offsetX / (itemWidth + spacing));
-
-            // 🔥 Trigger when near end
             if (
               currentIndex >= data.length - 4 &&
               page < totalPages &&
@@ -190,28 +185,18 @@ export default function Home() {
           horizontal
           showsHorizontalScrollIndicator={false}
           keyExtractor={(item) => item.recipeId.toString()}
-
-          // ✅ SNAP PER ITEM
           snapToInterval={itemWidth + spacing}
           decelerationRate="fast"
-
           contentContainerStyle={{ paddingHorizontal: spacing }}
-
           renderItem={({ item }) => (
             <View style={{ width: itemWidth }}>
               <RecipeCard {...item} />
             </View>
           )}
-
           ItemSeparatorComponent={() => <View style={{ width: spacing }} />}
-
           onMomentumScrollEnd={(event) => {
             const offsetX = event.nativeEvent.contentOffset.x;
-
-            // ✅ Correct index calculation (includes spacing)
             const currentIndex = Math.floor(offsetX / (itemWidth + spacing));
-
-            // 🔥 Trigger when near end
             if (
               currentIndex >= data.length - 4 &&
               page < totalPages &&
@@ -230,14 +215,6 @@ export default function Home() {
         <View style={styles.searchBar}>
           <Text style={styles.searchPlaceholder}>Search recipes</Text>
         </View>
-      </View>
-
-      {/* Hero tagline */}
-      <View style={styles.section}>
-        <Text style={styles.heroText}>Find best recipes for cooking</Text>
-        <Link push style={styles.link} href="/login">
-          Login
-        </Link>
       </View>
     </ScrollView>
   );

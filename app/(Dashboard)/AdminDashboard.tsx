@@ -59,13 +59,29 @@ export default function AdminDashboard() {
 
       {/* Admin controls */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Admin Controls</Text>
-        {["Recipes", "Ingredients", "Users", "Reviews", "Logging"].map((ctrl) => (
-          <Link key={ctrl} push style={styles.link} href={`./admin/${ctrl.toLowerCase()}`}>
-            {ctrl}
-          </Link>
-        ))}
-      </View>
+  <Text style={styles.sectionTitle}>Admin Controls</Text>
+
+  <Link push style={styles.link} href="./Recipe/RecipeManagement">
+    Recipes
+  </Link>
+
+  {/* <Link push style={styles.link} href="/(Dashboard)/Ingredients">
+    Ingredients
+  </Link>
+
+  <Link push style={styles.link} href="/(Dashboard)/Users">
+    Users
+  </Link>
+
+  <Link push style={styles.link} href="/(Dashboard)/Reviews">
+    Reviews
+  </Link>
+
+  <Link push style={styles.link} href="/(Dashboard)/Logging">
+    Logging
+  </Link> */}
+</View>
+
 
       {/* Recent activity */}
       <View style={styles.section}>

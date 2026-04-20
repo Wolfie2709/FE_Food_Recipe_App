@@ -79,10 +79,11 @@ export type RecipeBoxDTO = {
     imageUrl: string;
 };
 export type Recipe = {
-    id: number;
+    recipeId: number;
     name: string;
     cookingTime: number;
     servingSize: number;
+    category: Category;
  };
 export type KitchenUtensils = {
     id: number;

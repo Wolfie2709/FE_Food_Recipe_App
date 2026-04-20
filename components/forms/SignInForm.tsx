@@ -10,13 +10,13 @@ import {
   TextInput,
   View
 } from "react-native";
-import { useUser } from "../userContext"; // <-- import your context
+import { useUser } from "../userContext";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
-  const { setUser } = useUser(); // <-- context setter
+  const { setUser } = useUser(); 
 
   const handleLogin = async () => {
     console.log("Login pressed");
@@ -35,15 +35,13 @@ export default function Login() {
       }
 
       const data = await response.json();
-      // Example response: { accessToken, username, role }
-
-      // Save user in context
+      console.log(data.username);
       setUser({
         username: data.username,
         role: data.role,
         token: data.accessToken,
       });
-
+      
       // Navigate based on role
       if (data.role === "admin") {
         router.replace("../(Dashboard)/AdminDashboard");

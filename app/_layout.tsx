@@ -1,38 +1,32 @@
+import { UserProvider } from "@/components/userContext";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Poppins_400Regular, Poppins_600SemiBold, useFonts } from '@expo-google-fonts/poppins';
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { Stack } from "expo-router";
+import AppLoading from 'expo-app-loading';
+import { Slot } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import "react-native-reanimated";
-// import { Poppins, Sf_Pro_Text } from "next/font/google";
-// import "./globals.css";
-
-import { useColorScheme } from "@/hooks/use-color-scheme";
-
-export const unstable_settings = {
-  anchor: "(tabs)",
-};
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_600SemiBold,
+  });
+
+  if (!fontsLoaded) {
+    return <AppLoading />;
+  }
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack></Stack>
+      <UserProvider>
+        <Slot />
+      </UserProvider>
       <StatusBar style="auto" />
     </ThemeProvider>
   );
 }
-
-// const poppins = Poppins({
-//   subsets: ["latin"],
-//   weight: ["400", "600"],
-//   variable: "--font-poppins",
-// });
-// const sFProText = Sf_Pro_Text({
-//   subsets: ["latin"],
-//   weight: ["600"],
-//   variable: "--font-sf-pro-text",
-// });
