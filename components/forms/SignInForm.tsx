@@ -1,5 +1,6 @@
 import Button from "@/components/ui/button";
 import { authStyles as styles } from "@/theme";
+import { API_BASE_URL } from "@/utils/apiConfig";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -9,19 +10,18 @@ import {
   TextInput,
   View
 } from "react-native";
-import { API_BASE_URL } from "@/utils/apiConfig";
-
+import { useUser } from "../userContext";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
+  const { setUser } = useUser();
 
   const handleLogin = async () => {
     console.log("Login pressed");
     const payload = { username: username.trim(), password: password.trim() };
 
-    console.log("Request payload:", JSON.stringify(payload));
     try {
       const response = await fetch(`${API_BASE_URL}api/Auth/login`, {
         method: "POST",
@@ -35,9 +35,21 @@ export default function Login() {
       }
 
       const data = await response.json();
-      console.log("Access token:", data.accessToken);
+      // Example response: { accessToken, username, role }
 
-      router.push("/(main)/home"); // <-- valid route
+      // Save user in context
+      setUser({
+        username: data.username,
+        role: data.role,
+        token: data.accessToken,
+      });
+
+      // Navigate based on role
+      if (data.role === "admin") {
+        router.replace("../(Dashboard)/AdminDashboard");
+      } else {
+        router.replace("/(main)/home");
+      }
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Error", "Could not connect to server");

@@ -23,6 +23,61 @@ export const homeStyles = StyleSheet.create({
   searchBar: { borderWidth: 1, borderColor: "#D9D9D9", borderRadius: 8, padding: 10 },
   searchPlaceholder: { color: "#C1C1C1", fontSize: 14 },
   heroText: { fontSize: 20, fontWeight: "600", color: "#303030", marginBottom: 8 },
+
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 4,
+    textAlign: "left",
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#555",
+    textAlign: "left",
+  },
+
+
+  statCard: {
+    flex: 1,
+    margin: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 3, // Android shadow
+    shadowColor: "#000", // iOS shadow
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  statTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 6,
+    textAlign: "center",
+  },
+  statValue: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 4,
+    textAlign: "center",
+  },
+  statSubtitle: {
+    fontSize: 12,
+    fontWeight: "400",
+    color: "#333",
+    textAlign: "center",
+  },
+  sectionRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginHorizontal: 12,
+  },
 });
 
 export const onboardingStyles = StyleSheet.create({

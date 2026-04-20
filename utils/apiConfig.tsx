@@ -1,6 +1,6 @@
 export const API_CONFIG = {
     local_emulator: "http://10.0.2.2:5103/",
-    phone_test: "http://192.168.1.107:5103/"
+    phone_test: "http://192.168.1.108:5103/"
 };
 
 
