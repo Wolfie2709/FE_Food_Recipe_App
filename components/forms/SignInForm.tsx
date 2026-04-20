@@ -10,13 +10,13 @@ import {
   TextInput,
   View
 } from "react-native";
-import { useUser } from "../userContext";
+import { useUser } from "../userContext"; // <-- import your context
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
-  const { setUser } = useUser();
+  const { setUser } = useUser(); // <-- context setter
 
   const handleLogin = async () => {
     console.log("Login pressed");
@@ -37,7 +37,19 @@ export default function Login() {
       const data = await response.json();
       // Example response: { accessToken, username, role }
 
-      router.push("//(main)/home"); // <-- valid route
+      // Save user in context
+      setUser({
+        username: data.username,
+        role: data.role,
+        token: data.accessToken,
+      });
+
+      // Navigate based on role
+      if (data.role === "admin") {
+        router.replace("../(Dashboard)/AdminDashboard");
+      } else {
+        router.replace("../(main)/home");
+      }
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Error", "Could not connect to server");
