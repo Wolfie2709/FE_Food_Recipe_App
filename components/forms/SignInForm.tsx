@@ -37,19 +37,7 @@ export default function Login() {
       const data = await response.json();
       // Example response: { accessToken, username, role }
 
-      // Save user in context
-      setUser({
-        username: data.username,
-        role: data.role,
-        token: data.accessToken,
-      });
-
-      // Navigate based on role
-      if (data.role === "admin") {
-        router.replace("../(Dashboard)/AdminDashboard");
-      } else {
-        router.replace("/(main)/home");
-      }
+      router.push("//(main)/home"); // <-- valid route
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Error", "Could not connect to server");
