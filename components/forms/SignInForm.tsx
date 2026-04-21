@@ -16,7 +16,7 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const router = useRouter();
-  const { setUser } = useUser(); 
+  const { setUser } = useUser();
 
   const handleLogin = async () => {
     console.log("Login pressed");
@@ -41,7 +41,7 @@ export default function Login() {
         role: data.role,
         token: data.accessToken,
       });
-      
+
       // Navigate based on role
       if (data.role === "admin") {
         router.replace("../(Dashboard)/AdminDashboard");

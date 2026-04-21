@@ -10,25 +10,6 @@ const spacing = 10;
 const itemWidth = screenWidth / 3 - spacing;
 
 type Creator = { name: string; image: any };
-type Recipe = { title: string; author: string; image: any; time?: string };
-
-const creators: Creator[] = [
-  { name: "Troyan Smith", image: require("@/assets/images/figma_images/Unsplashwnolnjo7ts8.png") },
-  { name: "James Wolden", image: require("@/assets/images/figma_images/Unsplashgewnwhggxls.png") },
-  { name: "Niki Samantha", image: require("@/assets/images/figma_images/Unsplashij24uq1smwm.png") },
-  { name: "Roberta Anny", image: require("@/assets/images/figma_images/Unsplashsfdbi7p47xe.png") },
-];
-
-const recentRecipes: Recipe[] = [
-  { title: "Indonesian chicken burger", author: "Adrianna Curl", image: require("@/assets/images/figma_images/Image7.png") },
-  { title: "Home made cute pancake", author: "James Wolden", image: require("@/assets/images/figma_images/Image9.png") },
-  { title: "Seafood fried rice", author: "Roberta Anny", image: require("@/assets/images/figma_images/Image10.png") },
-];
-
-const trendingRecipes: Recipe[] = [
-  { title: "How to make sushi at home", author: "Niki Samantha", image: require("@/assets/images/figma_images/Image4.png") },
-  { title: "How to make sandwich", author: "Troyan Smith", image: require("@/assets/images/figma_images/Image6.png") },
-];
 
 function CreatorCard({ name, image }: Creator) {
   return (
@@ -40,10 +21,11 @@ function CreatorCard({ name, image }: Creator) {
 }
 
 function RecipeCard({ name, addedBy, rating, imageDirectory }: RecipeBox) {
+  let URL = API_BASE_URL.slice(0, -1);
   return (
     <View style={styles.recipeCard}>
       <Image
-        source={imageDirectory ? { uri: imageDirectory } : undefined}
+        source={imageDirectory ? { uri: `${URL}${imageDirectory}` } : undefined}
         style={styles.recipeImage}
       />
       <Text style={styles.recipeTitle}>{name}</Text>
@@ -54,7 +36,7 @@ function RecipeCard({ name, addedBy, rating, imageDirectory }: RecipeBox) {
 }
 
 export default function Home() {
-  const { user } = useUser(); 
+  const { user } = useUser();
   const [page, setPage] = useState(1);
   const [data, setData] = useState<RecipeBox[]>([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -78,11 +60,11 @@ export default function Home() {
         return [...prev, ...newItems];
       });
       setTotalPages(res.totalPages);
-      
+
     } catch (error) {
       Alert.alert("Error", "Could not connect to server");
     }
-    
+
 
     setIsLoading(false);
   };
@@ -102,7 +84,7 @@ export default function Home() {
       {/* Greeting */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
-        Welcome {user?.username ?? "Guest"}
+          Welcome {user?.username ?? "Guest"}
         </Text>
         <Text style={styles.sectionSubtitle}>
           Find best recipes for cooking
