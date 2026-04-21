@@ -26,7 +26,7 @@ type RecipeIngredient = {
 
 export default function AddNewRecipeForm() {
   const { user } = useUser();
-  const { id } = useLocalSearchParams(); // recipeId passed from RecipeManagement
+  const { recipeId } = useLocalSearchParams(); // recipeId passed from RecipeManagement
   const [serves, setServes] = useState("1");
   const [cookTime, setCookTime] = useState("0");
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -45,6 +45,8 @@ export default function AddNewRecipeForm() {
       .then((data) => setIngredients(data))
       .catch((err) => console.error("Error loading ingredients:", err));
   }, []);
+
+  console.log("Updating recipe with id:", recipeId);
 
   const addIngredientRow = () => {
     setRecipeIngredients([...recipeIngredients, { ingredientId: null, quantity: "" }]);
@@ -77,9 +79,13 @@ export default function AddNewRecipeForm() {
         console.error("No token available");
         return;
       }
-      const response = await fetch(`http://192.168.1.108:5103/api/Recipes/update-recipe/${id}`, {
+
+      const response = await fetch(`http://192.168.1.108:5103/api/Recipes/update-recipe/${recipeId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}`, },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token}`,
+        },
         body: JSON.stringify(payload),
       });
 
@@ -89,9 +95,10 @@ export default function AddNewRecipeForm() {
         return;
       }
 
+      // Navigate using the same id we received
       router.push({
         pathname: "./AddCookingSteps",
-        params: { recipeId: id.toString() },
+        params: { id: recipeId.toString() },
       });
     } catch (error) {
       console.error("Error updating recipe:", error);
