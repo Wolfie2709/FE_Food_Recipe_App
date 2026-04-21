@@ -3,7 +3,8 @@ import { ManagementStyles as styles } from "@/theme";
 import type { Recipe } from "@/types";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Button, FlatList, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Button from "../../../components/ui/button";
 
 export default function RecipeManagement() {
   const { user } = useUser();
@@ -78,7 +79,7 @@ export default function RecipeManagement() {
         const latest = recipes[recipes.length - 1];
         if (latest?.recipeId) {
           router.push({
-            pathname: "/(Dashboard)/Recipe/AddNewRecipe",
+            pathname: "./add-recipe/AddNewRecipe",
             params: { id: latest.recipeId.toString() },
           });
         }
@@ -91,7 +92,7 @@ export default function RecipeManagement() {
       }
 
       router.push({
-        pathname: "/(Dashboard)/Recipe/AddNewRecipe",
+        pathname: "./add-recipe/AddNewRecipe",
         params: { id: newRecipe.recipeId.toString() },
       });
 
@@ -103,16 +104,18 @@ export default function RecipeManagement() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>RECIPES</Text>
-      <Text style={styles.subtitle}>Recipe Management</Text>
+      <Text style={styles.title}>Recipe Management</Text>
 
-      {/* Search bar placeholder */}
+      {/* Search bar */}
       <View style={styles.searchBar}>
-        <Text style={styles.searchText}>Search</Text>
+        <TextInput style={styles.searchText} placeholder="Search recipes..." />
       </View>
 
-      {/* Add New Recipe button */}
-      <Button title="Add New Recipe" onPress={createRecipe} />
+      {/* Filter + Add New Recipe buttons */}
+      <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
+        <Button title="Filter" onPress={() => {}} />
+        <Button title="Add New Recipe" onPress={createRecipe} />
+      </View>
 
       {/* Table header */}
       <View style={styles.tableHeader}>
@@ -129,7 +132,7 @@ export default function RecipeManagement() {
             style={styles.tableRow}
             onPress={() =>
               router.push({
-                pathname: "/(Dashboard)/Recipe/AddNewRecipe",
+                pathname: "./Recipe/AddNewRecipe",
                 params: { id: item.recipeId.toString() },
               })
             }

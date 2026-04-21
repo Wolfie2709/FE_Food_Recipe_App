@@ -1,14 +1,15 @@
+import { RecipeFormStyles as styles } from "@/theme";
+import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useState } from "react";
 import {
-    Button,
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  FlatList,
+  Image,
+  Text,
+  TextInput,
+  View
 } from "react-native";
+import Button from "../ui/button";
 
 type Ingredient = {
   ingredientId: number;
@@ -21,7 +22,7 @@ type RecipeIngredient = {
   quantity: string;
 };
 
-export default function AddCookingRecipe() {
+export default function AddNewRecipeForm() {
   const [serves, setServes] = useState("1");
   const [cookTime, setCookTime] = useState("0");
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -32,7 +33,7 @@ export default function AddCookingRecipe() {
   const [utensils, setUtensils] = useState<string[]>([]);
   const [recipeImage, setRecipeImage] = useState<string | null>(null);
 
-  // Load available ingredients from API
+  // Load available ingredients
   useEffect(() => {
     fetch("http://192.168.1.108:5103/api/Ingredients/all")
       .then((res) => res.json())
@@ -40,34 +41,30 @@ export default function AddCookingRecipe() {
       .catch((err) => console.error("Error loading ingredients:", err));
   }, []);
 
-  // Add new ingredient row
   const addIngredientRow = () => {
     setRecipeIngredients([...recipeIngredients, { ingredientId: null, quantity: "" }]);
   };
 
-  // Pick image from gallery
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 0.8,
     });
-
     if (!result.canceled) {
       setRecipeImage(result.assets[0].uri);
     }
   };
 
-  // Submit recipe
   const submitRecipe = async () => {
     const payload = {
       name: "My Recipe",
-      serves: parseInt(serves),
-      cookTime: parseInt(cookTime),
+      serves: parseInt(serves, 10),
+      cookTime: parseInt(cookTime, 10),
       ingredients: recipeIngredients,
       category,
       utensils,
-      imageUrl: recipeImage, // include image URL
+      imageUrl: recipeImage,
     };
 
     try {
@@ -84,7 +81,7 @@ export default function AddCookingRecipe() {
   };
 
   return (
-    <View style={styles.container}>
+    <View>
       <Text style={styles.header}>Create Recipe</Text>
 
       {/* Recipe Image */}
@@ -99,10 +96,10 @@ export default function AddCookingRecipe() {
       {/* Serves */}
       <Text>Serves:</Text>
       <TextInput
-        style={styles.input}
+        style={styles.input}   // force visible text color
         keyboardType="numeric"
-        value={serves}
-        onChangeText={setServes}
+        value={serves}                              // must be a string
+        onChangeText={(val) => setServes(val)}      // don’t parse here
       />
 
       {/* Cook Time */}
@@ -111,55 +108,63 @@ export default function AddCookingRecipe() {
         style={styles.input}
         keyboardType="numeric"
         value={cookTime}
-        onChangeText={setCookTime}
+        onChangeText={(val) => setServes(val)}
       />
 
       {/* Ingredients */}
-<Text style={styles.sectionTitle}>Ingredients</Text>
-<FlatList
-  data={recipeIngredients}
-  keyExtractor={(_, index) => index.toString()}
-  renderItem={({ item, index }) => (
-    <View style={styles.ingredientRow}>
-      {/* Ingredient ID input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Ingredient ID"
-        value={item.ingredientId?.toString() ?? ""}
-        onChangeText={(val) => {
-          const updated = [...recipeIngredients];
-          updated[index].ingredientId = parseInt(val);
-          setRecipeIngredients(updated);
-        }}
+      <Text style={styles.sectionTitle}>Ingredients</Text>
+      <FlatList
+        data={recipeIngredients}
+        keyExtractor={(_, index) => index.toString()}
+        renderItem={({ item, index }) => (
+          <View style={styles.ingredientRow}>
+            {/* Ingredient dropdown */}
+            <Picker
+              selectedValue={item.ingredientId ?? ""}
+              style={styles.input}
+              onValueChange={(val) => {
+                const updated = [...recipeIngredients];
+                // Convert to number if not empty string
+                updated[index].ingredientId = val === "" ? null : Number(val);
+                setRecipeIngredients(updated);
+              }}
+            >
+              <Picker.Item label="Select ingredient..." value="" />
+              {ingredients.map((ing) => (
+                <Picker.Item
+                  key={ing.ingredientId}
+                  label={ing.name}
+                  value={ing.ingredientId} // always a number
+                />
+              ))}
+            </Picker>
+
+            {/* Quantity input */}
+            <TextInput
+              style={styles.input}
+              placeholder="Quantity (e.g. 250gr)"
+              value={item.quantity}
+              onChangeText={(val) => {
+                const updated = [...recipeIngredients];
+                updated[index].quantity = val;
+                setRecipeIngredients(updated);
+              }}
+            />
+
+            {/* Ingredient image preview */}
+            {item.ingredientId && (
+              <Image
+                source={{
+                  uri:
+                    ingredients.find((ing) => ing.ingredientId === item.ingredientId)
+                      ?.imageUrl || "",
+                }}
+                style={{ width: 40, height: 40 }}
+              />
+            )}
+          </View>
+        )}
       />
-
-      {/* Quantity input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Quantity (e.g. 250gr)"
-        value={item.quantity}
-        onChangeText={(val) => {
-          const updated = [...recipeIngredients];
-          updated[index].quantity = val;
-          setRecipeIngredients(updated);
-        }}
-      />
-
-      {/* Ingredient image */}
-      {item.ingredientId && (
-        <Image
-          source={{
-            uri:
-              ingredients.find((ing) => ing.ingredientId === item.ingredientId)
-                ?.imageUrl || "",
-          }}
-          style={{ width: 40, height: 40 }}
-        />
-      )}
-    </View>
-  )}
-/>
-
       <Button title="Add new ingredient" onPress={addIngredientRow} />
 
       {/* Category */}
@@ -180,23 +185,8 @@ export default function AddCookingRecipe() {
         onChangeText={(val) => setUtensils(val.split(","))}
       />
 
-      <Button title="Submit Recipe" onPress={submitRecipe} />
+      <Button title="Add cooking steps" onPress={submitRecipe} />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: "#FFF" },
-  header: { fontSize: 22, fontWeight: "bold", marginBottom: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: "600", marginTop: 20 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 8,
-    marginVertical: 8,
-    borderRadius: 6,
-    flex: 1,
-  },
-  ingredientRow: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  recipeImage: { width: 200, height: 200, marginVertical: 10, borderRadius: 8 },
-});

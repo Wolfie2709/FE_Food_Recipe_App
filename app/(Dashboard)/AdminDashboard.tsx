@@ -1,11 +1,7 @@
 import { Link } from "expo-router";
 import React from "react";
-import { Dimensions, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { homeStyles as styles } from "../../theme";
-
-const screenWidth = Dimensions.get("window").width;
-const spacing = 10;
-const itemWidth = screenWidth / 2 - spacing; // wider cards for admin stats
 
 type StatCardProps = {
   title: string;
@@ -24,30 +20,23 @@ function StatCard({ title, value, subtitle, color }: StatCardProps) {
   );
 }
 
-// Fake data for dashboard
 const fakeStats = [
-  { title: "Recipes", value: 120, subtitle: "+5 last 7 days", color: "#E94B4B" },
-  { title: "Ingredients", value: 340, subtitle: "+12 last 7 days", color: "#6FEF0E" },
-  { title: "Users", value: 89, subtitle: "+3 last 7 days", color: "#A45EE2" },
-  { title: "Reviews", value: 45, subtitle: "+7 last 7 days", color: "#C4E044" },
-];
-
-const fakeRecentRecipes = [
-  { name: "Indonesian Chicken Burger", addedBy: "Adrianna Curl" },
-  { name: "Homemade Pancake", addedBy: "James Wolden" },
-  { name: "Seafood Fried Rice", addedBy: "Roberta Anny" },
+  { title: "Recipes", value: 120, subtitle: "5 in last 7 days", color: "#E94B4B" },
+  { title: "Ingredients", value: 340, subtitle: "12 in last 7 days", color: "#6FEF0E" },
+  { title: "Users", value: 89, subtitle: "3 in last 7 days", color: "#A45EE2" },
+  { title: "Reviews", value: 45, subtitle: "7 in last 7 days", color: "#C4E044" },
 ];
 
 export default function AdminDashboard() {
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
+      {/* Greeting */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Admin Panel</Text>
-        <Text style={styles.sectionSubtitle}>Hi admin, welcome back</Text>
+        <Text style={styles.sectionSubtitle}>Hi admin, welcome back to your admin panel.</Text>
       </View>
 
-      {/* Dashboard stats */}
+      {/* Stats */}
       <View style={styles.sectionRow}>
         <StatCard {...fakeStats[0]} />
         <StatCard {...fakeStats[1]} />
@@ -57,11 +46,10 @@ export default function AdminDashboard() {
         <StatCard {...fakeStats[3]} />
       </View>
 
-      {/* Admin controls */}
+      {/* Admin Controls */}
       <View style={styles.section}>
-  <Text style={styles.sectionTitle}>Admin Controls</Text>
-
-  <Link push style={styles.link} href="./Recipe/RecipeManagement">
+        <Text style={styles.sectionTitle}>Admin Controls</Text>
+        <Link push style={styles.link} href="./Recipe/RecipeManagement">
     Recipes
   </Link>
 
@@ -80,16 +68,14 @@ export default function AdminDashboard() {
   <Link push style={styles.link} href="/(Dashboard)/Logging">
     Logging
   </Link> */}
-</View>
+      </View>
 
 
-      {/* Recent activity */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Recipes</Text>
-        {fakeRecentRecipes.map((item, index) => (
-          <View key={index} style={{ marginVertical: 8 }}>
-            <Text style={styles.recipeTitle}>{item.name}</Text>
-            <Text style={styles.recipeAuthor}>By {item.addedBy}</Text>
+      {/* Bottom sections */}
+      <View style={styles.sectionRow}>
+        {["Time", "Recipes", "Ingredients", "Charts", "Users", "Reviews"].map((section) => (
+          <View key={section} style={styles.statCard}>
+            <Text style={styles.statTitle}>{section}</Text>
           </View>
         ))}
       </View>
