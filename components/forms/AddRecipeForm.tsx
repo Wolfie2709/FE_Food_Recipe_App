@@ -1,13 +1,15 @@
+import { useUser } from "@/components/userContext";
 import { RecipeFormStyles as styles } from "@/theme";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  FlatList,
   Image,
+  ScrollView,
   Text,
   TextInput,
-  View
+  View,
 } from "react-native";
 import Button from "../ui/button";
 
@@ -23,6 +25,8 @@ type RecipeIngredient = {
 };
 
 export default function AddNewRecipeForm() {
+  const { user } = useUser();
+  const { id } = useLocalSearchParams(); // recipeId passed from RecipeManagement
   const [serves, setServes] = useState("1");
   const [cookTime, setCookTime] = useState("0");
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -32,6 +36,7 @@ export default function AddNewRecipeForm() {
   const [category, setCategory] = useState("");
   const [utensils, setUtensils] = useState<string[]>([]);
   const [recipeImage, setRecipeImage] = useState<string | null>(null);
+  const router = useRouter();
 
   // Load available ingredients
   useEffect(() => {
@@ -56,11 +61,11 @@ export default function AddNewRecipeForm() {
     }
   };
 
-  const submitRecipe = async () => {
+  const goToCookingSteps = async () => {
     const payload = {
       name: "My Recipe",
-      serves: parseInt(serves, 10),
-      cookTime: parseInt(cookTime, 10),
+      servingSize: parseInt(serves, 10),   // match backend naming
+      cookingTime: parseInt(cookTime, 10), // match backend naming
       ingredients: recipeIngredients,
       category,
       utensils,
@@ -68,20 +73,33 @@ export default function AddNewRecipeForm() {
     };
 
     try {
-      const response = await fetch("http://192.168.1.108:5103/api/Recipes/create-recipe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      if (!user?.token) {
+        console.error("No token available");
+        return;
+      }
+      const response = await fetch(`http://192.168.1.108:5103/api/Recipes/update-recipe/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${user.token}`, },
         body: JSON.stringify(payload),
       });
-      const result = await response.json();
-      console.log("Recipe created:", result);
+
+      if (!response.ok) {
+        const rawError = await response.text();
+        console.error("Recipe update failed:", response.status, rawError);
+        return;
+      }
+
+      router.push({
+        pathname: "./AddCookingSteps",
+        params: { recipeId: id.toString() },
+      });
     } catch (error) {
-      console.error("Error creating recipe:", error);
+      console.error("Error updating recipe:", error);
     }
   };
 
   return (
-    <View>
+    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }} contentContainerStyle={{ padding: 16 }}>
       <Text style={styles.header}>Create Recipe</Text>
 
       {/* Recipe Image */}
@@ -96,10 +114,11 @@ export default function AddNewRecipeForm() {
       {/* Serves */}
       <Text>Serves:</Text>
       <TextInput
-        style={styles.input}   // force visible text color
+        style={styles.input}
         keyboardType="numeric"
-        value={serves}                              // must be a string
-        onChangeText={(val) => setServes(val)}      // don’t parse here
+        value={serves}
+        onChangeText={setServes}
+        placeholder="Enter serving size"
       />
 
       {/* Cook Time */}
@@ -108,63 +127,56 @@ export default function AddNewRecipeForm() {
         style={styles.input}
         keyboardType="numeric"
         value={cookTime}
-        onChangeText={(val) => setServes(val)}
+        onChangeText={setCookTime}
+        placeholder="Enter cook time"
       />
 
       {/* Ingredients */}
       <Text style={styles.sectionTitle}>Ingredients</Text>
-      <FlatList
-        data={recipeIngredients}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item, index }) => (
-          <View style={styles.ingredientRow}>
-            {/* Ingredient dropdown */}
-            <Picker
-              selectedValue={item.ingredientId ?? ""}
-              style={styles.input}
-              onValueChange={(val) => {
-                const updated = [...recipeIngredients];
-                // Convert to number if not empty string
-                updated[index].ingredientId = val === "" ? null : Number(val);
-                setRecipeIngredients(updated);
-              }}
-            >
-              <Picker.Item label="Select ingredient..." value="" />
-              {ingredients.map((ing) => (
-                <Picker.Item
-                  key={ing.ingredientId}
-                  label={ing.name}
-                  value={ing.ingredientId} // always a number
-                />
-              ))}
-            </Picker>
-
-            {/* Quantity input */}
-            <TextInput
-              style={styles.input}
-              placeholder="Quantity (e.g. 250gr)"
-              value={item.quantity}
-              onChangeText={(val) => {
-                const updated = [...recipeIngredients];
-                updated[index].quantity = val;
-                setRecipeIngredients(updated);
-              }}
-            />
-
-            {/* Ingredient image preview */}
-            {item.ingredientId && (
-              <Image
-                source={{
-                  uri:
-                    ingredients.find((ing) => ing.ingredientId === item.ingredientId)
-                      ?.imageUrl || "",
-                }}
-                style={{ width: 40, height: 40 }}
+      {recipeIngredients.map((item, index) => (
+        <View key={index} style={styles.ingredientRow}>
+          <Picker
+            selectedValue={item.ingredientId ?? ""}
+            style={{ flex: 1 }}
+            onValueChange={(val) => {
+              const updated = [...recipeIngredients];
+              updated[index].ingredientId = val === "" ? null : Number(val);
+              setRecipeIngredients(updated);
+            }}
+          >
+            <Picker.Item label="Select ingredient..." value="" />
+            {ingredients.map((ing) => (
+              <Picker.Item
+                key={ing.ingredientId}
+                label={ing.name}
+                value={ing.ingredientId}
               />
-            )}
-          </View>
-        )}
-      />
+            ))}
+          </Picker>
+
+          <TextInput
+            style={[styles.input, { flex: 1 }]}
+            placeholder="Quantity (e.g. 250gr)"
+            value={item.quantity}
+            onChangeText={(val) => {
+              const updated = [...recipeIngredients];
+              updated[index].quantity = val;
+              setRecipeIngredients(updated);
+            }}
+          />
+
+          {item.ingredientId && (
+            <Image
+              source={{
+                uri:
+                  ingredients.find((ing) => ing.ingredientId === item.ingredientId)
+                    ?.imageUrl || "",
+              }}
+              style={{ width: 40, height: 40 }}
+            />
+          )}
+        </View>
+      ))}
       <Button title="Add new ingredient" onPress={addIngredientRow} />
 
       {/* Category */}
@@ -185,8 +197,7 @@ export default function AddNewRecipeForm() {
         onChangeText={(val) => setUtensils(val.split(","))}
       />
 
-      <Button title="Add cooking steps" onPress={submitRecipe} />
-    </View>
+      <Button title="Add cooking steps" onPress={goToCookingSteps} />
+    </ScrollView>
   );
 }
-
