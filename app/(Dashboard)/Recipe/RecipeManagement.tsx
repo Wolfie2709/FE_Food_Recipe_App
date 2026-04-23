@@ -1,6 +1,7 @@
 import { useUser } from "@/components/userContext";
 import { ManagementStyles as styles } from "@/theme";
 import type { Recipe } from "@/types";
+import { API_BASE_URL } from "@/utils/apiConfig";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -15,7 +16,7 @@ export default function RecipeManagement() {
   const loadRecipes = async () => {
     try {
       const res = await fetch(
-        "http://192.168.1.108:5103/api/Recipes/home?page=1&pageSize=50",
+        `${API_BASE_URL}api/Recipes/home?page=1&pageSize=50`,
         {
           headers: {
             "Authorization": user?.token ? `Bearer ${user.token}` : "",
@@ -47,7 +48,7 @@ export default function RecipeManagement() {
         return;
       }
   
-      const res = await fetch("http://192.168.1.108:5103/api/Recipes/create-recipe", {
+      const res = await fetch(`${API_BASE_URL}api/Recipes/create-recipe`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -55,9 +56,12 @@ export default function RecipeManagement() {
         },
         body: JSON.stringify({
           name: "Untitled Recipe",
+          description: null,
           cookingTime: 0,
           servingSize: 0,
-          category: null,
+          categories: [],
+          ingredients: [],
+          kitchenUtensils:[]
         }),
       });
   
@@ -67,29 +71,7 @@ export default function RecipeManagement() {
         return;
       }
   
-      const raw = await res.text();
-      let newRecipe: any;
-      try {
-        newRecipe = JSON.parse(raw);
-      } catch {
-        console.log("Response was not JSON:", raw);
-        await loadRecipes();
-        const latest = recipes[recipes.length - 1];
-        if (latest?.recipeId) {
-          console.log("New recipe created with ID:", latest.recipeId); // ✅ log fallback ID
-          router.push({
-            pathname: "./add-recipe/AddNewRecipe",
-            params: { recipeId: latest.recipeId.toString() },
-          });
-        }
-        return;
-      }
-  
-      if (!newRecipe.recipeId) {
-        console.error("API did not return recipeId:", newRecipe);
-        return;
-      }
-  
+      const newRecipe : Recipe = await res.json();
       console.log("New recipe created with ID:", newRecipe.recipeId); // ✅ log the ID
   
       router.push({

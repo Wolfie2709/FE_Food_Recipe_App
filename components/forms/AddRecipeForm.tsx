@@ -1,5 +1,7 @@
 import { useUser } from "@/components/userContext";
 import { RecipeFormStyles as styles } from "@/theme";
+import { Category, CreateRecipeRequestDto, Ingredient, KitchenUtensil, RecipeIngredient } from "@/types";
+import { API_BASE_URL } from "@/utils/apiConfig";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -13,17 +15,6 @@ import {
 } from "react-native";
 import Button from "../ui/button";
 
-type Ingredient = {
-  ingredientId: number;
-  name: string;
-  imageUrl: string;
-};
-
-type RecipeIngredient = {
-  ingredientId: number | null;
-  quantity: string;
-};
-
 export default function AddNewRecipeForm() {
   const { user } = useUser();
   const { recipeId } = useLocalSearchParams(); // recipeId passed from RecipeManagement
@@ -33,14 +24,14 @@ export default function AddNewRecipeForm() {
   const [recipeIngredients, setRecipeIngredients] = useState<RecipeIngredient[]>([
     { ingredientId: null, quantity: "" },
   ]);
-  const [category, setCategory] = useState("");
-  const [utensils, setUtensils] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [kitchenUtensils, setKitchenUtensils] = useState<KitchenUtensil[]>([]);
   const [recipeImage, setRecipeImage] = useState<string | null>(null);
   const router = useRouter();
 
   // Load available ingredients
   useEffect(() => {
-    fetch("http://192.168.1.108:5103/api/Ingredients/all")
+    fetch(`${API_BASE_URL}/api/Ingredients/all`)
       .then((res) => res.json())
       .then((data) => setIngredients(data))
       .catch((err) => console.error("Error loading ingredients:", err));
@@ -64,14 +55,20 @@ export default function AddNewRecipeForm() {
   };
 
   const goToCookingSteps = async () => {
-    const payload = {
+    const payload: CreateRecipeRequestDto = {
       name: "My Recipe",
-      servingSize: parseInt(serves, 10),   // match backend naming
-      cookingTime: parseInt(cookTime, 10), // match backend naming
-      ingredients: recipeIngredients,
-      category,
-      utensils,
-      imageUrl: recipeImage,
+      description: null,
+      servingSize: parseInt(serves, 10),
+      cookingTime: parseInt(cookTime, 10),
+      ingredients: recipeIngredients
+        .filter(rI => rI.ingredientId !== null)
+        .map(rI => ({
+          ingredientId: rI.ingredientId!,
+          quantity: rI.quantity
+        })),
+      categories: categories.map(c => ({ categoryId: c.id })),
+      kitchenUtensils: kitchenUtensils.map(u => ({ utensilId: u.id })),
+      // imageUrl: recipeImage, // only include if backend supports it
     };
 
     try {
@@ -80,7 +77,7 @@ export default function AddNewRecipeForm() {
         return;
       }
 
-      const response = await fetch(`http://192.168.1.108:5103/api/Recipes/update-recipe/${recipeId}`, {
+      const response = await fetch(`${API_BASE_URL}api/Recipes/update-recipe/${recipeId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -154,9 +151,9 @@ export default function AddNewRecipeForm() {
             <Picker.Item label="Select ingredient..." value="" />
             {ingredients.map((ing) => (
               <Picker.Item
-                key={ing.ingredientId}
+                key={ing.id}
                 label={ing.name}
-                value={ing.ingredientId}
+                value={ing.id}
               />
             ))}
           </Picker>
@@ -176,7 +173,7 @@ export default function AddNewRecipeForm() {
             <Image
               source={{
                 uri:
-                  ingredients.find((ing) => ing.ingredientId === item.ingredientId)
+                  ingredients.find((ing) => ing.id === item.ingredientId)
                     ?.imageUrl || "",
               }}
               style={{ width: 40, height: 40 }}
@@ -186,25 +183,31 @@ export default function AddNewRecipeForm() {
       ))}
       <Button title="Add new ingredient" onPress={addIngredientRow} />
 
-      {/* Category */}
-      <Text style={styles.sectionTitle}>Category</Text>
+      {/* Categories */}
+      <Text style={styles.sectionTitle}>Categories</Text>
+      {/* Replace with a proper multi-select UI later */}
       <TextInput
         style={styles.input}
-        placeholder="Category"
-        value={category}
-        onChangeText={setCategory}
+        placeholder="Category IDs (comma separated)"
+        value={categories.map(c => c.id).join(", ")}
+        onChangeText={(val) =>
+          setCategories(val.split(",").map(id => ({ id: Number(id.trim()), name: "" })))
+        }
       />
 
-      {/* Utensils */}
+      {/* Kitchen Utensils */}
       <Text style={styles.sectionTitle}>Kitchen Utensils</Text>
       <TextInput
         style={styles.input}
-        placeholder="Utensils (comma separated)"
-        value={utensils.join(", ")}
-        onChangeText={(val) => setUtensils(val.split(","))}
+        placeholder="Utensil IDs (comma separated)"
+        value={kitchenUtensils.map(u => u.id).join(", ")}
+        onChangeText={(val) =>
+          setKitchenUtensils(val.split(",").map(id => ({ id: Number(id.trim()), name: "", imageUrl: "" })))
+        }
       />
 
       <Button title="Add cooking steps" onPress={goToCookingSteps} />
     </ScrollView>
   );
 }
+//

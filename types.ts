@@ -69,7 +69,7 @@ export type Ingredient = {
     name: string;
     categoryId: number;
     categoryName: string;
-
+    imageUrl: string;
  };
 export type RecipeBoxDTO = {
     id: number;
@@ -78,14 +78,18 @@ export type RecipeBoxDTO = {
     rating: number;
     imageUrl: string;
 };
+
 export type Recipe = {
-    recipeId: number;
-    name: string;
-    cookingTime: number;
-    servingSize: number;
-    category: Category;
- };
-export type KitchenUtensils = {
+  recipeId: number;
+  name: string;
+  description?: string | null;
+  cookingTime: number;
+  servingSize: number;
+  categories: Category[];       
+  ingredients: Ingredient[];     
+  kitchenUtensils: KitchenUtensil[]; 
+};
+export type KitchenUtensil = {
     id: number;
     name: string;
     imageUrl: string;
@@ -109,10 +113,26 @@ export type ShoppingList = {
 };
 
 export type Category = {
-    
+    id:number;
+    name: string;
+    description?: string;
 };
 
 export type Image= {
 
 }
 
+export type CreateRecipeRequestDto = {
+  name: string;
+  description?: string | null;
+  cookingTime?: number;
+  servingSize?: number;
+  ingredients: { ingredientId: number; quantity: string }[];
+  categories: { categoryId: number }[];
+  kitchenUtensils: { utensilId: number }[];
+};
+
+export type RecipeIngredient = {
+  ingredientId: number | null;
+  quantity: string;
+};
