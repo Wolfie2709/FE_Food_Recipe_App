@@ -1,14 +1,14 @@
 import { StyleSheet } from "react-native";
 
 export const colors = {
-  primary: "#FF6B00",       // Figma primary
-  secondary: "#0066FF",     // optional secondary
+  primary: "#FF6B00", // Figma primary
+  secondary: "#0066FF", // optional secondary
   textDark: "#1A1A1A",
   textLight: "#7A7A7A",
   background: "#FDFDFD",
   dark: "#303030",
   light: "#FFF",
-  uikitPrimary: "#E23E3E"
+  uikitPrimary: "#E23E3E",
 };
 
 export const fonts = {
@@ -29,20 +29,47 @@ export const spacing = {
 export const homeStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   section: { padding: spacing.md },
-  sectionHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: spacing.sm },
-  sectionTitle: { fontSize: 18, fontFamily: fonts.semiBold, color: colors.textDark },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: spacing.sm,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontFamily: fonts.semiBold,
+    color: colors.textDark,
+  },
   link: { color: colors.primary, fontSize: 14, fontFamily: fonts.medium },
   creatorRow: { flexDirection: "row", gap: spacing.md },
   creator: { alignItems: "center", marginRight: spacing.md },
   avatar: { width: 60, height: 60, borderRadius: 30 },
-  creatorName: { marginTop: spacing.xs, fontSize: 12, fontFamily: fonts.medium, color: colors.textDark },
+  creatorName: {
+    marginTop: spacing.xs,
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    color: colors.textDark,
+  },
   recipeRow: { flexDirection: "row", gap: spacing.md },
   recipeCard: { width: 120, marginRight: spacing.md },
   recipeImage: { width: "100%", height: 80, borderRadius: 8 },
-  recipeTitle: { fontSize: 14, fontFamily: fonts.semiBold, color: colors.textDark, marginTop: spacing.xs },
+  recipeTitle: {
+    fontSize: 14,
+    fontFamily: fonts.semiBold,
+    color: colors.textDark,
+    marginTop: spacing.xs,
+  },
   recipeAuthor: { fontSize: 12, color: colors.textLight },
-  recipeTime: { fontSize: 12, color: colors.textDark, fontFamily: fonts.medium },
-  categoryRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm, marginTop: spacing.sm },
+  recipeTime: {
+    fontSize: 12,
+    color: colors.textDark,
+    fontFamily: fonts.medium,
+  },
+  categoryRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
   category: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -54,10 +81,29 @@ export const homeStyles = StyleSheet.create({
     fontFamily: fonts.medium,
   },
   categoryActive: { backgroundColor: colors.primary, color: colors.background },
-  searchBar: { borderWidth: 1, borderColor: colors.textLight, borderRadius: 8, padding: spacing.sm },
-  searchPlaceholder: { color: colors.textLight, fontSize: 14, fontFamily: fonts.regular },
-  heroText: { fontSize: 20, fontFamily: fonts.semiBold, color: colors.textDark, marginBottom: spacing.sm },
-  sectionSubtitle: { fontSize: 14, fontFamily: fonts.regular, color: colors.textLight, textAlign: "left" },
+  searchBar: {
+    borderWidth: 1,
+    borderColor: colors.textLight,
+    borderRadius: 8,
+    padding: spacing.sm,
+  },
+  searchPlaceholder: {
+    color: colors.textLight,
+    fontSize: 14,
+    fontFamily: fonts.regular,
+  },
+  heroText: {
+    fontSize: 20,
+    fontFamily: fonts.semiBold,
+    color: colors.textDark,
+    marginBottom: spacing.sm,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    fontFamily: fonts.regular,
+    color: colors.textLight,
+    textAlign: "left",
+  },
   statCard: {
     flex: 1,
     margin: spacing.sm,
@@ -72,10 +118,31 @@ export const homeStyles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
   },
-  statTitle: { fontSize: 16, fontFamily: fonts.semiBold, color: colors.textDark, marginBottom: spacing.xs, textAlign: "center" },
-  statValue: { fontSize: 22, fontFamily: fonts.bold, color: colors.textDark, marginBottom: spacing.xs, textAlign: "center" },
-  statSubtitle: { fontSize: 12, fontFamily: fonts.regular, color: colors.textLight, textAlign: "center" },
-  sectionRow: { flexDirection: "row", justifyContent: "space-between", marginHorizontal: spacing.md },
+  statTitle: {
+    fontSize: 16,
+    fontFamily: fonts.semiBold,
+    color: colors.textDark,
+    marginBottom: spacing.xs,
+    textAlign: "center",
+  },
+  statValue: {
+    fontSize: 22,
+    fontFamily: fonts.bold,
+    color: colors.textDark,
+    marginBottom: spacing.xs,
+    textAlign: "center",
+  },
+  statSubtitle: {
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    color: colors.textLight,
+    textAlign: "center",
+  },
+  sectionRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginHorizontal: spacing.md,
+  },
   link: {
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -91,15 +158,51 @@ export const homeStyles = StyleSheet.create({
 });
 
 export const onboardingStyles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: colors.background, alignItems: "center", justifyContent: "center" },
+  container: {
+    flexGrow: 1,
+    backgroundColor: colors.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   backgroundImage: { position: "absolute", width: "100%", height: "100%" },
-  overlay: { position: "absolute", bottom: 0, width: "100%", height: 400, backgroundColor: "rgba(0,0,0,0.4)" },
-  header: { position: "absolute", top: 60, left: 40, flexDirection: "row", alignItems: "center" },
-  headerIcon: { fontSize: 20, color: colors.background, marginRight: spacing.sm },
-  headerText: { color: colors.background, fontSize: 16, fontFamily: fonts.semiBold },
+  overlay: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    height: 400,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  header: {
+    position: "absolute",
+    top: 60,
+    left: 40,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  headerIcon: {
+    fontSize: 20,
+    color: colors.background,
+    marginRight: spacing.sm,
+  },
+  headerText: {
+    color: colors.background,
+    fontSize: 16,
+    fontFamily: fonts.semiBold,
+  },
   textContainer: { marginTop: 450, alignItems: "center" },
-  title: { color: colors.background, fontSize: 48, fontFamily: fonts.bold, textAlign: "center" },
-  subtitle: { color: colors.background, fontSize: 16, marginTop: spacing.sm, textAlign: "center", fontFamily: fonts.regular },
+  title: {
+    color: colors.background,
+    fontSize: 48,
+    fontFamily: fonts.bold,
+    textAlign: "center",
+  },
+  subtitle: {
+    color: colors.background,
+    fontSize: 16,
+    marginTop: spacing.sm,
+    textAlign: "center",
+    fontFamily: fonts.regular,
+  },
   button: {
     marginTop: spacing.lg,
     backgroundColor: colors.primary,
@@ -111,28 +214,147 @@ export const onboardingStyles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
   },
-  buttonText: { color: colors.background, fontSize: 16, fontFamily: fonts.semiBold },
+  buttonText: {
+    color: colors.background,
+    fontSize: 16,
+    fontFamily: fonts.semiBold,
+  },
 });
 
 export const authStyles = StyleSheet.create({
   background: { flex: 1, resizeMode: "cover" },
-  overlay: { flex: 1, justifyContent: "center", padding: spacing.md, backgroundColor: "rgba(0,0,0,0.4)" },
-  title: { color: colors.background, fontSize: 18, marginBottom: spacing.md, textAlign: "center", fontFamily: fonts.semiBold },
-  label: { color: colors.background, marginBottom: spacing.xs, fontFamily: fonts.regular },
-  input: { backgroundColor: "#D9D9D9", borderRadius: 8, padding: spacing.sm, marginBottom: spacing.md },
-  link: { color: colors.background, textAlign: "center", marginTop: spacing.md, fontFamily: fonts.medium },
+  overlay: {
+    flex: 1,
+    justifyContent: "center",
+    padding: spacing.md,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  title: {
+    color: colors.background,
+    fontSize: 18,
+    marginBottom: spacing.md,
+    textAlign: "center",
+    fontFamily: fonts.semiBold,
+  },
+  label: {
+    color: colors.background,
+    marginBottom: spacing.xs,
+    fontFamily: fonts.regular,
+  },
+  input: {
+    backgroundColor: "#D9D9D9",
+    borderRadius: 8,
+    padding: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  link: {
+    color: colors.background,
+    textAlign: "center",
+    marginTop: spacing.md,
+    fontFamily: fonts.medium,
+  },
 });
 
 export const ManagementStyles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
-  title: { fontSize: 24, fontFamily: fonts.semiBold, textAlign: "center", marginTop: spacing.lg },
-  subtitle: { fontSize: 16, fontFamily: fonts.regular, textAlign: "center", marginBottom: spacing.md },
-  searchBar: { borderWidth: 1, borderColor: colors.textDark, backgroundColor: colors.background, padding: spacing.sm, marginBottom: spacing.md },
-  searchText: { fontSize: 14, color: colors.textDark, fontFamily: fonts.regular },
-  tableHeader: { flexDirection: "row", justifyContent: "space-between", borderBottomWidth: 1, borderColor: colors.textDark, paddingVertical: spacing.sm },
-  tableHeaderText: { fontSize: 15, fontFamily: fonts.semiBold, color: colors.textDark },
-  tableRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: spacing.sm, borderBottomWidth: 1, borderColor: colors.textLight },
-  tableCell: { fontSize: 13, color: colors.textDark, fontFamily: fonts.regular },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    padding: spacing.md,
+    margin: 20,
+    marginTop: 70,
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 24,
+    fontFamily: fonts.semiBold,
+    textAlign: "center",
+    // marginTop: spacing.lg,
+  },
+  subtitle: {
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    textAlign: "center",
+    marginBottom: spacing.md,
+  },
+  searchBar: {
+    borderWidth: 1,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: colors.textDark,
+    backgroundColor: colors.background,
+    padding: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  searchIcon: {
+    marginVertical: spacing.md,
+  },
+  searchText: {
+    fontSize: 14,
+    flex: 1,
+    color: colors.textDark,
+    fontFamily: fonts.regular,
+  },
+  tableHeader: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    borderBottomWidth: 1,
+    borderColor: colors.textDark,
+    height: 43,
+  },
+  tableHeaderText: {
+    fontSize: 15,
+    fontFamily: fonts.semiBold,
+    color: colors.textDark,
+    paddingHorizontal: 15,
+  },
+  tableHeaderTextId: {
+    flex: 1,
+    borderRightWidth: 1,
+    borderColor: "#000000",
+    borderStyle: "solid",
+  },
+  tableHeaderTextProducts: {
+    flex: 4,
+  },
+  TabHeaderInner: {
+    display: "flex",
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  tableRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: spacing.sm,
+    paddingLeft: spacing.md,
+    paddingRight: spacing.sm,
+    borderBottomWidth: 1,
+    borderColor: colors.textLight,
+  },
+  tableCellId: {
+    flex: 1,
+  },
+  tableCellProduct: {
+    flex: 4,
+  },
+  ProductCell: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  ImageContent: {
+    width: 60,
+    height: 60,
+  },
+  ProductInformation: {
+    marginLeft: spacing.md,
+  },
+  tableCellText: {
+    fontSize: 13,
+    color: colors.textDark,
+    fontFamily: fonts.regular,
+  },
   section: { padding: spacing.md },
   link: {
     paddingVertical: 12,
@@ -146,7 +368,25 @@ export const ManagementStyles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Poppins_600SemiBold",
   },
-  
+
+  // Recipe table list
+  boxListTable: {
+    // margin: "auto",
+    // marginTop: 20,
+    background: "#E5E5E5",
+    borderWidth: 1,
+    borderColor: "#000000",
+    borderStyle: "solid",
+    width: "100%",
+    height: 500,
+    boxSizing: "border-box",
+  },
+
+  boxList: {
+    paddingVertical: spacing.sm,
+    paddingLeft: spacing.md,
+    paddingRight: spacing.sm,
+  },
 });
 
 export const uiKitsStyles = StyleSheet.create({
@@ -279,7 +519,11 @@ export const buttonStyles = StyleSheet.create({
 
   // Variants
   primary: { backgroundColor: colors.uikitPrimary },
-  secondary: { backgroundColor: "#F9D8D8", borderWidth: 1, borderColor: "#9E2B2B" },
+  secondary: {
+    backgroundColor: "#F9D8D8",
+    borderWidth: 1,
+    borderColor: "#9E2B2B",
+  },
   textButton: { backgroundColor: "transparent" },
 
   // States
@@ -468,9 +712,13 @@ export const RecipeFormStyles = StyleSheet.create({
     borderRadius: 6,
     flex: 1,
     backgroundColor: "#fff", // ensure contrast
-    color: "#000",           // make typed text visible
-    fontSize: 16,            // optional: improve readability
+    color: "#000", // make typed text visible
+    fontSize: 16, // optional: improve readability
   },
-  ingredientRow: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
+  ingredientRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
   recipeImage: { width: 200, height: 200, marginVertical: 10, borderRadius: 8 },
 });

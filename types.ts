@@ -59,24 +59,24 @@ export type RecipePagination = {
 };
 
 export type ChangePasswordDTO = {
-    username: string;
-    oldPassword: string;
-    newPassword: string;
- };
+  username: string;
+  oldPassword: string;
+  newPassword: string;
+};
 
 export type Ingredient = {
-    id: number;
-    name: string;
-    categoryId: number;
-    categoryName: string;
-    imageUrl: string;
- };
+  id: number;
+  name: string;
+  categoryId: number;
+  categoryName: string;
+  imageUrl: string;
+};
 export type RecipeBoxDTO = {
-    id: number;
-    name: string;
-    addedBy: string;
-    rating: number;
-    imageUrl: string;
+  id: number;
+  name: string;
+  addedBy: string;
+  rating: number;
+  imageUrl: string;
 };
 
 export type Recipe = {
@@ -85,42 +85,38 @@ export type Recipe = {
   description?: string | null;
   cookingTime: number;
   servingSize: number;
-  categories: Category[];       
-  ingredients: Ingredient[];     
-  kitchenUtensils: KitchenUtensil[]; 
+  categories: Category[];
+  ingredients: Ingredient[];
+  kitchenUtensils: KitchenUtensil[];
+  imageDirectory: string;
 };
 export type KitchenUtensil = {
-    id: number;
-    name: string;
-    imageUrl: string;
- };
+  id: number;
+  name: string;
+  imageUrl: string;
+};
 
 export type Review = {
-    username: string;
-    image: string;
-    content: string;
-    rating: number;
-    date: Date;
+  username: string;
+  image: string;
+  content: string;
+  rating: number;
+  date: Date;
 };
 
 export type Wishlist = {
-    id: number;
-
+  id: number;
 };
 
-export type ShoppingList = {
-
-};
+export type ShoppingList = {};
 
 export type Category = {
-    id:number;
-    name: string;
-    description?: string;
+  id: number;
+  name: string;
+  description?: string;
 };
 
-export type Image= {
-
-}
+export type Image = {};
 
 export type CreateRecipeRequestDto = {
   name: string;
