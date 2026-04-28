@@ -4,7 +4,7 @@ import type { Recipe } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Button from "../../../components/ui/button";
 
 export default function RecipeManagement() {
@@ -85,7 +85,49 @@ export default function RecipeManagement() {
     }
   };
 
-  var URL = API_BASE_URL.slice(0, -1);
+  const renderItem: ListRenderItem<Recipe> = ({ item }) => (
+    <TouchableOpacity
+      style={styles.tableRow}
+      onPress={() =>
+        router.push({
+          pathname: "/Recipe/add-recipe/AddNewRecipe",
+          params: { recipeId: item.recipeId.toString() },
+        })
+      }
+    >
+      <View style={styles.tableCellId}>
+        <Text style={styles.tableCellText}>{item.recipeId}</Text>
+      </View>
+
+      <View style={styles.tableCellProduct}>
+        <View style={styles.ProductCell}>
+          <View>
+            <Image
+              source={
+                item.imageDirectory
+                  ? { uri: `${URL}${item.imageDirectory}` }
+                  : require("assets/images/icon.png")
+              }
+              style={styles.ImageContent}
+              resizeMode="cover"
+            />
+          </View>
+
+          <View style={styles.ProductInformation}>
+            <Text style={styles.tableCellText}>
+              {item.name || "Untitled"}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <View>
+        <Image source={require("assets/images/Union.png")} />
+      </View>
+    </TouchableOpacity>
+  );
+
+  const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Recipe</Text>
@@ -122,39 +164,10 @@ export default function RecipeManagement() {
         {/* Recipe list */}
         <FlatList
           data={recipes}
+          style={{ flex: 1 }}
           keyExtractor={(item) => item.recipeId.toString()}
           // style={styles.boxList}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.tableRow}
-              onPress={() =>
-                router.push({
-                  pathname: "./Recipe/AddNewRecipe",
-                  params: { recipeId: item.recipeId.toString() }, // ✅ consistent param
-                })
-              }
-            >
-              <View style={styles.tableCellId}>
-                <Text style={styles.tableCellText}>{item.recipeId}</Text>
-              </View>
-              <View style={styles.tableCellProduct}>
-                <View style={styles.ProductCell}>
-                  <View>
-                    <Image
-                      source={item.imageDirectory ? { uri: `${URL}${item.imageDirectory}` } : require("assets/images/icon.png")}
-                      style={styles.ImageContent}
-                      resizeMode="cover" />
-                  </View>
-                  <View style={styles.ProductInformation}>
-                    <Text style={styles.tableCellText}>{item.name || "Untitled"}</Text>
-                  </View>
-                </View>
-              </View>
-              <View>
-                <Image source={require("assets/images/Union.png")} />
-              </View>
-            </TouchableOpacity>
-          )}
+          renderItem={renderItem}
         />
       </View>
     </View>

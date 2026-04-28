@@ -262,7 +262,7 @@ export const ManagementStyles = StyleSheet.create({
     padding: spacing.md,
     margin: 20,
     marginTop: 70,
-    justifyContent: "center",
+    // justifyContent: "center",
   },
   title: {
     fontSize: 24,
@@ -371,15 +371,14 @@ export const ManagementStyles = StyleSheet.create({
 
   // Recipe table list
   boxListTable: {
-    // margin: "auto",
-    // marginTop: 20,
     background: "#E5E5E5",
     borderWidth: 1,
     borderColor: "#000000",
     borderStyle: "solid",
     width: "100%",
-    height: 500,
-    boxSizing: "border-box",
+    // height: 500,
+    // boxSizing: "border-box",
+    flex: 1,
   },
 
   boxList: {
