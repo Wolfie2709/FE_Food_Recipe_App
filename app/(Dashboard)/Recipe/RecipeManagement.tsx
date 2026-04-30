@@ -11,6 +11,7 @@ export default function RecipeManagement() {
   const { user } = useUser();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const router = useRouter();
+  
 
   // Load all recipes
   const loadRecipes = async () => {
@@ -47,7 +48,7 @@ export default function RecipeManagement() {
         console.error("No token available");
         return;
       }
-
+  
       const res = await fetch(`${API_BASE_URL}api/Recipes/create-recipe`, {
         method: "POST",
         headers: {
@@ -64,26 +65,35 @@ export default function RecipeManagement() {
           kitchenUtensils: []
         }),
       });
-
+  
+      const raw = await res.text();
+  
       if (!res.ok) {
-        const rawError = await res.text();
-        console.error("Failed to create recipe:", res.status, res.statusText, rawError);
+        console.error("Failed to create recipe:", res.status, res.statusText, raw);
         return;
       }
-
-      const newRecipe: Recipe = await res.json();
-      console.log("New recipe created with ID:", newRecipe.recipeId); // ✅ log the ID
-
-      router.push({
-        pathname: "./add-recipe/AddNewRecipe",
-        params: { recipeId: newRecipe.recipeId.toString() },
-      });
-
-      loadRecipes();
+  
+      // Backend only returns plain text, so treat this as success
+      if (raw.includes("success")) {
+        console.log("Recipe created successfully");
+  
+        // Reload recipes
+        await loadRecipes();
+  
+        // Navigate to the newest recipe (assuming API returns newest first)
+        if (recipes.length > 0) {
+          const latest = recipes.reduce((max, r) => r.recipeId > max.recipeId ? r: max, recipes[0]);
+          router.push({
+            pathname: "./add-recipe/AddNewRecipe",
+            params: { recipeId: latest.recipeId.toString() },
+          });
+        }
+      }
     } catch (error) {
       console.error("Error creating recipe:", error);
     }
   };
+  
 
   const renderItem: ListRenderItem<Recipe> = ({ item }) => (
     <TouchableOpacity

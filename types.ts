@@ -129,6 +129,21 @@ export type CreateRecipeRequestDto = {
 };
 
 export type RecipeIngredient = {
-  ingredientId: number | null;
+  ingredientsId: number | null;
   quantity: string;
+  imageUrl?: string;
 };
+
+export type RecipeStepInfo = {
+  name: string;
+  description: string;
+  imageUrl?: string;
+};
+
+export type RecipeCategoryInfoDto = {
+  CategoriesId: number | null;
+};
+
+export type RecipeKitchenUtensilsInfoDto = {
+  KitchenUtensilsId: number | null;
+}
