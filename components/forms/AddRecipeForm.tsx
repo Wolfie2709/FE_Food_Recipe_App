@@ -1,6 +1,6 @@
 import { useUser } from "@/components/userContext";
 import { RecipeFormStyles as styles } from "@/theme";
-import { Category, CreateRecipeRequestDto, Ingredient, KitchenUtensil, RecipeIngredient } from "@/types";
+import { Category, CreateRecipeRequestDto, Ingredient, KitchenUtensil, RecipeCategoryInfoDto, RecipeIngredient, RecipeKitchenUtensilsInfoDto } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
@@ -11,6 +11,7 @@ import {
   ScrollView,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
 } from "react-native";
 import Button from "../ui/button";
@@ -18,11 +19,19 @@ import Button from "../ui/button";
 export default function AddNewRecipeForm() {
   const { user } = useUser();
   const { recipeId } = useLocalSearchParams(); // recipeId passed from RecipeManagement
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [serves, setServes] = useState("1");
   const [cookTime, setCookTime] = useState("0");
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [recipeIngredients, setRecipeIngredients] = useState<RecipeIngredient[]>([
-    { ingredientId: null, quantity: "" },
+    { ingredientsId: null, quantity: "" },
+  ]);
+  const [recipeCategories, setRecipeCategories] = useState<RecipeCategoryInfoDto[]>([
+    { CategoriesId: null},
+  ]);
+  const [recipeKU, setRecipeKU] = useState<RecipeKitchenUtensilsInfoDto[]>([
+    {KitchenUtensilsId: null },
   ]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [kitchenUtensils, setKitchenUtensils] = useState<KitchenUtensil[]>([]);
@@ -31,16 +40,112 @@ export default function AddNewRecipeForm() {
 
   // Load available ingredients
   useEffect(() => {
-    fetch(`${API_BASE_URL}/api/Ingredients/all`)
-      .then((res) => res.json())
-      .then((data) => setIngredients(data))
+    console.log("Updating recipe with id:", recipeId);
+    fetch(`${API_BASE_URL}api/Ingredients/all`, {
+      headers: {
+        "Authorization": user?.token ? `Bearer ${user.token}` : "",
+      },
+    })
+      .then(async (res) => {
+        const raw = await res.text(); // read once
+        if (!res.ok) {
+          console.error("Failed to load ingredients:", res.status, res.statusText, raw);
+          return [];
+        }
+        if (!raw) {
+          console.warn("Ingredients API returned empty response");
+          return [];
+        }
+        try {
+          return JSON.parse(raw);
+        } catch {
+          console.error("Ingredients response was not valid JSON:", raw);
+          return [];
+        }
+      })
+      .then((data) => {
+        // Normalize: if backend returns a single object, wrap it in an array
+        const normalized = Array.isArray(data) ? data : [data];
+        setIngredients(normalized);
+      })
       .catch((err) => console.error("Error loading ingredients:", err));
   }, []);
-
-  console.log("Updating recipe with id:", recipeId);
-
+  
+  useEffect(() => {
+    console.log("Updating recipe with id:", recipeId);
+    fetch(`${API_BASE_URL}api/Categories/all`, {
+      headers: {
+        "Authorization": user?.token ? `Bearer ${user.token}` : "",
+      },
+    })
+      .then(async (res) => {
+        const raw = await res.text(); // read once
+        if (!res.ok) {
+          console.error("Failed to load categories:", res.status, res.statusText, raw);
+          return [];
+        }
+        if (!raw) {
+          console.warn("Categories API returned empty response");
+          return [];
+        }
+        try {
+          return JSON.parse(raw);
+        } catch {
+          console.error("Categories  response was not valid JSON:", raw);
+          return [];
+        }
+      })
+      .then((data) => {
+        // Normalize: if backend returns a single object, wrap it in an array
+        const normalized = Array.isArray(data) ? data : [data];
+        setCategories(normalized);
+      })
+      .catch((err) => console.error("Error loading Categories :", err));
+  }, []);
+  
+  useEffect(() => {
+    console.log("Updating recipe with id:", recipeId);
+    fetch(`${API_BASE_URL}api/KitchenUtensils/all`, {
+      headers: {
+        "Authorization": user?.token ? `Bearer ${user.token}` : "",
+      },
+    })
+      .then(async (res) => {
+        const raw = await res.text(); // read once
+        if (!res.ok) {
+          console.error("Failed to load ingredients:", res.status, res.statusText, raw);
+          return [];
+        }
+        if (!raw) {
+          console.warn("Kitchen Utensils API returned empty response");
+          return [];
+        }
+        try {
+          return JSON.parse(raw);
+        } catch {
+          console.error("KitchenUtensils response was not valid JSON:", raw);
+          return [];
+        }
+      })
+      .then((data) => {
+        // Normalize: if backend returns a single object, wrap it in an array
+        const normalized = Array.isArray(data) ? data : [data];
+        setKitchenUtensils(normalized);
+      })
+      .catch((err) => console.error("Error loading ingredients:", err));
+  }, []);
+  
   const addIngredientRow = () => {
-    setRecipeIngredients([...recipeIngredients, { ingredientId: null, quantity: "" }]);
+    setRecipeIngredients([...recipeIngredients, { ingredientsId: null, quantity: "" }]);
+  };
+
+
+  const addCategoryRow = () => {
+    setRecipeCategories([...recipeCategories, { CategoriesId: null}]);
+  };
+
+  const addKitchenUtensilsRow = () => {
+    setRecipeKU([...recipeKU, { KitchenUtensilsId: null}]);
   };
 
   const pickImage = async () => {
@@ -56,19 +161,23 @@ export default function AddNewRecipeForm() {
 
   const goToCookingSteps = async () => {
     const payload: CreateRecipeRequestDto = {
-      name: "My Recipe",
-      description: null,
+      name ,
+      description: description || null,
       servingSize: parseInt(serves, 10),
       cookingTime: parseInt(cookTime, 10),
       ingredients: recipeIngredients
-        .filter(rI => rI.ingredientId !== null)
+        .filter(rI => rI.ingredientsId !== null)
         .map(rI => ({
-          ingredientId: rI.ingredientId!,
+          ingredientId: rI.ingredientsId!,
           quantity: rI.quantity
         })),
-      categories: categories.map(c => ({ categoryId: c.id })),
-      kitchenUtensils: kitchenUtensils.map(u => ({ utensilId: u.id })),
-      // imageUrl: recipeImage, // only include if backend supports it
+      categories: recipeCategories.filter(rC => rC.CategoriesId !== null).map(rC => ({
+        categoryId: rC.CategoriesId!
+      })),
+      kitchenUtensils: recipeKU.filter(rKU => rKU.KitchenUtensilsId !== null).map(rKU => ({
+        utensilId: rKU.KitchenUtensilsId!
+      })),
+
     };
 
     try {
@@ -77,7 +186,7 @@ export default function AddNewRecipeForm() {
         return;
       }
 
-      const response = await fetch(`${API_BASE_URL}api/Recipes/update-recipe/${recipeId}`, {
+      const response = await fetch(`${API_BASE_URL}api/Recipes/update/complete-recipe-info/${recipeId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -95,8 +204,9 @@ export default function AddNewRecipeForm() {
       // Navigate using the same id we received
       router.push({
         pathname: "./AddCookingSteps",
-        params: { id: recipeId.toString() },
+        params: { recipeId: recipeId.toString() },
       });
+      
     } catch (error) {
       console.error("Error updating recipe:", error);
     }
@@ -108,13 +218,39 @@ export default function AddNewRecipeForm() {
 
       {/* Recipe Image */}
       <Text style={styles.sectionTitle}>Recipe Image</Text>
+      <TouchableOpacity onPress={pickImage}>
       {recipeImage ? (
         <Image source={{ uri: recipeImage }} style={styles.recipeImage} />
       ) : (
-        <Text>No image selected</Text>
-      )}
-      <Button title="Pick an Image" onPress={pickImage} />
+        <View style = {[
+          styles.recipeImage, 
+          { justifyContent: "center", alignItems: "center", backgroundColor: "#eee" }
+        ]}>
 
+          <Text>Tap to select an image</Text>
+        </View>
+        
+      )}
+      </TouchableOpacity>
+
+      {/* Recipe Name */}
+      <Text>Recipe Name:</Text>
+      <TextInput
+      style={styles.input}
+      value = {name}
+      onChangeText={setName}
+      placeholder="Enter recipe name"
+      />
+
+      {/* Description */}
+      <Text>Description:</Text>
+      <TextInput
+      style = {styles.input}
+      value = {description}
+      onChangeText={setDescription}
+      placeholder="Enter recipe description"
+      multiline
+      />
       {/* Serves */}
       <Text>Serves:</Text>
       <TextInput
@@ -140,11 +276,11 @@ export default function AddNewRecipeForm() {
       {recipeIngredients.map((item, index) => (
         <View key={index} style={styles.ingredientRow}>
           <Picker
-            selectedValue={item.ingredientId ?? ""}
+            selectedValue={item.ingredientsId ?? ""}
             style={{ flex: 1 }}
             onValueChange={(val) => {
               const updated = [...recipeIngredients];
-              updated[index].ingredientId = val === "" ? null : Number(val);
+              updated[index].ingredientsId = val === "" ? null : Number(val);
               setRecipeIngredients(updated);
             }}
           >
@@ -169,11 +305,11 @@ export default function AddNewRecipeForm() {
             }}
           />
 
-          {item.ingredientId && (
+          {item.ingredientsId && (
             <Image
               source={{
                 uri:
-                  ingredients.find((ing) => ing.id === item.ingredientId)
+                  ingredients.find((ing) => ing.id === item.ingredientsId)
                     ?.imageUrl || "",
               }}
               style={{ width: 40, height: 40 }}
@@ -185,26 +321,57 @@ export default function AddNewRecipeForm() {
 
       {/* Categories */}
       <Text style={styles.sectionTitle}>Categories</Text>
-      {/* Replace with a proper multi-select UI later */}
-      <TextInput
-        style={styles.input}
-        placeholder="Category IDs (comma separated)"
-        value={categories.map(c => c.id).join(", ")}
-        onChangeText={(val) =>
-          setCategories(val.split(",").map(id => ({ id: Number(id.trim()), name: "" })))
-        }
-      />
+      {recipeCategories.map((item, index) => (
+        <View key={index} style={styles.ingredientRow}>
+          <Picker
+            selectedValue={item.CategoriesId ?? ""}
+            style={{ flex: 1 }}
+            onValueChange={(val) => {
+              const updated = [...recipeCategories];
+              updated[index].CategoriesId = val === "" ? null : Number(val);
+              setRecipeCategories(updated);
+            }}
+          >
+            <Picker.Item label="Select category..." value="" />
+            {categories.map((cat) => (
+              <Picker.Item
+                key={cat.id}
+                label={cat.name}
+                value={cat.id}
+              />
+            ))}
+          </Picker>
+
+        </View>
+      ))}
+      <Button title="Add new category" onPress={addCategoryRow} />
 
       {/* Kitchen Utensils */}
       <Text style={styles.sectionTitle}>Kitchen Utensils</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Utensil IDs (comma separated)"
-        value={kitchenUtensils.map(u => u.id).join(", ")}
-        onChangeText={(val) =>
-          setKitchenUtensils(val.split(",").map(id => ({ id: Number(id.trim()), name: "", imageUrl: "" })))
-        }
-      />
+      {recipeKU.map((item, index) => (
+        <View key={index} style={styles.ingredientRow}>
+          <Picker
+            selectedValue={item.KitchenUtensilsId ?? ""}
+            style={{ flex: 1 }}
+            onValueChange={(val) => {
+              const updated = [...recipeKU];
+              updated[index].KitchenUtensilsId = val === "" ? null : Number(val);
+              setRecipeKU(updated);
+            }}
+          >
+            <Picker.Item label="Select utensils..." value="" />
+            {kitchenUtensils.map((ku) => (
+              <Picker.Item
+                key={ku.id}
+                label={ku.name}
+                value={ku.id}
+              />
+            ))}
+          </Picker>
+
+        </View>
+      ))}
+      <Button title="Add new utensil" onPress={addKitchenUtensilsRow} />
 
       <Button title="Add cooking steps" onPress={goToCookingSteps} />
     </ScrollView>

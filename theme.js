@@ -721,3 +721,21 @@ export const RecipeFormStyles = StyleSheet.create({
   },
   recipeImage: { width: 200, height: 200, marginVertical: 10, borderRadius: 8 },
 });
+
+
+
+export const RecipeStepStyles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#FFF", padding: 16 },
+  header: { fontSize: 22, fontWeight: "bold", marginBottom: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: "600", marginVertical: 12 },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 8,
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  stepRow: { marginVertical: 10 },
+  stepText: { fontSize: 14, marginBottom: 6 },
+  stepImage: { width: 100, height: 100, borderRadius: 8, marginBottom: 6 },
+});
