@@ -1,6 +1,5 @@
-import { useUser } from "@/components/userContext";
 import { ManagementStyles as styles } from "@/theme";
-import type { Recipe } from "@/types";
+import type { Recipe, UserWithToken } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -8,9 +7,10 @@ import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, Vie
 import Button from "../../../components/ui/button";
 
 export default function RecipeManagement() {
-  const { user } = useUser();
+  const [user, setUserState] = useState<UserWithToken | null>(null);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const router = useRouter();
+  
   
 
   // Load all recipes

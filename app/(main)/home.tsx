@@ -1,3 +1,4 @@
+import NavigationBar from "@/components/ui/figma_navbar";
 import { useUser } from "@/components/userContext";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import React, { useEffect, useRef, useState } from "react";
@@ -198,6 +199,8 @@ export default function Home() {
           <Text style={styles.searchPlaceholder}>Search recipes</Text>
         </View>
       </View>
+      {user && <NavigationBar user={user} />}
+
     </ScrollView>
   );
 }
