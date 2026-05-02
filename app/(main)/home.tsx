@@ -1,7 +1,8 @@
 import { useUser } from "@/components/userContext";
 import { API_BASE_URL } from "@/utils/apiConfig";
+import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Dimensions, FlatList, Image, ScrollView, Text, View } from "react-native";
+import { Alert, Dimensions, FlatList, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { homeStyles as styles } from "../../theme";
 import { RecipeBox, RecipePagination } from "../../types";
 
@@ -41,6 +42,7 @@ export default function Home() {
   const [data, setData] = useState<RecipeBox[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
   console.log("Home sees user:", user);
 
   const loadData = async (pageToLoad: number) => {
@@ -117,9 +119,18 @@ export default function Home() {
           decelerationRate="fast"
           contentContainerStyle={{ paddingHorizontal: spacing }}
           renderItem={({ item }) => (
-            <View style={{ width: itemWidth }}>
-              <RecipeCard {...item} />
-            </View>
+            <TouchableOpacity
+              onPress={() => {
+                router.push({
+                  pathname: "/(main)/Recipe/[recipeId]/RecipeDetail",
+                  params: { recipeId: item.recipeId.toString() },
+                })
+              }}
+            >
+              <View style={{ width: itemWidth }}>
+                <RecipeCard {...item} />
+              </View>
+            </TouchableOpacity>
           )}
           ItemSeparatorComponent={() => <View style={{ width: spacing }} />}
           onMomentumScrollEnd={(event) => {
