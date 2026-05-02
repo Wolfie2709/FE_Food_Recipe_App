@@ -11,7 +11,7 @@ export type User = {
   birthdate: string ; // ISO date
   isActive: boolean;
   pictureId: number;
-  role: string;
+  role: "user" | "admin"; 
   token: string;
 };
 
