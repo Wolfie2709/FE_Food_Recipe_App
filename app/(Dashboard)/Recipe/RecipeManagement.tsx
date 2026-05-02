@@ -10,8 +10,6 @@ export default function RecipeManagement() {
   const [user, setUserState] = useState<UserWithToken | null>(null);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const router = useRouter();
-  
-  
 
   // Load all recipes
   const loadRecipes = async () => {

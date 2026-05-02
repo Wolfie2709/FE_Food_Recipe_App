@@ -1,7 +1,8 @@
 // UserContext.tsx
-import { User } from "@/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
+
+type User = { username: string; role: "user" | "admin"; token: string };
 
 const UserContext = createContext<{
   user: User | null;
