@@ -42,12 +42,9 @@ export default function Login() {
         token: data.accessToken,
       });
 
-      // Navigate based on role
-      if (data.role === "admin") {
-        router.replace("../(Dashboard)/AdminDashboard");
-      } else {
+    
         router.replace("../(main)/home");
-      }
+      
     } catch (error) {
       console.error("Login error:", error);
       Alert.alert("Error", "Could not connect to server");
