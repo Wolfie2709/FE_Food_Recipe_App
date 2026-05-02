@@ -1,3 +1,4 @@
+import NavigationBar from "@/components/ui/figma_navbar";
 import { useUser } from "@/components/userContext";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { useRouter } from "expo-router";
@@ -209,6 +210,8 @@ export default function Home() {
           <Text style={styles.searchPlaceholder}>Search recipes</Text>
         </View>
       </View>
+      {user && <NavigationBar user={user} />}
+
     </ScrollView>
   );
 }

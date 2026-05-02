@@ -1,17 +1,18 @@
 export type User = {
   id: number;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   username: string;
   password: string;
-  phone_number: string;
-  email: string;
-  create_date: string; // ISO timestamp
-  sex: string;
+  phoneNumber: string | null;
+  email: string | null;
+  createDate: string; // ISO timestamp
+  sex: string | null;
   birthdate: string; // ISO date
-  is_active: boolean;
-  picture_id: number | null;
+  isActive: boolean;
+  pictureId: number;
   role: string;
+  token: string;
 };
 
 export type LoginRequest = {
@@ -185,3 +186,5 @@ export type RecipeDetailCompleteDto = {
   kitchenUtensils?: Array<RecipeDetailUtensilListDto>;
   recipeSteps?: Array<RecipeDetailStepListDto>;
 };
+
+export type UserWithToken = User & { token: string };

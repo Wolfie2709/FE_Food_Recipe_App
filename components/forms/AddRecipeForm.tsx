@@ -1,6 +1,5 @@
-import { useUser } from "@/components/userContext";
 import { RecipeFormStyles as styles } from "@/theme";
-import { Category, CreateRecipeRequestDto, Ingredient, KitchenUtensil, RecipeCategoryInfoDto, RecipeIngredient, RecipeKitchenUtensilsInfoDto } from "@/types";
+import { Category, CreateRecipeRequestDto, Ingredient, KitchenUtensil, RecipeCategoryInfoDto, RecipeIngredient, RecipeKitchenUtensilsInfoDto, UserWithToken } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
@@ -15,9 +14,10 @@ import {
   View,
 } from "react-native";
 import Button from "../ui/button";
+import { MinusIcon } from "../ui/figma_Icons";
 
 export default function AddNewRecipeForm() {
-  const { user } = useUser();
+  const [user, setUserState] = useState<UserWithToken | null>(null);
   const { recipeId } = useLocalSearchParams(); // recipeId passed from RecipeManagement
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -28,10 +28,10 @@ export default function AddNewRecipeForm() {
     { ingredientsId: null, quantity: "" },
   ]);
   const [recipeCategories, setRecipeCategories] = useState<RecipeCategoryInfoDto[]>([
-    { CategoriesId: null},
+    { CategoriesId: null },
   ]);
   const [recipeKU, setRecipeKU] = useState<RecipeKitchenUtensilsInfoDto[]>([
-    {KitchenUtensilsId: null },
+    { KitchenUtensilsId: null },
   ]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [kitchenUtensils, setKitchenUtensils] = useState<KitchenUtensil[]>([]);
@@ -70,7 +70,7 @@ export default function AddNewRecipeForm() {
       })
       .catch((err) => console.error("Error loading ingredients:", err));
   }, []);
-  
+
   useEffect(() => {
     console.log("Updating recipe with id:", recipeId);
     fetch(`${API_BASE_URL}api/Categories/all`, {
@@ -102,7 +102,7 @@ export default function AddNewRecipeForm() {
       })
       .catch((err) => console.error("Error loading Categories :", err));
   }, []);
-  
+
   useEffect(() => {
     console.log("Updating recipe with id:", recipeId);
     fetch(`${API_BASE_URL}api/KitchenUtensils/all`, {
@@ -134,18 +134,18 @@ export default function AddNewRecipeForm() {
       })
       .catch((err) => console.error("Error loading ingredients:", err));
   }, []);
-  
+
   const addIngredientRow = () => {
     setRecipeIngredients([...recipeIngredients, { ingredientsId: null, quantity: "" }]);
   };
 
 
   const addCategoryRow = () => {
-    setRecipeCategories([...recipeCategories, { CategoriesId: null}]);
+    setRecipeCategories([...recipeCategories, { CategoriesId: null }]);
   };
 
   const addKitchenUtensilsRow = () => {
-    setRecipeKU([...recipeKU, { KitchenUtensilsId: null}]);
+    setRecipeKU([...recipeKU, { KitchenUtensilsId: null }]);
   };
 
   const pickImage = async () => {
@@ -161,7 +161,7 @@ export default function AddNewRecipeForm() {
 
   const goToCookingSteps = async () => {
     const payload: CreateRecipeRequestDto = {
-      name ,
+      name,
       description: description || null,
       servingSize: parseInt(serves, 10),
       cookingTime: parseInt(cookTime, 10),
@@ -206,7 +206,7 @@ export default function AddNewRecipeForm() {
         pathname: "./AddCookingSteps",
         params: { recipeId: recipeId.toString() },
       });
-      
+
     } catch (error) {
       console.error("Error updating recipe:", error);
     }
@@ -219,37 +219,37 @@ export default function AddNewRecipeForm() {
       {/* Recipe Image */}
       <Text style={styles.sectionTitle}>Recipe Image</Text>
       <TouchableOpacity onPress={pickImage}>
-      {recipeImage ? (
-        <Image source={{ uri: recipeImage }} style={styles.recipeImage} />
-      ) : (
-        <View style = {[
-          styles.recipeImage, 
-          { justifyContent: "center", alignItems: "center", backgroundColor: "#eee" }
-        ]}>
+        {recipeImage ? (
+          <Image source={{ uri: recipeImage }} style={styles.recipeImage} />
+        ) : (
+          <View style={[
+            styles.recipeImage,
+            { justifyContent: "center", alignItems: "center", backgroundColor: "#eee" }
+          ]}>
 
-          <Text>Tap to select an image</Text>
-        </View>
-        
-      )}
+            <Text>Tap to select an image</Text>
+          </View>
+
+        )}
       </TouchableOpacity>
 
       {/* Recipe Name */}
       <Text>Recipe Name:</Text>
       <TextInput
-      style={styles.input}
-      value = {name}
-      onChangeText={setName}
-      placeholder="Enter recipe name"
+        style={styles.input}
+        value={name}
+        onChangeText={setName}
+        placeholder="Enter recipe name"
       />
 
       {/* Description */}
       <Text>Description:</Text>
       <TextInput
-      style = {styles.input}
-      value = {description}
-      onChangeText={setDescription}
-      placeholder="Enter recipe description"
-      multiline
+        style={styles.input}
+        value={description}
+        onChangeText={setDescription}
+        placeholder="Enter recipe description"
+        multiline
       />
       {/* Serves */}
       <Text>Serves:</Text>
@@ -304,6 +304,17 @@ export default function AddNewRecipeForm() {
               setRecipeIngredients(updated);
             }}
           />
+
+          {/* Delete row button */}
+          <TouchableOpacity
+            onPress={() => {
+              const updated = recipeIngredients.filter((_, i) => i !== index);
+              setRecipeIngredients(updated);
+            }}
+            style={{ marginLeft: 8 }}
+          >
+            <MinusIcon size={20} color="#E23E3E" />
+          </TouchableOpacity>
 
           {item.ingredientsId && (
             <Image

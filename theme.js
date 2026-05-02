@@ -738,6 +738,23 @@ export const RecipeStepStyles = StyleSheet.create({
   stepImage: { width: 100, height: 100, borderRadius: 8, marginBottom: 6 },
 });
 
+export const nBarStyles = StyleSheet.create({
+  container: {
+    backgroundColor: "#FFF",
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderColor: "#C1C1C1",
+  },
+  navRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  navItem: {
+    padding: 10,
+  },
+});
+
 export const RecipeDetailStyles = StyleSheet.create({
   header: {
     flexDirection: "row",
