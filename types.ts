@@ -8,7 +8,7 @@ export type User = {
   email: string | null;
   createDate: string; // ISO timestamp
   sex: string | null;
-  birthdate: string ; // ISO date
+  birthdate: string; // ISO date
   isActive: boolean;
   pictureId: number;
   role: "user" | "admin"; 
@@ -147,6 +147,44 @@ export type RecipeCategoryInfoDto = {
 
 export type RecipeKitchenUtensilsInfoDto = {
   KitchenUtensilsId: number | null;
-}
+};
+
+//Recipe Detail
+export type RecipeDetailIngredientListDto = {
+  id: number;
+  name?: string;
+  measurementUnit?: string;
+  quantity?: number;
+};
+
+export type RecipeDetailCategoryListDto = {
+  categoriesId: number;
+  name?: string;
+  description?: string;
+};
+
+export type RecipeDetailUtensilListDto = {
+  kitchenUtensilId: number;
+  name?: string;
+};
+
+export type RecipeDetailStepListDto = {
+  recipeStepId: number;
+  name?: string;
+  description?: string;
+};
+
+export type RecipeDetailCompleteDto = {
+  recipeId: number;
+  name?: string;
+  description?: string;
+  cookingTime?: number;
+  servingSize?: number;
+  pictureDirectory?: Array<string>;
+  ingredients?: Array<RecipeDetailIngredientListDto>;
+  categories?: Array<RecipeDetailCategoryListDto>;
+  kitchenUtensils?: Array<RecipeDetailUtensilListDto>;
+  recipeSteps?: Array<RecipeDetailStepListDto>;
+};
 
 export type UserWithToken = User & { token: string };

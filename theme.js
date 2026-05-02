@@ -722,8 +722,6 @@ export const RecipeFormStyles = StyleSheet.create({
   recipeImage: { width: 200, height: 200, marginVertical: 10, borderRadius: 8 },
 });
 
-
-
 export const RecipeStepStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF", padding: 16 },
   header: { fontSize: 22, fontWeight: "bold", marginBottom: 16 },
@@ -740,21 +738,120 @@ export const RecipeStepStyles = StyleSheet.create({
   stepImage: { width: 100, height: 100, borderRadius: 8, marginBottom: 6 },
 });
 
-
 export const nBarStyles = StyleSheet.create({
-    container: {
-      backgroundColor: "#FFF",
-      paddingVertical: 12,
-      borderTopWidth: 1,
-      borderColor: "#C1C1C1",
-    },
-    navRow: {
-      flexDirection: "row",
-      justifyContent: "space-around",
-      alignItems: "center",
-    },
-    navItem: {
-      padding: 10,
-    },
-  });
+  container: {
+    backgroundColor: "#FFF",
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderColor: "#C1C1C1",
+  },
+  navRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  navItem: {
+    padding: 10,
+  },
+});
 
+export const RecipeDetailStyles = StyleSheet.create({
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  headerButton: { width: 24, height: 24 },
+  RecipeVisualBlock: { marginBottom: 16 },
+  RecipeName: { fontSize: 24, fontWeight: "bold", marginBottom: 8 },
+  RecipePicture: {
+    width: "100%",
+    height: 200,
+    marginVertical: 8,
+    borderRadius: 16,
+  },
+  RecipeRating: { fontSize: 14, color: "#3c3c3c" },
+  RecipeAuthor: {
+    marginTop: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  RecipeAuthorAvatar: { width: 50, height: 50, borderRadius: 25 },
+  RecipeAuthorName: { marginLeft: 10 },
+  RecipeDetailPageButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: "red",
+    borderRadius: 8,
+    color: "white",
+    fontWeight: "600",
+  },
+  InfoBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  InfoCard: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 10,
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "#000",
+  },
+  InfoLabel: {
+    fontSize: 14,
+  },
+  InfoDetail: { fontSize: 20, fontWeight: "600" },
+  DescriptionCard: {
+    marginTop: 16,
+    padding: 8,
+    backgroundColor: "#D9D9D9",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderStyle: "solid",
+    borderColor: "#000",
+    minHeight: 200,
+  },
+  DescriptionLabel: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginHorizontal: "auto",
+  },
+  DescriptionContent: {
+    marginTop: 8,
+    textAlign: "justify",
+    lineHeight: 20,
+    fontSize: 16,
+    color: "#3c3c3c",
+    marginHorizontal: "auto",
+  },
+  CardList: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginVertical: 8,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  CardListItem: { flexDirection: "row", alignItems: "center" },
+  CardListItemImage: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    marginRight: 12,
+  },
+  CardListItemName: { fontSize: 16, fontWeight: "600" },
+  StepButton: {
+    paddingVertical: 15,
+    paddingHorizontal: 32,
+    marginTop: 16,
+    textAlign: "center",
+  },
+});
