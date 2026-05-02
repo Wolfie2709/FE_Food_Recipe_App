@@ -3,7 +3,7 @@ import {
   RecipeDetailCompleteDto
 } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -39,7 +39,13 @@ export default function RecipeDetail() {
       <ScrollView contentContainerStyle={{ padding: 24 }}>
         {/* HEADER */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.headerButton}>
+          <TouchableOpacity style={styles.headerButton}
+            onPress={() => {
+              router.push({
+                pathname: "/(main)/home",
+              })
+            }}
+          >
             <Image source={require("assets/images/Arrow-Left.png")} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerButton}>
