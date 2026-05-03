@@ -92,8 +92,8 @@ export default function RecipeDetail() {
         </View>
         {/* INGREDIENT LIST */}
         <Text style={{ marginTop: 24, fontSize: 18, fontWeight: "600" }}>Ingredients</Text>
-        {recipe.ingredients && recipe.ingredients.map((ing) => (
-          <View key={ing.id} style={styles.CardList}>
+        {recipe.ingredients && recipe.ingredients.map((ing, index) => (
+          <View key={`${ing.id}-${index}`} style={styles.CardList}>
             <View style={styles.CardListItem}>
               <Image source={require("assets/images/icon.png")} style={styles.CardListItemImage} />
               <Text style={styles.CardListItemName}>{ing.name}</Text>
@@ -103,8 +103,8 @@ export default function RecipeDetail() {
         ))}
         {/* UTENSIL LIST */}
         <Text style={{ marginTop: 24, fontSize: 18, fontWeight: "600" }}>Kitchen Utensils</Text>
-        {recipe.kitchenUtensils && recipe.kitchenUtensils.map((ku) => (
-          <View key={ku.kitchenUtensilId} style={styles.CardList}>
+        {recipe.kitchenUtensils && recipe.kitchenUtensils.map((ku, index) => (
+          <View key={`${ku.kitchenUtensilId}-${index}`} style={styles.CardList}>
             <View style={styles.CardListItem}>
               <Image source={require("assets/images/icon.png")} style={styles.CardListItemImage} />
               <Text style={styles.CardListItemName}>{ku.name}</Text>
@@ -113,8 +113,17 @@ export default function RecipeDetail() {
         ))}
         {/* <Text style={{ marginTop: 16, fontSize: 18, fontWeight: "600" }}>Steps</Text> */}
         {/* UTENSIL */}
-        <TouchableOpacity>
-          <Text style={[styles.RecipeDetailPageButton, styles.StepButton]}>LET'S GET COOKING</Text>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "/(main)/Recipe/[recipeId]/RecipeStepList",
+              params: { recipeId, steps: JSON.stringify(recipe.recipeSteps) },
+            })
+          }
+        >
+          <Text style={[styles.RecipeDetailPageButton, styles.StepButton]}>
+            LET'S GET COOKING
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

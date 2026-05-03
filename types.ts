@@ -173,6 +173,7 @@ export type RecipeDetailStepListDto = {
   name?: string;
   description?: string;
   imageUrl?: string;
+  recipeId: number;
 };
 
 export type RecipeDetailCompleteDto = {
