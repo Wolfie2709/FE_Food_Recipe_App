@@ -172,6 +172,7 @@ export type RecipeDetailStepListDto = {
   recipeStepId: number;
   name?: string;
   description?: string;
+  imageUrl?: string;
 };
 
 export type RecipeDetailCompleteDto = {
@@ -188,3 +189,4 @@ export type RecipeDetailCompleteDto = {
 };
 
 export type UserWithToken = User & { token: string };
+

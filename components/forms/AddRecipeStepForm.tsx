@@ -5,8 +5,9 @@ import { API_BASE_URL } from "@/utils/apiConfig";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { FlatList, Image, Text, TextInput, View } from "react-native";
+import { FlatList, Image, Text, View } from "react-native";
 import Button from "../ui/button";
+import Field from "../ui/figma_input_fields";
 
 type Props = {
   recipeId: string; // pass this in via navigation params
@@ -67,9 +68,9 @@ export default function AddCookingSteps({ recipeId }: Props) {
           console.error("Failed to save step:", res.status, rawError);
         }
         router.push({
-            pathname: "../RecipeManagement",
-            params: { id: recipeId.toString() },
-          });
+          pathname: "../RecipeManagement",
+          params: { id: recipeId.toString() },
+        });
       }
       console.log("All steps saved!");
     } catch (err) {
@@ -83,8 +84,7 @@ export default function AddCookingSteps({ recipeId }: Props) {
       <Text style={styles.sectionTitle}>Steps</Text>
 
       {/* Input for new step */}
-      <TextInput
-        style={styles.input}
+      <Field
         placeholder="Instruction description"
         value={currentDescription}
         onChangeText={setCurrentDescription}

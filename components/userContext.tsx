@@ -2,15 +2,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-type User = { username: string; role: "user" | "admin"; token: string };
+type UserLogin = { username: string; role: "user" | "admin"; token: string };
 
 const UserContext = createContext<{
-  user: User | null;
-  setUser: (u: User | null) => void;
+  user: UserLogin | null;
+  setUser: (u: UserLogin | null) => void;
 }>({ user: null, setUser: () => {} });
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUserState] = useState<User | null>(null);
+  const [user, setUserState] = useState<UserLogin | null>(null);
 
   // Load user from storage on app start
   useEffect(() => {
@@ -24,7 +24,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Save user whenever it changes
-  const setUser = async (u: User | null) => {
+  const setUser = async (u: UserLogin | null) => {
     setUserState(u);
     if (u) {
       await AsyncStorage.setItem("user", JSON.stringify(u));

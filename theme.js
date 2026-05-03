@@ -855,3 +855,109 @@ export const RecipeDetailStyles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+
+export const profilePageStyles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: "#FFF" },
+  content: { flex: 1, alignItems: "center", padding: 20 },
+  header: { flexDirection: "row", padding: 16, alignItems: "center" },
+  headerInfo: { flex: 1, marginLeft: 16 },
+  avatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 16 },
+  avatarPlaceholder: {
+    backgroundColor: "#E23E3E",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  username: { fontSize: 20, fontWeight: "700", color: "#303030" },
+  infoBox: { flexDirection: "row", marginBottom: 8, width: "100%" },
+  label: { fontWeight: "600", color: "#787A7C", marginRight: 8 },
+  value: { color: "#303030" },
+  message: { fontSize: 18, color: "#787A7C", marginTop: 40, textAlign: "center" },
+  settings: { width: 30,
+    height: 30,
+    borderRadius: 10,
+    position: "absolute",
+    top: 16,
+    right: 16 },
+  bio: { fontSize: 14, color: "#787A7C", marginTop: 4 },
+
+  statsRow: { flexDirection: "row", justifyContent: "space-around", marginVertical: 20 },
+  statBox: { alignItems: "center" },
+    statLabel: { color: "#A9A9A9", fontSize: 12 },
+    statValue: { color: "#303030", fontSize: 18, fontWeight: "700" },
+  
+    card: {
+      width: 335,
+      height: 200,
+      borderRadius: 10,
+      overflow: "hidden",
+      marginBottom: 20,
+      alignSelf: "center",
+      backgroundColor: "#C1C1C1",
+    },
+    cardImage: { width: "100%", height: "100%" },
+    overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.3)" },
+    cardTitle: {
+      position: "absolute",
+      bottom: 40,
+      left: 16,
+      color: "#FFF",
+      fontSize: 16,
+      fontWeight: "600",
+    },
+    infoRow: { position: "absolute", bottom: 16, left: 16, flexDirection: "row", gap: 12 },
+    infoText: { color: "#FFF", fontSize: 12 },
+    rating: {
+      position: "absolute",
+      top: 8,
+      left: 8,
+      backgroundColor: "rgba(48,48,48,0.3)",
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 6,
+    },
+    ratingText: { color: "#FFF", fontWeight: "600" },
+  
+    bottomNav: {
+      height: 60,
+      borderTopWidth: 1,
+      borderColor: "#DDD",
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    
+});
+
+export const RecipeStepListStyles = StyleSheet.create({
+  infoBox: {
+    borderWidth: 1,
+    borderColor: "#000",
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 12,
+    backgroundColor: "#FFF",
+  },
+  stepTitle: { fontSize: 18, fontWeight: "700", marginBottom: 8 },
+  stepDescription: { fontSize: 16, color: "#333" },
+  finishButton: {
+    backgroundColor: "#E23E3E",
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  finishButtonText: { color: "#FFF", fontSize: 16, fontWeight: "600" },
+  thumbnail: {
+    width: 55,
+    height: 55,
+    borderRadius: 27.5,
+    marginRight: 12,
+  },
+  thumbnailPlaceholder: {
+    width: 55,
+    height: 55,
+    borderRadius: 27.5,
+    backgroundColor: "#D9D9D9",
+    marginRight: 12,
+  },
+});

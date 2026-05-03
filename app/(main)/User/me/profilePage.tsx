@@ -1,10 +1,13 @@
 // import { useAuthStore } from "@/components/Store/authStore";
+import Button from "@/components/ui/button";
 import NavigationBar from "@/components/ui/figma_navbar";
 import { useUser } from "@/components/userContext";
+import { profilePageStyles as styles } from "@/theme";
 import { User } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ProfilePage() {
@@ -43,8 +46,14 @@ export default function ProfilePage() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <View style={styles.container}>
-        <View style={styles.content}>
+      <View style={styles.header}>
+        <View>
+          <Image
+            source={require("../../../../assets/images/SettingsIcon.png")}
+            style={styles.settings}
+          />
+        </View>
+        <View style={styles.headerInfo}>
           {/* Avatar */}
           {user.pictureId ? (
             <Image
@@ -53,10 +62,22 @@ export default function ProfilePage() {
             />
           ) : (
             <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Text style={{ color: "#FFF", fontSize: 24 }}>
+              <Text style={[styles.username]}>
                 {user.username.charAt(0).toUpperCase()}
               </Text>
             </View>
+          )}
+
+          {user.role === "admin" && (
+            <Button
+              title="Admin Panel"
+              variant="primary"
+              size="large"
+              onPress={() => {
+                console.log("Admin button pressed");
+                router.push("/(Dashboard)/AdminDashboard")
+              }}
+            />
           )}
           {/* Username */}
           <Text style={styles.username}>{user.username}</Text>
@@ -85,7 +106,18 @@ export default function ProfilePage() {
               {new Date(user.createDate).toLocaleDateString()}
             </Text>
           </View>
+          <Button 
+          title = "Edit Profile"
+          variant="primary"
+          size = "small"
+          onPress={() => {
+            console.log("Edit profile button pressed")
+            router.push("./EditProfile")
+          } }
+          />
         </View>
+      </View>
+      <View>
         {/* Bottom navigation bar */}
         {user && <NavigationBar user={user} />}
       </View>
@@ -93,18 +125,3 @@ export default function ProfilePage() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#FFF" },
-  content: { flex: 1, alignItems: "center", padding: 20 },
-  avatar: { width: 100, height: 100, borderRadius: 50, marginBottom: 16 },
-  avatarPlaceholder: {
-    backgroundColor: "#E23E3E",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  username: { fontSize: 24, fontWeight: "700", marginBottom: 20, color: "#303030" },
-  infoBox: { flexDirection: "row", marginBottom: 8, width: "100%" },
-  label: { fontWeight: "600", color: "#787A7C", marginRight: 8 },
-  value: { color: "#303030" },
-  message: { fontSize: 18, color: "#787A7C", marginTop: 40, textAlign: "center" },
-});
