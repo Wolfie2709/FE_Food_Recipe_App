@@ -59,6 +59,19 @@ export type RecipePagination = {
   recipeList: Array<RecipeBox>;
 };
 
+export type KitchenUtensilPagination = {
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  recipeList: Array<RecipeBox>;
+};
+
+export type KithcenUtensilBox = {
+  kitchenUtensilId: number;
+  name: string;
+  imageDirectory: string;
+};
+
 export type ChangePasswordDTO = {
   username: string;
   oldPassword: string;
@@ -66,7 +79,7 @@ export type ChangePasswordDTO = {
 };
 
 export type Ingredient = {
-  id: number;
+  ingredientsId: number;
   name: string;
   categoryId: number;
   categoryName: string;
@@ -92,9 +105,10 @@ export type Recipe = {
   imageDirectory: string;
 };
 export type KitchenUtensil = {
-  id: number;
+  kitchenUtensilId: number;
   name: string;
   imageUrl: string;
+  categoryId: number;
 };
 
 export type Review = {
@@ -191,3 +205,6 @@ export type RecipeDetailCompleteDto = {
 
 export type UserWithToken = User & { token: string };
 
+export type KitchenUtensilCategoryDto = {
+  categoriesId: number | null;
+}

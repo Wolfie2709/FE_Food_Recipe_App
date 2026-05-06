@@ -14,6 +14,7 @@ export default function Field({
   value,
   onChangeText,
   editable = true,
+  secureTextEntry = true,
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
 
@@ -33,6 +34,7 @@ export default function Field({
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         editable={editable}
+        secureTextEntry={secureTextEntry}
       />
     </View>
   );

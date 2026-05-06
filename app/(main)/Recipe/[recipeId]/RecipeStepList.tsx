@@ -16,34 +16,20 @@ export default function RecipeStepList() {
   useEffect(() => {
     const fetchSteps = async () => {
       try {
-        // Try route-style endpoint first
-        let res = await fetch(`${API_BASE_URL}api/RecipeSteps/recipe-${recipeId}`);
-        let text = await res.text(); // get raw text
-        let data: RecipeDetailStepListDto[] = [];
+        const res = await fetch(
+          `${API_BASE_URL}api/RecipeSteps/recipe-${recipeId}`
+        );
   
-        if (text) {
-          try {
-            data = JSON.parse(text);
-          } catch (parseErr) {
-            console.error("Parse error (route):", parseErr, text);
-          }
+        if (!res.ok) {
+          console.error("Failed to fetch steps:", res.status);
+          setSteps([]);
+          return;
         }
   
-        // If route returned empty, try query-style
-        if (!data || !data.length) {
-          res = await fetch(`${API_BASE_URL}api/RecipeSteps?recipeId=${recipeId}`);
-          text = await res.text();
-          if (text) {
-            try {
-              data = JSON.parse(text);
-            } catch (parseErr) {
-              console.error("Parse error (query):", parseErr, text);
-            }
-          }
-        }
-  
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : [];
         console.log("Fetched steps:", data);
-        setSteps(data || []);
+        setSteps(data);
       } catch (err) {
         console.error("Error loading steps:", err);
         setSteps([]);
@@ -54,6 +40,7 @@ export default function RecipeStepList() {
   
     fetchSteps();
   }, [recipeId]);
+  
   if (loading) return <Text>Loading steps...</Text>;
   if (!steps.length) return <Text>No steps found for this recipe.</Text>;
 

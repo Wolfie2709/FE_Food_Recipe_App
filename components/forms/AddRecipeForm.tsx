@@ -1,5 +1,5 @@
 import { RecipeFormStyles as styles } from "@/theme";
-import { Category, CreateRecipeRequestDto, Ingredient, KitchenUtensil, RecipeCategoryInfoDto, RecipeIngredient, RecipeKitchenUtensilsInfoDto, UserWithToken } from "@/types";
+import { Category, CreateRecipeRequestDto, Ingredient, KitchenUtensil, RecipeCategoryInfoDto, RecipeIngredient, RecipeKitchenUtensilsInfoDto } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
@@ -15,9 +15,10 @@ import {
 } from "react-native";
 import Button from "../ui/button";
 import { MinusIcon } from "../ui/figma_Icons";
+import { useUser } from "../userContext";
 
 export default function AddNewRecipeForm() {
-  const [user, setUserState] = useState<UserWithToken | null>(null);
+  const {user} = useUser();
   const { recipeId } = useLocalSearchParams(); // recipeId passed from RecipeManagement
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -373,9 +374,9 @@ export default function AddNewRecipeForm() {
             <Picker.Item label="Select utensils..." value="" />
             {kitchenUtensils.map((ku) => (
               <Picker.Item
-                key={ku.id}
+                key={ku.kitchenUtensilId}
                 label={ku.name}
-                value={ku.id}
+                value={ku.kitchenUtensilId}
               />
             ))}
           </Picker>

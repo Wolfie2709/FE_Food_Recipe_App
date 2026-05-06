@@ -50,24 +50,28 @@ export default function AdminDashboard() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Admin Controls</Text>
         <Link push style={styles.link} href="./Recipe/RecipeManagement">
-    Recipes
+          Recipes
+        </Link>
+
+        <Link push style={styles.link} href="./(Dashboard)/Ingredients">
+          Ingredients
+        </Link>
+
+  <Link push style={styles.link} href="./KitchenUtensils/KitchenUtensilsManagement">
+    KitchenUtensils
   </Link>
 
-  {/* <Link push style={styles.link} href="/(Dashboard)/Ingredients">
-    Ingredients
-  </Link>
-
-  <Link push style={styles.link} href="/(Dashboard)/Users">
+        {/* <Link push style={styles.link} href="/(Dashboard)/Users">
     Users
-  </Link>
-
-  <Link push style={styles.link} href="/(Dashboard)/Reviews">
-    Reviews
-  </Link>
-
-  <Link push style={styles.link} href="/(Dashboard)/Logging">
-    Logging
   </Link> */}
+
+        {/* <Link push style={styles.link} href="/(Dashboard)/Reviews">
+    Reviews
+  </Link> */}
+
+        {/*  <Link push style={styles.link} href="/(Dashboard)/Logging">
+     Logging
+ </Link>  */}
       </View>
 
 
