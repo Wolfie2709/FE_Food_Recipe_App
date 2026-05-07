@@ -142,15 +142,14 @@ export type CreateRecipeRequestDto = {
   description?: string | null;
   cookingTime?: number;
   servingSize?: number;
-  ingredients: { ingredientId: number; quantity: string }[];
-  categories: { categoryId: number }[];
-  kitchenUtensils: { utensilId: number }[];
+  ingredients: Array<RecipeIngredient>;
+  categories: Array<RecipeCategoryInfoDto>;
+  kitchenUtensils: Array<RecipeKitchenUtensilsInfoDto>;
 };
 
 export type RecipeIngredient = {
   ingredientsId: number | null;
   quantity: string;
-  imageUrl?: string;
 };
 
 export type RecipeStepInfo = {
@@ -165,7 +164,7 @@ export type RecipeCategoryInfoDto = {
 };
 
 export type RecipeKitchenUtensilsInfoDto = {
-  KitchenUtensilsId: number | null;
+  KitchenUtensilId: number | null;
 };
 
 //Recipe Detail

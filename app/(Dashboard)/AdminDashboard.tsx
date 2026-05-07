@@ -61,6 +61,10 @@ export default function AdminDashboard() {
     KitchenUtensils
   </Link>
 
+   <Link push style={styles.link} href="./Category/CategoriesManagement">
+    Categories
+  </Link>
+
         {/* <Link push style={styles.link} href="/(Dashboard)/Users">
     Users
   </Link> */}

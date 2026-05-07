@@ -32,7 +32,7 @@ export default function AddNewRecipeForm() {
     { CategoriesId: null },
   ]);
   const [recipeKU, setRecipeKU] = useState<RecipeKitchenUtensilsInfoDto[]>([
-    { KitchenUtensilsId: null },
+    { KitchenUtensilId: null },
   ]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [kitchenUtensils, setKitchenUtensils] = useState<KitchenUtensil[]>([]);
@@ -146,7 +146,7 @@ export default function AddNewRecipeForm() {
   };
 
   const addKitchenUtensilsRow = () => {
-    setRecipeKU([...recipeKU, { KitchenUtensilsId: null }]);
+    setRecipeKU([...recipeKU, { KitchenUtensilId: null }]);
   };
 
   const pickImage = async () => {
@@ -162,24 +162,28 @@ export default function AddNewRecipeForm() {
 
   const goToCookingSteps = async () => {
     const payload: CreateRecipeRequestDto = {
-      name,
-      description: description || null,
-      servingSize: parseInt(serves, 10),
-      cookingTime: parseInt(cookTime, 10),
-      ingredients: recipeIngredients
-        .filter(rI => rI.ingredientsId !== null)
-        .map(rI => ({
-          ingredientId: rI.ingredientsId!,
-          quantity: rI.quantity
-        })),
-      categories: recipeCategories.filter(rC => rC.CategoriesId !== null).map(rC => ({
-        categoryId: rC.CategoriesId!
-      })),
-      kitchenUtensils: recipeKU.filter(rKU => rKU.KitchenUtensilsId !== null).map(rKU => ({
-        utensilId: rKU.KitchenUtensilsId!
-      })),
+  name,
+  description: description || null,
+  servingSize: parseInt(serves, 10),
+  cookingTime: parseInt(cookTime, 10),
+  ingredients: recipeIngredients
+    .filter(rI => rI.ingredientsId !== null)
+    .map(rI => ({
+      ingredientsId: rI.ingredientsId!,   // ✅ match RecipeIngredient type
+      quantity: rI.quantity
+    })),
+  categories: recipeCategories
+    .filter(rC => rC.CategoriesId !== null)
+    .map(rC => ({
+      CategoriesId: rC.CategoriesId!      // ✅ match RecipeCategoryInfoDto type
+    })),
+kitchenUtensils: recipeKU
+    .filter(rKU => rKU.KitchenUtensilId !== null)
+    .map(rKU => ({
+      KitchenUtensilId: rKU.KitchenUtensilId! // ✅ matches RecipeKitchenUtensilsInfoDto
+    })),
+};
 
-    };
 
     try {
       if (!user?.token) {
@@ -187,6 +191,7 @@ export default function AddNewRecipeForm() {
         return;
       }
 
+      console.log("payload: ", payload);
       const response = await fetch(`${API_BASE_URL}api/Recipes/update/complete-recipe-info/${recipeId}`, {
         method: "PUT",
         headers: {
@@ -363,11 +368,11 @@ export default function AddNewRecipeForm() {
       {recipeKU.map((item, index) => (
         <View key={index} style={styles.ingredientRow}>
           <Picker
-            selectedValue={item.KitchenUtensilsId ?? ""}
+            selectedValue={item.KitchenUtensilId ?? ""}
             style={{ flex: 1 }}
             onValueChange={(val) => {
               const updated = [...recipeKU];
-              updated[index].KitchenUtensilsId = val === "" ? null : Number(val);
+              updated[index].KitchenUtensilId = val === "" ? null : Number(val);
               setRecipeKU(updated);
             }}
           >

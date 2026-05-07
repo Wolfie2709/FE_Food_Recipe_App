@@ -60,7 +60,7 @@ export default function CategoryManagement() {
 
       const data = JSON.parse(raw);
       router.push({
-        pathname: "./AddCategoryForm",
+        pathname: "./AddCategories",
         params: { categoryId: data.categoryId.toString() },
       });
     } catch (err) {

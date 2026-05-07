@@ -56,9 +56,6 @@ export default function RecipeManagement() {
           description: null,
           cookingTime: 0,
           servingSize: 0,
-          categories: [],
-          ingredients: [],
-          kitchenUtensils: []
         }),
       });
   
@@ -163,7 +160,7 @@ export default function RecipeManagement() {
           <TouchableOpacity
             onPress={() =>
               router.push({
-                pathname: "./edit-recipe/[recipeId]/EditRecipe",
+                pathname: "./edit-recipe/EditRecipe",
                 params: { recipeId: item.recipeId.toString() },
               })
             }

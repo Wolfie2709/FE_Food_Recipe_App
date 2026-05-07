@@ -95,7 +95,7 @@ export default function KitchenUtensilsManagement() {
       style={styles.tableRow}
       onPress={() =>
         router.push({
-          pathname: "/Recipe/add-recipe/AddNewRecipe",
+          pathname: "./Recipe/add-recipe/AddNewRecipe",
           params: { kitchenUtensilId: item.kitchenUtensilId.toString() },
         })
       }
