@@ -8,11 +8,11 @@ import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, Vie
 import Button from "../../../components/ui/button";
 
 export default function RecipeManagement() {
-  const {user} = useUser();
+  const { user } = useUser();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null); // ✅ track which row’s menu is open
   const router = useRouter();
 
-  // Load all recipes
   const loadRecipes = async () => {
     try {
       const res = await fetch(
@@ -23,12 +23,10 @@ export default function RecipeManagement() {
           },
         }
       );
-
       if (!res.ok) {
         console.error("Failed to load recipes:", res.status, res.statusText);
         return;
       }
-
       const data = await res.json();
       setRecipes(data.recipeList);
     } catch (error) {
@@ -40,7 +38,6 @@ export default function RecipeManagement() {
     loadRecipes();
   }, []);
 
-  // Create new recipe and navigate to AddNewRecipe
   const createRecipe = async () => {
     try {
       if (!user?.token) {
@@ -94,49 +91,98 @@ export default function RecipeManagement() {
   };
   
 
-  const renderItem: ListRenderItem<Recipe> = ({ item }) => (
-    <TouchableOpacity
-      style={styles.tableRow}
-      onPress={() =>
-        router.push({
-          pathname: "/Recipe/add-recipe/AddNewRecipe",
-          params: { recipeId: item.recipeId.toString() },
-        })
+  const softDeleteRecipe = async (recipeId: number) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}api/RecipeSteps/recipe-${recipeId}`, {
+        method: "DELETE",
+        headers: { "Authorization": user?.token ? `Bearer ${user.token}` : "" },
+      });
+      if (res.ok) {
+        console.log("Soft deleted successfully");
+        await loadRecipes();
+      } else {
+        console.error("Soft delete failed");
       }
-    >
+    } catch (err) {
+      console.error("Error soft deleting recipe:", err);
+    }
+  };
+
+  const hardDeleteRecipe = async (recipeId: number) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}api/Recipes/${recipeId}`, {
+        method: "DELETE",
+        headers: { "Authorization": user?.token ? `Bearer ${user.token}` : "" },
+      });
+      if (res.ok) {
+        console.log("Hard deleted successfully");
+        await loadRecipes();
+      } else {
+        console.error("Hard delete failed");
+      }
+    } catch (err) {
+      console.error("Error hard deleting recipe:", err);
+    }
+  };
+
+  const renderItem: ListRenderItem<Recipe> = ({ item }) => (
+    <View style={styles.tableRow}>
       <View style={styles.tableCellId}>
         <Text style={styles.tableCellText}>{item.recipeId}</Text>
       </View>
 
       <View style={styles.tableCellProduct}>
         <View style={styles.ProductCell}>
-          <View>
-            <Image
-              source={
-                item.imageDirectory
-                  ? { uri: `${URL}${item.imageDirectory}` }
-                  : require("assets/images/icon.png")
-              }
-              style={styles.ImageContent}
-              resizeMode="cover"
-            />
-          </View>
-
+          <Image
+            source={
+              item.imageDirectory
+                ? { uri: `${URL}${item.imageDirectory}` }
+                : require("assets/images/icon.png")
+            }
+            style={styles.ImageContent}
+            resizeMode="cover"
+          />
           <View style={styles.ProductInformation}>
-            <Text style={styles.tableCellText}>
-              {item.name || "Untitled"}
-            </Text>
+            <Text style={styles.tableCellText}>{item.name || "Untitled"}</Text>
           </View>
         </View>
       </View>
 
-      <View>
+      {/* Three-dot icon */}
+      <TouchableOpacity
+        onPress={() =>
+          setMenuVisibleId(menuVisibleId === item.recipeId ? null : item.recipeId)
+        }
+      >
         <Image source={require("assets/images/Union.png")} />
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+
+      {/* Context menu */}
+      {menuVisibleId === item.recipeId && (
+        <View style={styles.contextMenu}>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: "./edit-recipe/[recipeId]/EditRecipe",
+                params: { recipeId: item.recipeId.toString() },
+              })
+            }
+          >
+            <Text style={styles.menuItem}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => softDeleteRecipe(item.recipeId)}>
+            <Text style={styles.menuItem}>Soft Delete</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => hardDeleteRecipe(item.recipeId)}>
+            <Text style={styles.menuItem}>Hard Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
   );
 
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Recipe</Text>
@@ -150,13 +196,12 @@ export default function RecipeManagement() {
 
       {/* Filter + Add New Recipe buttons */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
-        <Button title="Filter" onPress={() => { }} />
+        <Button title="Filter" onPress={() => {}} />
         <Button title="Add New Recipe" onPress={createRecipe} />
       </View>
 
       {/* Table */}
       <View style={styles.boxListTable}>
-        {/* Table header */}
         <View style={styles.tableHeader}>
           <View style={styles.tableHeaderTextId}>
             <View style={styles.TabHeaderInner}>
@@ -170,16 +215,13 @@ export default function RecipeManagement() {
           </View>
         </View>
 
-        {/* Recipe list */}
         <FlatList
           data={recipes}
           style={{ flex: 1 }}
           keyExtractor={(item) => item.recipeId.toString()}
-          // style={styles.boxList}
           renderItem={renderItem}
         />
       </View>
     </View>
   );
 }
-

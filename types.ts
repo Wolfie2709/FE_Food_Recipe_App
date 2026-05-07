@@ -150,6 +150,7 @@ export type RecipeIngredient = {
 };
 
 export type RecipeStepInfo = {
+  recipeStepId: number|null;
   name: string;
   description: string;
   imageUrl?: string;
@@ -208,3 +209,9 @@ export type UserWithToken = User & { token: string };
 export type KitchenUtensilCategoryDto = {
   categoriesId: number | null;
 }
+
+export type RecipeStepInfoUpdate = {
+  name: string;
+  description: string;
+  imageUrl?: string;
+};

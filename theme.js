@@ -386,6 +386,21 @@ export const ManagementStyles = StyleSheet.create({
     paddingLeft: spacing.md,
     paddingRight: spacing.sm,
   },
+  contextMenu: {
+    position: "absolute",
+    right: 0,
+    top: 30,
+    backgroundColor: "#fff",
+    borderRadius: 4,
+    elevation: 4, // shadow on Android
+    padding: 8,
+  },
+  menuItem: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    fontSize: 14,
+  }
+  
 });
 
 export const uiKitsStyles = StyleSheet.create({

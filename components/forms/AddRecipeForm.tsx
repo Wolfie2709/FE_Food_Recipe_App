@@ -288,9 +288,9 @@ export default function AddNewRecipeForm() {
             <Picker.Item label="Select ingredient..." value="" />
             {ingredients.map((ing) => (
               <Picker.Item
-                key={ing.id}
+                key={ing.ingredientsId}
                 label={ing.name}
-                value={ing.id}
+                value={ing.ingredientsId}
               />
             ))}
           </Picker>
@@ -321,7 +321,7 @@ export default function AddNewRecipeForm() {
             <Image
               source={{
                 uri:
-                  ingredients.find((ing) => ing.id === item.ingredientsId)
+                  ingredients.find((ing) => ing.ingredientsId === item.ingredientsId)
                     ?.imageUrl || "",
               }}
               style={{ width: 40, height: 40 }}

@@ -3,21 +3,37 @@ import { RecipeStepStyles as styles } from "@/theme";
 import { RecipeStepInfo } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { FlatList, Image, Text, View } from "react-native";
 import Button from "../ui/button";
 import Field from "../ui/figma_input_fields";
 
-type Props = {
-  recipeId: string; // pass this in via navigation params
-};
-
-export default function AddCookingSteps({ recipeId }: Props) {
+export default function EditCookingSteps() {
   const { user } = useUser();
+  const { recipeId } = useLocalSearchParams(); // passed via navigation
   const [recipeSteps, setRecipeSteps] = useState<RecipeStepInfo[]>([]);
   const [currentDescription, setCurrentDescription] = useState("");
   const router = useRouter();
+
+  // Load existing steps
+  useEffect(() => {
+    const fetchSteps = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}api/RecipeSteps/${recipeId}`, {
+          headers: {
+            "Authorization": user?.token ? `Bearer ${user.token}` : "",
+          },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setRecipeSteps(data || []);
+      } catch (err) {
+        console.error("Error fetching steps:", err);
+      }
+    };
+    fetchSteps();
+  }, [recipeId]);
 
   // Pick image for a step
   const pickImage = async (index: number) => {
@@ -37,13 +53,13 @@ export default function AddCookingSteps({ recipeId }: Props) {
   const addStep = () => {
     if (!currentDescription.trim()) return;
     setRecipeSteps([
-      ...recipeSteps,
-      {  recipeStepId: Date.now() * -1, name: currentDescription, description: currentDescription },
-    ]);
+        ...recipeSteps,
+        {  recipeStepId: Date.now() * -1, name: currentDescription, description: currentDescription },
+      ]);
     setCurrentDescription("");
   };
 
-  // Save all steps to API
+  // Save steps (PUT for existing, POST for new)
   const saveSteps = async () => {
     try {
       for (const step of recipeSteps) {
@@ -52,27 +68,31 @@ export default function AddCookingSteps({ recipeId }: Props) {
           description: step.description,
           imageUrl: step.imageUrl || null,
         };
-        const res = await fetch(
-          `${API_BASE_URL}api/RecipeSteps/create-step-for-${recipeId}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": user?.token ? `Bearer ${user.token}` : "",
-            },
-            body: JSON.stringify(payload),
-          }
-        );
-        if (!res.ok) {
-          const rawError = await res.text();
-          console.error("Failed to save step:", res.status, rawError);
-        }
-        router.push({
-          pathname: "../RecipeManagement",
-          params: { id: recipeId.toString() },
+
+        const url = step.recipeStepId
+          ? `${API_BASE_URL}api/RecipeSteps/update-step-${step.recipeStepId}`
+          : `${API_BASE_URL}api/RecipeSteps/create-step-for-${recipeId}`;
+
+        const method = step.recipeStepId ? "PUT" : "POST";
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": user?.token ? `Bearer ${user.token}` : "",
+          },
+          body: JSON.stringify(payload),
         });
+
+        if (!res.ok) {
+          console.error("Failed to save step:", await res.text());
+        }
       }
-      console.log("All steps saved!");
+
+      router.push({
+        pathname: "../RecipeManagement",
+        params: { id: recipeId.toString() },
+      });
     } catch (err) {
       console.error("Error saving steps:", err);
     }
@@ -80,7 +100,7 @@ export default function AddCookingSteps({ recipeId }: Props) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Create Recipe</Text>
+      <Text style={styles.header}>Edit Cooking Steps</Text>
       <Text style={styles.sectionTitle}>Steps</Text>
 
       {/* Input for new step */}
@@ -106,11 +126,8 @@ export default function AddCookingSteps({ recipeId }: Props) {
         )}
       />
 
-      {/* Save buttons */}
-      <Button
-        title="Save cooking steps"
-        onPress={saveSteps}
-      />
+      {/* Save button */}
+      <Button title="Save cooking steps" onPress={saveSteps} />
     </View>
   );
 }
