@@ -263,7 +263,7 @@ export default function EditRecipeForm() {
           >
             <Picker.Item label="Select category..." value="" />
             {categories.map((cat) => (
-              <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
+              <Picker.Item key={cat.categoryId} label={cat.name} value={cat.categoryId} />
             ))}
           </Picker>
         </View>

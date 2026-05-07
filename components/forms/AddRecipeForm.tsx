@@ -347,9 +347,9 @@ export default function AddNewRecipeForm() {
             <Picker.Item label="Select category..." value="" />
             {categories.map((cat) => (
               <Picker.Item
-                key={cat.id}
+                key={cat.categoryId}
                 label={cat.name}
-                value={cat.id}
+                value={cat.categoryId}
               />
             ))}
           </Picker>

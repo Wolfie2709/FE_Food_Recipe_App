@@ -1,6 +1,6 @@
+import AddKitchenUtensilsForm from "@/components/forms/AddKitchenUtensilsForm";
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import AddKitchenUtensilsForm from "../../../components/forms/AddKitchenUtensilsForm";
 
 export default function AddCookingRecipe() {
   return (

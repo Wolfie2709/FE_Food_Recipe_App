@@ -6,12 +6,12 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    Image,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Button from "../ui/button";
 import { useUser } from "../userContext";
@@ -143,9 +143,9 @@ export default function AddKitchenUtensilForm() {
             <Picker.Item label="Select category..." value="" />
             {categories.map((cat) => (
               <Picker.Item
-                key={cat.id}
+                key={cat.categoryId}
                 label={cat.name}
-                value={cat.id}
+                value={cat.categoryId}
               />
             ))}
           </Picker>

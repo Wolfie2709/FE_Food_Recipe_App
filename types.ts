@@ -126,9 +126,13 @@ export type Wishlist = {
 export type ShoppingList = {};
 
 export type Category = {
-  id: number;
+  categoryId: number;
   name: string;
-  description?: string;
+  description: string | null;
+  ingredientCategory: boolean;
+  kitchenCategory: boolean;
+  pictureDirectory?: string | null;
+  isActive: boolean;
 };
 
 export type Image = {};
