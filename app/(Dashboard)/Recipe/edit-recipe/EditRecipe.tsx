@@ -2,7 +2,7 @@ import EditRecipeForm from "@/components/forms/EditRecipeForm";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
-export default function EditCookingRecipe() {
+export default function AddCookingRecipe() {
   return (
     <View style={styles.container}>
       <EditRecipeForm />
