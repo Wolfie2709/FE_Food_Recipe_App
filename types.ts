@@ -50,6 +50,8 @@ export type RecipeBox = {
   addedBy: number;
   rating: number;
   imageDirectory: string;
+  authorName: string;
+  avatar?: string | null;
 };
 
 export type RecipePagination = {
@@ -202,6 +204,7 @@ export type RecipeDetailCompleteDto = {
   servingSize?: number;
   rating?: number | 0;
   username: string;
+  avatar?: string | null;
   pictureDirectory?: Array<string>;
   ingredients?: Array<RecipeDetailIngredientListDto>;
   categories?: Array<RecipeDetailCategoryListDto>;

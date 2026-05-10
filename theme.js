@@ -58,7 +58,7 @@ export const homeStyles = StyleSheet.create({
     color: colors.textDark,
     marginTop: spacing.xs,
   },
-  recipeAuthor: { fontSize: 12, color: colors.textLight },
+  recipeAuthor: { fontSize: 12, color: colors.textLight, flex: 1 },
   recipeTime: {
     fontSize: 12,
     color: colors.textDark,
@@ -156,6 +156,12 @@ export const homeStyles = StyleSheet.create({
     color: "#E23E3E",
     fontSize: 14,
     fontFamily: "Poppins_600SemiBold",
+  },
+  RecipeAuthorAvatar: {
+    width: 15,
+    height: 15,
+    borderRadius: 15,
+    marginRight: 8,
   },
 });
 
@@ -1027,9 +1033,9 @@ export const SearchPageStyle = StyleSheet.create({
     color: colors.textDark,
     // marginTop: spacing.xs,
   },
-  recipeAuthor: { fontSize: 18, color: colors.textLight },
+  recipeAuthor: { fontSize: 18, color: colors.textLight, flex: 1 },
   recipeTime: {
-    fontSize: 14,
+    fontSize: 18,
     color: colors.textDark,
     fontFamily: fonts.medium,
   },
@@ -1050,5 +1056,11 @@ export const SearchPageStyle = StyleSheet.create({
   categoryListActive: {
     backgroundColor: "#FF6B00", // highlight selected category
     color: "#FFFFFF",
+  },
+  RecipeAuthorAvatar: {
+    width: 15,
+    height: 15,
+    borderRadius: 15,
+    marginRight: 8,
   },
 });

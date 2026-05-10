@@ -10,7 +10,7 @@ const screenWidth = Dimensions.get("window").width;
 const spacing = 10;
 const itemWidth = screenWidth / 3 - spacing;
 
-function RecipeCard({ name, addedBy, rating, imageDirectory }: RecipeBox) {
+function RecipeCard({ name, authorName, rating, imageDirectory, avatar }: RecipeBox) {
   let URL = API_BASE_URL.slice(0, -1);
   return (
     <View style={styles.recipeCardStyle}>
@@ -19,8 +19,20 @@ function RecipeCard({ name, addedBy, rating, imageDirectory }: RecipeBox) {
         style={styles.recipeImage}
       />
       <Text style={styles.recipeTitle}>{name}</Text>
-      <Text style={styles.recipeAuthor}>By {addedBy}</Text>
-      {rating && <Text style={styles.recipeTime}>star: {rating}</Text>}
+      <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+          <Image
+            source={avatar ? { uri: `${URL}${avatar}` } : require("assets/images/icon.png")}
+            style={styles.RecipeAuthorAvatar} />
+          <Text style={styles.recipeAuthor}>{authorName}</Text>
+        </View>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={styles.recipeTime}>
+            {rating ? rating : 0}
+          </Text>
+          <Image source={require("assets/images/Star.png")} />
+        </View>
+      </View>
     </View>
   );
 }
@@ -173,9 +185,18 @@ export default function Search() {
         {/* SEARCH CONTENT */}
         <View style={{ marginTop: 16 }}>
           {recipe.length > 0 ? recipe.map(r => (
-            <View key={r.recipeId}>
-              <RecipeCard {...r} />
-            </View>
+            <TouchableOpacity
+              onPress={() => {
+                router.push({
+                  pathname: "/(main)/Recipe/[recipeId]/RecipeDetail",
+                  params: { recipeId: r.recipeId.toString() },
+                })
+              }}
+            >
+              <View key={r.recipeId}>
+                <RecipeCard {...r} />
+              </View>
+            </TouchableOpacity>
           )) :
             <View><Text>Khong tim thay ket qua</Text></View>
           }

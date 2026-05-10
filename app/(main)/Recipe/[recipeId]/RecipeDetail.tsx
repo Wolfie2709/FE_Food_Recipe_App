@@ -66,7 +66,9 @@ export default function RecipeDetail() {
           <View style={styles.RecipeAuthor}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               {/* Haven't return Author info right now so use placeholder instead */}
-              <Image source={require("assets/images/icon.png")} style={styles.RecipeAuthorAvatar} />
+              <Image
+                source={recipe.avatar ? { uri: `${URL}${recipe.avatar}` } : require("assets/images/icon.png")}
+                style={styles.RecipeAuthorAvatar} />
               <Text style={styles.RecipeAuthorName}>{recipe.username}</Text>
             </View>
             <TouchableOpacity>

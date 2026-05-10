@@ -23,7 +23,7 @@ function CreatorCard({ name, image }: Creator) {
   );
 }
 
-function RecipeCard({ name, addedBy, rating, imageDirectory }: RecipeBox) {
+function RecipeCard({ name, authorName, rating, imageDirectory, avatar }: RecipeBox) {
   let URL = API_BASE_URL.slice(0, -1);
   return (
     <View style={styles.recipeCard}>
@@ -32,8 +32,20 @@ function RecipeCard({ name, addedBy, rating, imageDirectory }: RecipeBox) {
         style={styles.recipeImage}
       />
       <Text style={styles.recipeTitle}>{name}</Text>
-      <Text style={styles.recipeAuthor}>By {addedBy}</Text>
-      {rating && <Text style={styles.recipeTime}>star: {rating}</Text>}
+      <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+          <Image
+            source={avatar ? { uri: `${URL}${avatar}` } : require("assets/images/icon.png")}
+            style={styles.RecipeAuthorAvatar} />
+          <Text style={styles.recipeAuthor}>{authorName}</Text>
+        </View>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Text style={styles.recipeTime}>
+            {rating ? rating : 0}
+          </Text>
+          <Image source={require("assets/images/Star.png")} />
+        </View>
+      </View>
     </View>
   );
 }
