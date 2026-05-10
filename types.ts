@@ -220,3 +220,17 @@ export type RecipeStepInfoUpdate = {
   description: string;
   imageUrl?: string;
 };
+
+export type CategoryBoxDto = {
+  name: string;
+  categoryId: number;
+  description?: string | undefined;
+  pictureDirectory?: string | undefined;
+};
+
+export type CategoryPagination = {
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  categoryList: Array<CategoryBoxDto>;
+};

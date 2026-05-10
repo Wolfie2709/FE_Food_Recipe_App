@@ -1006,7 +1006,9 @@ export const SearchPageStyle = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginVertical: 16,
+    backgroundColor: colors.background,
+    paddingHorizontal: 20,
   },
   headerButton: { width: 24, height: 24 },
   SearchBar: {
@@ -1035,5 +1037,18 @@ export const SearchPageStyle = StyleSheet.create({
     width: "100%",
     objectFit: "cover",
     marginBottom: spacing.lg,
+  },
+  categoryList: {
+    padding: spacing.md,
+    backgroundColor: "#0A0A0A",
+    color: "white",
+    fontSize: 10,
+    fontWeight: "600",
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  categoryListActive: {
+    backgroundColor: "#FF6B00", // highlight selected category
+    color: "#FFFFFF",
   },
 });
