@@ -61,13 +61,13 @@ export default function RecipeDetail() {
             style={styles.RecipePicture} />
           <View style={{ flexDirection: "row", alignItems: "baseline" }}>
             <Image source={require("assets/images/Star.png")} />
-            <Text style={styles.RecipeRating}>Rating: 4.5 </Text>
+            <Text style={styles.RecipeRating}>Rating: {recipe.rating} </Text>
           </View>
           <View style={styles.RecipeAuthor}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               {/* Haven't return Author info right now so use placeholder instead */}
               <Image source={require("assets/images/icon.png")} style={styles.RecipeAuthorAvatar} />
-              <Text style={styles.RecipeAuthorName}>{userPlaceholder.Name}</Text>
+              <Text style={styles.RecipeAuthorName}>{recipe.username}</Text>
             </View>
             <TouchableOpacity>
               <Text style={styles.RecipeDetailPageButton}>Follow</Text>

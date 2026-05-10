@@ -3,7 +3,8 @@ import { useUser } from "@/components/userContext";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Dimensions, FlatList, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Dimensions, FlatList, Image, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { homeStyles as styles } from "../../theme";
 import { RecipeBox, RecipePagination } from "../../types";
 
@@ -83,135 +84,135 @@ export default function Home() {
   }, []);
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Greeting */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>
-          Welcome {user?.username ?? "Guest"}
-        </Text>
-        <Text style={styles.sectionSubtitle}>
-          Find best recipes for cooking
-        </Text>
-      </View>
-
-      {/* Popular creators */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Popular creators</Text>
-          <Text style={styles.link}>See all</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      <ScrollView style={styles.container}>
+        {/* Greeting */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>
+            Welcome {user?.username ?? "Guest"}
+          </Text>
+          <Text style={styles.sectionSubtitle}>
+            Find best recipes for cooking
+          </Text>
         </View>
-        <View style={styles.creatorRow}>
-          {/* map creators here */}
+        {/* Search bar */}
+        <Pressable
+          style={styles.section}
+          onPress={() => router.push("/(main)/Search")}>
+          <View style={styles.searchBar}>
+            <Text style={styles.searchPlaceholder}>Search recipes</Text>
+            <Image source={require("assets/images/Search.png")} />
+          </View>
+        </Pressable>
+        {/* Popular creators */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Popular creators</Text>
+            <Text style={styles.link}>See all</Text>
+          </View>
+          <View style={styles.creatorRow}>
+            {/* map creators here */}
+          </View>
         </View>
-      </View>
-
-      {/* Recent recipes */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent recipes</Text>
-          <Text style={styles.link}>See all</Text>
+        {/* Recent recipes */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recent recipes</Text>
+            <Text style={styles.link}>See all</Text>
+          </View>
+          <FlatList
+            data={data}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.recipeId.toString()}
+            snapToInterval={itemWidth + spacing}
+            decelerationRate="fast"
+            contentContainerStyle={{ paddingHorizontal: spacing }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  router.push({
+                    pathname: "/(main)/Recipe/[recipeId]/RecipeDetail",
+                    params: { recipeId: item.recipeId.toString() },
+                  })
+                }}
+              >
+                <View style={{ width: itemWidth }}>
+                  <RecipeCard {...item} />
+                </View>
+              </TouchableOpacity>
+            )}
+            ItemSeparatorComponent={() => <View style={{ width: spacing }} />}
+            onMomentumScrollEnd={(event) => {
+              const offsetX = event.nativeEvent.contentOffset.x;
+              const currentIndex = Math.floor(offsetX / (itemWidth + spacing));
+              if (
+                currentIndex >= data.length - 4 &&
+                page < totalPages &&
+                !isLoading
+              ) {
+                const nextPage = page + 1;
+                setPage(nextPage);
+                loadData(nextPage);
+              }
+            }}
+          />
         </View>
-        <FlatList
-          data={data}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.recipeId.toString()}
-          snapToInterval={itemWidth + spacing}
-          decelerationRate="fast"
-          contentContainerStyle={{ paddingHorizontal: spacing }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => {
-                router.push({
-                  pathname: "/(main)/Recipe/[recipeId]/RecipeDetail",
-                  params: { recipeId: item.recipeId.toString() },
-                })
-              }}
-            >
+        {/* Categories */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Popular categories</Text>
+          <View style={styles.categoryRow}>
+            {["Salad", "Breakfast", "Appetizer", "Noodle", "Lunch"].map((cat) => (
+              <Text
+                key={cat}
+                style={[
+                  styles.category,
+                  cat === "Breakfast" && styles.categoryActive,
+                ]}
+              >
+                {cat}
+              </Text>
+            ))}
+          </View>
+        </View>
+        {/* Trending */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Trending now 🔥</Text>
+            <Text style={styles.link}>See all</Text>
+          </View>
+          <FlatList
+            data={data}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.recipeId.toString()}
+            snapToInterval={itemWidth + spacing}
+            decelerationRate="fast"
+            contentContainerStyle={{ paddingHorizontal: spacing }}
+            renderItem={({ item }) => (
               <View style={{ width: itemWidth }}>
                 <RecipeCard {...item} />
               </View>
-            </TouchableOpacity>
-          )}
-          ItemSeparatorComponent={() => <View style={{ width: spacing }} />}
-          onMomentumScrollEnd={(event) => {
-            const offsetX = event.nativeEvent.contentOffset.x;
-            const currentIndex = Math.floor(offsetX / (itemWidth + spacing));
-            if (
-              currentIndex >= data.length - 4 &&
-              page < totalPages &&
-              !isLoading
-            ) {
-              const nextPage = page + 1;
-              setPage(nextPage);
-              loadData(nextPage);
-            }
-          }}
-        />
-      </View>
-
-      {/* Categories */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Popular categories</Text>
-        <View style={styles.categoryRow}>
-          {["Salad", "Breakfast", "Appetizer", "Noodle", "Lunch"].map((cat) => (
-            <Text
-              key={cat}
-              style={[
-                styles.category,
-                cat === "Breakfast" && styles.categoryActive,
-              ]}
-            >
-              {cat}
-            </Text>
-          ))}
+            )}
+            ItemSeparatorComponent={() => <View style={{ width: spacing }} />}
+            onMomentumScrollEnd={(event) => {
+              const offsetX = event.nativeEvent.contentOffset.x;
+              const currentIndex = Math.floor(offsetX / (itemWidth + spacing));
+              if (
+                currentIndex >= data.length - 4 &&
+                page < totalPages &&
+                !isLoading
+              ) {
+                const nextPage = page + 1;
+                setPage(nextPage);
+                loadData(nextPage);
+              }
+            }}
+          />
         </View>
-      </View>
 
-      {/* Trending */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Trending now 🔥</Text>
-          <Text style={styles.link}>See all</Text>
-        </View>
-        <FlatList
-          data={data}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.recipeId.toString()}
-          snapToInterval={itemWidth + spacing}
-          decelerationRate="fast"
-          contentContainerStyle={{ paddingHorizontal: spacing }}
-          renderItem={({ item }) => (
-            <View style={{ width: itemWidth }}>
-              <RecipeCard {...item} />
-            </View>
-          )}
-          ItemSeparatorComponent={() => <View style={{ width: spacing }} />}
-          onMomentumScrollEnd={(event) => {
-            const offsetX = event.nativeEvent.contentOffset.x;
-            const currentIndex = Math.floor(offsetX / (itemWidth + spacing));
-            if (
-              currentIndex >= data.length - 4 &&
-              page < totalPages &&
-              !isLoading
-            ) {
-              const nextPage = page + 1;
-              setPage(nextPage);
-              loadData(nextPage);
-            }
-          }}
-        />
-      </View>
-
-      {/* Search bar */}
-      <View style={styles.section}>
-        <View style={styles.searchBar}>
-          <Text style={styles.searchPlaceholder}>Search recipes</Text>
-        </View>
-      </View>
-      {user && <NavigationBar user={user} />}
-
-    </ScrollView>
+        {user && <NavigationBar user={user} />}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
