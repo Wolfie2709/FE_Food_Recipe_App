@@ -58,7 +58,7 @@ export const homeStyles = StyleSheet.create({
     color: colors.textDark,
     marginTop: spacing.xs,
   },
-  recipeAuthor: { fontSize: 12, color: colors.textLight },
+  recipeAuthor: { fontSize: 12, color: colors.textLight, flex: 1 },
   recipeTime: {
     fontSize: 12,
     color: colors.textDark,
@@ -86,11 +86,13 @@ export const homeStyles = StyleSheet.create({
     borderColor: colors.textLight,
     borderRadius: 8,
     padding: spacing.sm,
+    flexDirection: "row",
   },
   searchPlaceholder: {
     color: colors.textLight,
     fontSize: 14,
     fontFamily: fonts.regular,
+    flex: 1,
   },
   heroText: {
     fontSize: 20,
@@ -154,6 +156,12 @@ export const homeStyles = StyleSheet.create({
     color: "#E23E3E",
     fontSize: 14,
     fontFamily: "Poppins_600SemiBold",
+  },
+  RecipeAuthorAvatar: {
+    width: 15,
+    height: 15,
+    borderRadius: 15,
+    marginRight: 8,
   },
 });
 
@@ -399,8 +407,7 @@ export const ManagementStyles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     fontSize: 14,
-  }
-  
+  },
 });
 
 export const uiKitsStyles = StyleSheet.create({
@@ -871,7 +878,6 @@ export const RecipeDetailStyles = StyleSheet.create({
   },
 });
 
-
 export const profilePageStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#FFF" },
   content: { flex: 1, alignItems: "center", padding: 20 },
@@ -887,60 +893,79 @@ export const profilePageStyles = StyleSheet.create({
   infoBox: { flexDirection: "row", marginBottom: 8, width: "100%" },
   label: { fontWeight: "600", color: "#787A7C", marginRight: 8 },
   value: { color: "#303030" },
-  message: { fontSize: 18, color: "#787A7C", marginTop: 40, textAlign: "center" },
-  settings: { width: 30,
+  message: {
+    fontSize: 18,
+    color: "#787A7C",
+    marginTop: 40,
+    textAlign: "center",
+  },
+  settings: {
+    width: 30,
     height: 30,
     borderRadius: 10,
     position: "absolute",
     top: 16,
-    right: 16 },
+    right: 16,
+  },
   bio: { fontSize: 14, color: "#787A7C", marginTop: 4 },
 
-  statsRow: { flexDirection: "row", justifyContent: "space-around", marginVertical: 20 },
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 20,
+  },
   statBox: { alignItems: "center" },
-    statLabel: { color: "#A9A9A9", fontSize: 12 },
-    statValue: { color: "#303030", fontSize: 18, fontWeight: "700" },
-  
-    card: {
-      width: 335,
-      height: 200,
-      borderRadius: 10,
-      overflow: "hidden",
-      marginBottom: 20,
-      alignSelf: "center",
-      backgroundColor: "#C1C1C1",
-    },
-    cardImage: { width: "100%", height: "100%" },
-    overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.3)" },
-    cardTitle: {
-      position: "absolute",
-      bottom: 40,
-      left: 16,
-      color: "#FFF",
-      fontSize: 16,
-      fontWeight: "600",
-    },
-    infoRow: { position: "absolute", bottom: 16, left: 16, flexDirection: "row", gap: 12 },
-    infoText: { color: "#FFF", fontSize: 12 },
-    rating: {
-      position: "absolute",
-      top: 8,
-      left: 8,
-      backgroundColor: "rgba(48,48,48,0.3)",
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: 6,
-    },
-    ratingText: { color: "#FFF", fontWeight: "600" },
-  
-    bottomNav: {
-      height: 60,
-      borderTopWidth: 1,
-      borderColor: "#DDD",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    
+  statLabel: { color: "#A9A9A9", fontSize: 12 },
+  statValue: { color: "#303030", fontSize: 18, fontWeight: "700" },
+
+  card: {
+    width: 335,
+    height: 200,
+    borderRadius: 10,
+    overflow: "hidden",
+    marginBottom: 20,
+    alignSelf: "center",
+    backgroundColor: "#C1C1C1",
+  },
+  cardImage: { width: "100%", height: "100%" },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.3)",
+  },
+  cardTitle: {
+    position: "absolute",
+    bottom: 40,
+    left: 16,
+    color: "#FFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  infoRow: {
+    position: "absolute",
+    bottom: 16,
+    left: 16,
+    flexDirection: "row",
+    gap: 12,
+  },
+  infoText: { color: "#FFF", fontSize: 12 },
+  rating: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    backgroundColor: "rgba(48,48,48,0.3)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  ratingText: { color: "#FFF", fontWeight: "600" },
+
+  bottomNav: {
+    height: 60,
+    borderTopWidth: 1,
+    borderColor: "#DDD",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
 
 export const RecipeStepListStyles = StyleSheet.create({
@@ -996,4 +1021,67 @@ export const employeeFormStyles = StyleSheet.create({
       marginBottom: 15,
   },
   link: { color: "#fff", textAlign: "center", marginTop: 15 },
+});
+
+export const SearchPageStyle = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingHorizontal: 20,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 16,
+    backgroundColor: colors.background,
+    paddingHorizontal: 20,
+  },
+  headerButton: { width: 24, height: 24 },
+  SearchBar: {
+    flex: 1,
+    marginHorizontal: 12,
+    fontSize: 16,
+    borderRadius: 20,
+    backgroundColor: "#f3f3f3",
+    paddingHorizontal: 16,
+  },
+  recipeCard: { width: 120 },
+  recipeImage: { width: "100%", height: 180, borderRadius: 16 },
+  recipeTitle: {
+    fontSize: 22,
+    fontFamily: fonts.semiBold,
+    color: colors.textDark,
+    // marginTop: spacing.xs,
+  },
+  recipeAuthor: { fontSize: 18, color: colors.textLight, flex: 1 },
+  recipeTime: {
+    fontSize: 18,
+    color: colors.textDark,
+    fontFamily: fonts.medium,
+  },
+  recipeCardStyle: {
+    width: "100%",
+    objectFit: "cover",
+    marginBottom: spacing.lg,
+  },
+  categoryList: {
+    padding: spacing.md,
+    backgroundColor: "#0A0A0A",
+    color: "white",
+    fontSize: 10,
+    fontWeight: "600",
+    borderRadius: 8,
+    marginRight: 8,
+  },
+  categoryListActive: {
+    backgroundColor: "#FF6B00", // highlight selected category
+    color: "#FFFFFF",
+  },
+  RecipeAuthorAvatar: {
+    width: 15,
+    height: 15,
+    borderRadius: 15,
+    marginRight: 8,
+  },
 });

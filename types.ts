@@ -11,7 +11,7 @@ export type User = {
   birthdate: string; // ISO date
   isActive: boolean;
   pictureId: number;
-  role: "user" | "admin"; 
+  role: "user" | "admin";
   token: string;
 };
 
@@ -50,6 +50,8 @@ export type RecipeBox = {
   addedBy: number;
   rating: number;
   imageDirectory: string;
+  authorName: string;
+  avatar?: string | null;
 };
 
 export type RecipePagination = {
@@ -155,7 +157,7 @@ export type RecipeIngredient = {
 };
 
 export type RecipeStepInfo = {
-  recipeStepId: number|null;
+  recipeStepId: number | null;
   name: string;
   description: string;
   imageUrl?: string;
@@ -202,6 +204,9 @@ export type RecipeDetailCompleteDto = {
   description?: string;
   cookingTime?: number;
   servingSize?: number;
+  rating?: number | 0;
+  username: string;
+  avatar?: string | null;
   pictureDirectory?: Array<string>;
   ingredients?: Array<RecipeDetailIngredientListDto>;
   categories?: Array<RecipeDetailCategoryListDto>;
@@ -213,13 +218,28 @@ export type UserWithToken = User & { token: string };
 
 export type KitchenUtensilCategoryDto = {
   categoriesId: number | null;
-}
+};
 
 export type RecipeStepInfoUpdate = {
   name: string;
   description: string;
   imageUrl?: string;
 };
+
+export type CategoryBoxDto = {
+  name: string;
+  categoryId: number;
+  description?: string | undefined;
+  pictureDirectory?: string | undefined;
+};
+
+export type CategoryPagination = {
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  categoryList: Array<CategoryBoxDto>;
+};
+
 
 export type IngredientCategoryDto = {
   categoriesId: number | null;
