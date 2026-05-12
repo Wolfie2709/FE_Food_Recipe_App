@@ -9,7 +9,7 @@ import Button from "../../../components/ui/button";
 
 export default function IngredientsManagement() {
   const {user} = useUser();
-  const [Ingredient, setIngredient] = useState<Ingredient[]>([]);
+  const [ingredient, setIngredient] = useState<Ingredient[]>([]);
   const router = useRouter();
 
   // Load all recipes
@@ -77,8 +77,8 @@ export default function IngredientsManagement() {
         await loadIngredients();
   
         // Navigate to the newest recipe (assuming API returns newest first)
-        if (Ingredient.length > 0) {
-          const latest = Ingredient.reduce((max, Ing) => Ing.ingredientsId > max.ingredientsId ? Ing: max, Ingredient[0]);
+        if (ingredient.length > 0) {
+          const latest = ingredient.reduce((max, Ing) => Ing.ingredientsId > max.ingredientsId ? Ing: max, ingredient[0]);
           router.push({
             pathname: "./AddIngredients",
             params: { ingredientsId: latest.ingredientsId.toString() },
@@ -110,8 +110,8 @@ export default function IngredientsManagement() {
           <View>
             <Image
               source={
-                item.imageUrl
-                  ? { uri: `${URL}${item.imageUrl}` }
+                item.pictureDirectory
+                  ? { uri: `${URL}${item.pictureDirectory}` }
                   : require("assets/images/icon.png")
               }
               style={styles.ImageContent}
@@ -136,8 +136,7 @@ export default function IngredientsManagement() {
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Kitchen Utensils</Text>
-      <Text style={styles.title}>Kitchen Utensils Management</Text>
+      <Text style={styles.title}>Ingredients Management</Text>
 
       {/* Search bar */}
       <View style={styles.searchBar}>
@@ -169,7 +168,7 @@ export default function IngredientsManagement() {
 
         {/* Recipe list */}
         <FlatList
-          data={Ingredient}
+          data={ingredient}
           style={{ flex: 1 }}
           keyExtractor={(item) => item.ingredientsId.toString()}
           // style={styles.boxList}

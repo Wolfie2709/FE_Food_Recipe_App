@@ -976,3 +976,24 @@ export const RecipeStepListStyles = StyleSheet.create({
     marginRight: 12,
   },
 });
+
+
+export const employeeFormStyles = StyleSheet.create({
+  picker: { height: 50, width: 200 },
+  background: { flex: 1, resizeMode: "cover" },
+  overlay: {
+      flex: 1,
+      justifyContent: "center",
+      padding: 20,
+      backgroundColor: "rgba(0,0,0,0.4)",
+  },
+  title: { color: "#fff", fontSize: 18, marginBottom: 20, textAlign: "center" },
+  label: { color: "#fff", marginBottom: 5 },
+  input: {
+      backgroundColor: "#D9D9D9",
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 15,
+  },
+  link: { color: "#fff", textAlign: "center", marginTop: 15 },
+});

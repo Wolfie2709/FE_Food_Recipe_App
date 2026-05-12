@@ -6,19 +6,19 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Image,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Image,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import Button from "../ui/button";
 import { useUser } from "../userContext";
 
 export default function AddIngredientForm() {
     const {user} = useUser();
-  const { ingredientsId } = useLocalSearchParams(); // utensilId passed in
+  const { ingredientsId } = useLocalSearchParams(); 
   const [name, setName] = useState("");
   const [ingredientCategory, setIngCategory] = useState<IngredientCategoryDto[]>([{categoriesId: null}]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -51,6 +51,27 @@ export default function AddIngredientForm() {
       })
       .catch((err) => console.error("Error loading categories:", err));
   }, []);
+
+  //Fetch Ingredient Details if editing
+
+  useEffect(() => {
+    if(!ingredientsId) return;
+    const fetchIngDetails = async () => {
+        try {
+            const res = await fetch (`${API_BASE_URL}api/Ingredients/${ingredientsId}`,{
+                headers: {Authorization: user?.token ? `Bearer ${user.token}` : ""},
+            });
+            if(!res.ok) return;
+            const data = await res.json();
+
+            setName(data.name || "");
+            setIngCategory(data.categories||[]);
+            setPictureDirectory(data.pictureDirectory|| "");
+        } catch(err){
+            console.error("Error fetching ingredient details:", err);
+        }
+    }
+  })
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({

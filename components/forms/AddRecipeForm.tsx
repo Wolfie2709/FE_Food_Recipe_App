@@ -29,10 +29,10 @@ export default function AddNewRecipeForm() {
     { ingredientsId: null, quantity: "" },
   ]);
   const [recipeCategories, setRecipeCategories] = useState<RecipeCategoryInfoDto[]>([
-    { CategoriesId: null },
+    { categoriesId: null },
   ]);
   const [recipeKU, setRecipeKU] = useState<RecipeKitchenUtensilsInfoDto[]>([
-    { KitchenUtensilId: null },
+    { kitchenUtensilId: null },
   ]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [kitchenUtensils, setKitchenUtensils] = useState<KitchenUtensil[]>([]);
@@ -142,11 +142,11 @@ export default function AddNewRecipeForm() {
 
 
   const addCategoryRow = () => {
-    setRecipeCategories([...recipeCategories, { CategoriesId: null }]);
+    setRecipeCategories([...recipeCategories, { categoriesId: null }]);
   };
 
   const addKitchenUtensilsRow = () => {
-    setRecipeKU([...recipeKU, { KitchenUtensilId: null }]);
+    setRecipeKU([...recipeKU, { kitchenUtensilId: null }]);
   };
 
   const pickImage = async () => {
@@ -173,14 +173,14 @@ export default function AddNewRecipeForm() {
       quantity: rI.quantity
     })),
   categories: recipeCategories
-    .filter(rC => rC.CategoriesId !== null)
+    .filter(rC => rC.categoriesId !== null)
     .map(rC => ({
-      CategoriesId: rC.CategoriesId!      // ✅ match RecipeCategoryInfoDto type
+      categoriesId: rC.categoriesId!      // ✅ match RecipeCategoryInfoDto type
     })),
 kitchenUtensils: recipeKU
-    .filter(rKU => rKU.KitchenUtensilId !== null)
+    .filter(rKU => rKU.kitchenUtensilId !== null)
     .map(rKU => ({
-      KitchenUtensilId: rKU.KitchenUtensilId! // ✅ matches RecipeKitchenUtensilsInfoDto
+      kitchenUtensilId: rKU.kitchenUtensilId! // ✅ matches RecipeKitchenUtensilsInfoDto
     })),
 };
 
@@ -327,7 +327,7 @@ kitchenUtensils: recipeKU
               source={{
                 uri:
                   ingredients.find((ing) => ing.ingredientsId === item.ingredientsId)
-                    ?.imageUrl || "",
+                    ?.pictureDirectory || "",
               }}
               style={{ width: 40, height: 40 }}
             />
@@ -341,11 +341,11 @@ kitchenUtensils: recipeKU
       {recipeCategories.map((item, index) => (
         <View key={index} style={styles.ingredientRow}>
           <Picker
-            selectedValue={item.CategoriesId ?? ""}
+            selectedValue={item.categoriesId ?? ""}
             style={{ flex: 1 }}
             onValueChange={(val) => {
               const updated = [...recipeCategories];
-              updated[index].CategoriesId = val === "" ? null : Number(val);
+              updated[index].categoriesId = val === "" ? null : Number(val);
               setRecipeCategories(updated);
             }}
           >
@@ -368,11 +368,11 @@ kitchenUtensils: recipeKU
       {recipeKU.map((item, index) => (
         <View key={index} style={styles.ingredientRow}>
           <Picker
-            selectedValue={item.KitchenUtensilId ?? ""}
+            selectedValue={item.kitchenUtensilId ?? ""}
             style={{ flex: 1 }}
             onValueChange={(val) => {
               const updated = [...recipeKU];
-              updated[index].KitchenUtensilId = val === "" ? null : Number(val);
+              updated[index].kitchenUtensilId = val === "" ? null : Number(val);
               setRecipeKU(updated);
             }}
           >

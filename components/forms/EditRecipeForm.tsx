@@ -1,12 +1,12 @@
 import { RecipeFormStyles as styles } from "@/theme";
 import {
-    Category,
-    CreateRecipeRequestDto,
-    Ingredient,
-    KitchenUtensil,
-    RecipeCategoryInfoDto,
-    RecipeIngredient,
-    RecipeKitchenUtensilsInfoDto,
+  Category,
+  CreateRecipeRequestDto,
+  Ingredient,
+  KitchenUtensil,
+  RecipeCategoryInfoDto,
+  RecipeIngredient,
+  RecipeKitchenUtensilsInfoDto,
 } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { Picker } from "@react-native-picker/picker";
@@ -14,12 +14,12 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    Image,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Button from "../ui/button";
 import { MinusIcon } from "../ui/figma_Icons";
@@ -115,14 +115,14 @@ export default function EditRecipeForm() {
       servingSize: parseInt(serves, 10),
       cookingTime: parseInt(cookTime, 10),
       ingredients: recipeIngredients.map((rI) => ({
-        ingredientId: rI.ingredientsId!,
+        ingredientsId: rI.ingredientsId!,
         quantity: rI.quantity,
       })),
       categories: recipeCategories.map((rC) => ({
-        categoryId: rC.CategoriesId!,
+        categoriesId: rC.categoriesId!,
       })),
       kitchenUtensils: recipeKU.map((rKU) => ({
-        utensilId: rKU.KitchenUtensilsId!,
+        kitchenUtensilId: rKU.kitchenUtensilId!,
       })),
     };
 
@@ -253,11 +253,11 @@ export default function EditRecipeForm() {
       {recipeCategories.map((item, index) => (
         <View key={index} style={styles.ingredientRow}>
           <Picker
-            selectedValue={item.CategoriesId ?? ""}
+            selectedValue={item.categoriesId ?? ""}
             style={{ flex: 1 }}
             onValueChange={(val) => {
               const updated = [...recipeCategories];
-              updated[index].CategoriesId = val === "" ? null : Number(val);
+              updated[index].categoriesId = val === "" ? null : Number(val);
               setRecipeCategories(updated);
             }}
           >
@@ -268,18 +268,18 @@ export default function EditRecipeForm() {
           </Picker>
         </View>
       ))}
-      <Button title="Add new category" onPress={() => setRecipeCategories([...recipeCategories, { CategoriesId: null }])} />
+      <Button title="Add new category" onPress={() => setRecipeCategories([...recipeCategories, { categoriesId: null }])} />
 
       {/* Kitchen Utensils */}
       <Text style={styles.sectionTitle}>Kitchen Utensils</Text>
       {recipeKU.map((item, index) => (
         <View key={index} style={styles.ingredientRow}>
           <Picker
-            selectedValue={item.KitchenUtensilsId ?? ""}
+            selectedValue={item.kitchenUtensilId ?? ""}
             style={{ flex: 1 }}
             onValueChange={(val) => {
               const updated = [...recipeKU];
-              updated[index].KitchenUtensilsId = val === "" ? null : Number(val);
+              updated[index].kitchenUtensilId = val === "" ? null : Number(val);
               setRecipeKU(updated);
             }}
           >
@@ -290,7 +290,7 @@ export default function EditRecipeForm() {
           </Picker>
         </View>
       ))}
-      <Button title="Add new utensil" onPress={() => setRecipeKU([...recipeKU, { KitchenUtensilsId: null }])} />
+      <Button title="Add new utensil" onPress={() => setRecipeKU([...recipeKU, { kitchenUtensilId: null }])} />
 
       {/* Save and go to cooking steps */}
       <Button title="Save & Edit Cooking Steps" onPress={saveRecipe} />

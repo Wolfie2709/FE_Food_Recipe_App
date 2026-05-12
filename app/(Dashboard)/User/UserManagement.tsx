@@ -1,22 +1,23 @@
 import { useUser } from "@/components/userContext";
 import { ManagementStyles as styles } from "@/theme";
-import type { KitchenUtensil } from "@/types";
+import type { User } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Button from "../../../components/ui/button";
 
-export default function KitchenUtensilsManagement() {
+
+export default function IngredientsManagement() {
   const {user} = useUser();
-  const [kitchenUtensil, setKU] = useState<KitchenUtensil[]>([]);
+  const [userInfo, setUserInfo] = useState<User[]>([]);
   const router = useRouter();
 
   // Load all recipes
-  const loadKitchenUtensils = async () => {
+  const loadUsers = async () => {
     try {
       const res = await fetch(
-        `${API_BASE_URL}api/KitchenUtensils/utensil/pagination?page=1&pageSize=10`,
+        `${API_BASE_URL}api/Users/users/pagination?page=1&pageSize=10`,
         {
           headers: {
             "Authorization": user?.token ? `Bearer ${user.token}` : "",
@@ -25,83 +26,35 @@ export default function KitchenUtensilsManagement() {
       );
 
       if (!res.ok) {
-        console.error("Failed to load  kitchen utensils:", res.status, res.statusText);
+        console.error("Failed to load users:", res.status, res.statusText);
         return;
       }
 
       const data = await res.json();
-      setKU(data.utensilList);
+      setUserInfo(data.userList);
     } catch (error) {
-      console.error("Error loading kitchen utensils:", error);
+      console.error("Error loading users:", error);
     }
   };
 
   useEffect(() => {
-    loadKitchenUtensils();
+    loadUsers();
   }, []);
 
-  // Create new recipe and navigate to AddNewRecipe
-  const createKitchenUtensil = async () => {
-    try {
-      if (!user?.token) {
-        console.error("No token available");
-        return;
-      }
-  
-      const res = await fetch(`${API_BASE_URL}api/KitchenUtensils/create-utensil`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${user.token}`,
-        },
-        body: JSON.stringify({
-            name: " ",
-            categoryId: 0,
-            pictureDirectory: null
-        }),
-      });
-  
-      const raw = await res.text();
-  
-      if (!res.ok) {
-        console.error("Failed to create recipe:", res.status, res.statusText, raw);
-        return;
-      }
-  
-      // Backend only returns plain text, so treat this as success
-      if (raw.includes("success")) {
-        console.log("Kitchen utensil created successfully");
-  
-        // Reload recipes
-        await loadKitchenUtensils();
-  
-        // Navigate to the newest recipe (assuming API returns newest first)
-        if (kitchenUtensil.length > 0) {
-          const latest = kitchenUtensil.reduce((max, kU) => kU.kitchenUtensilId > max.kitchenUtensilId ? kU: max, kitchenUtensil[0]);
-          router.push({
-            pathname: "./AddKitchenUtensils",
-            params: { kitchenUtensilId: latest.kitchenUtensilId.toString() },
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Error creating recipe:", error);
-    }
-  };
   
 
-  const renderItem: ListRenderItem<KitchenUtensil> = ({ item }) => (
+  const renderItem: ListRenderItem<User> = ({ item }) => (
     <TouchableOpacity
       style={styles.tableRow}
       onPress={() =>
         router.push({
-          pathname: "./Recipe/add-recipe/AddNewRecipe",
-          params: { kitchenUtensilId: item.kitchenUtensilId.toString() },
+          pathname: "/Recipe/add-recipe/AddNewRecipe",
+          params: { ingredientsId: item.id.toString() },
         })
       }
     >
       <View style={styles.tableCellId}>
-        <Text style={styles.tableCellText}>{item.kitchenUtensilId}</Text>
+        <Text style={styles.tableCellText}>{item.id}</Text>
       </View>
 
       <View style={styles.tableCellProduct}>
@@ -109,8 +62,8 @@ export default function KitchenUtensilsManagement() {
           <View>
             <Image
               source={
-                item.pictureDirectory
-                  ? { uri: `${URL}${item.pictureDirectory}` }
+                item.pictureId
+                  ? { uri: `${URL}${item.pictureId}` }
                   : require("assets/images/icon.png")
               }
               style={styles.ImageContent}
@@ -120,7 +73,7 @@ export default function KitchenUtensilsManagement() {
 
           <View style={styles.ProductInformation}>
             <Text style={styles.tableCellText}>
-              {item.name || "Untitled"}
+              {item.username || "Untitled"}
             </Text>
           </View>
         </View>
@@ -135,8 +88,7 @@ export default function KitchenUtensilsManagement() {
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Kitchen Utensils</Text>
-      <Text style={styles.title}>Kitchen Utensils Management</Text>
+      <Text style={styles.title}>User Management</Text>
 
       {/* Search bar */}
       <View style={styles.searchBar}>
@@ -147,7 +99,7 @@ export default function KitchenUtensilsManagement() {
       {/* Filter + Add New Recipe buttons */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
         <Button title="Filter" onPress={() => { }} />
-        <Button title="Add New Kitchen Utensil" onPress={createKitchenUtensil} />
+        <Button title="Add New User" onPress={() => router.push("./AddNewEmployee")} />
       </View>
 
       {/* Table */}
@@ -161,16 +113,16 @@ export default function KitchenUtensilsManagement() {
           </View>
           <View style={styles.tableHeaderTextProducts}>
             <View style={styles.TabHeaderInner}>
-              <Text style={styles.tableHeaderText}>Utensils</Text>
+              <Text style={styles.tableHeaderText}>Users</Text>
             </View>
           </View>
         </View>
 
         {/* Recipe list */}
         <FlatList
-          data={kitchenUtensil}
+          data={userInfo}
           style={{ flex: 1 }}
-          keyExtractor={(item) => item.kitchenUtensilId.toString()}
+          keyExtractor={(item) => item.id.toString()}
           // style={styles.boxList}
           renderItem={renderItem}
         />

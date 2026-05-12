@@ -1,11 +1,11 @@
-import AddIngredientForm from "@/components/forms/AddIngredientForm";
+import AddNewEmployeeForm from "@/components/forms/AddNewEmployeeForm";
 import React from "react";
 import { StyleSheet, View } from "react-native";
 
-export default function AddCookingRecipe() {
+export default function AddNewEmployee() {
   return (
     <View style={styles.container}>
-      <AddIngredientForm />
+      <AddNewEmployeeForm />
     </View>
   );
 }
