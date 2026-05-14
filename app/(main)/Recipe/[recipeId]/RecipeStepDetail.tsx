@@ -1,3 +1,4 @@
+import { useUser } from "@/components/userContext";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -12,13 +13,14 @@ type RecipeStep = {
 };
 
 export default function RecipeStepDetail() {
-  const { id, recipeId } = useLocalSearchParams<{ id: string; recipeId: string }>();
+  const {user} = useUser();
+  const { recipeStepId, recipeId } = useLocalSearchParams<{ recipeStepId: string; recipeId: string }>();
   const [step, setStep] = useState<RecipeStep | null>(null);
 
   useEffect(() => {
     const fetchStep = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}api/RecipeSteps/recipe-step-${id}`);
+        const res = await fetch(`${API_BASE_URL}api/RecipeSteps/recipe/step-${recipeStepId}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setStep(data);
@@ -28,11 +30,44 @@ export default function RecipeStepDetail() {
       }
     };
     fetchStep();
-  }, [id]);
+  }, [recipeStepId]);
 
   if (!step) return <Text>Loading step...</Text>;
 
   const URL = API_BASE_URL.slice(0, -1);
+
+
+  const updateStep = async (stepId: number) => {
+    try {
+      await fetch(`${API_BASE_URL}api/UserCookingSessions/step`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: user?.token ? `Bearer ${user.token}` : "",
+        },
+        body: JSON.stringify({ RecipeId: Number(recipeId), StepId: stepId }),
+      });
+      console.log("Updated current step:", stepId);
+    } catch (error) {
+      console.error("Error updating step:", error);
+    }
+  };
+    const finishSession = async () => {
+      try {
+        await fetch(`${API_BASE_URL}api/UserCookingSessions/finish`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: user?.token ? `Bearer ${user.token}` : "",
+          },
+          body: JSON.stringify({ RecipeId: Number(recipeId) }),
+        });
+        console.log("Cooking session finished!");
+        router.push("/(main)/home");
+      } catch (error) {
+        console.error("Error finishing session:", error);
+      }
+    };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -67,10 +102,10 @@ export default function RecipeStepDetail() {
             style={styles.navButton}
             onPress={() => {
               // Example: go to next step (id+1)
-              const nextId = Number(id) + 1;
+              const nextId = Number(recipeStepId) + 1;
               router.push({
                 pathname: "/(main)/Recipe/[recipeId]/RecipeStepDetail",
-                params: { id: nextId.toString(), recipeId },
+                params: { recipeStepId: nextId.toString(), recipeId },
               });
             }}
           >
@@ -79,7 +114,7 @@ export default function RecipeStepDetail() {
         </View>
 
         {/* Finish button */}
-        <TouchableOpacity style={styles.finishButton}>
+        <TouchableOpacity style={styles.finishButton}  onPress={finishSession}>
           <Text style={styles.finishButtonText}>Finish this recipe</Text>
         </TouchableOpacity>
       </ScrollView>

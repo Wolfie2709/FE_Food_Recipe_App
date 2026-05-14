@@ -147,6 +147,7 @@ export default function RecipeManagement() {
 
       {/* Three-dot icon */}
       <TouchableOpacity
+      style={{marginRight: -1}}
         onPress={() =>
           setMenuVisibleId(menuVisibleId === item.recipeId ? null : item.recipeId)
         }
@@ -214,7 +215,7 @@ export default function RecipeManagement() {
 
         <FlatList
           data={recipes}
-          style={{ flex: 1 }}
+          style={{marginLeft: -6, flex: 1 }}
           keyExtractor={(item) => item.recipeId.toString()}
           renderItem={renderItem}
         />

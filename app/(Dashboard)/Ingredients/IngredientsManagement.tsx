@@ -10,13 +10,14 @@ import Button from "../../../components/ui/button";
 export default function IngredientsManagement() {
   const {user} = useUser();
   const [ingredient, setIngredient] = useState<Ingredient[]>([]);
+  const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
   const router = useRouter();
 
   // Load all recipes
   const loadIngredients = async () => {
     try {
       const res = await fetch(
-        `${API_BASE_URL}api/Ingredients/ingredient/pagination?page=1&pageSize=10`,
+        `${API_BASE_URL}api/Ingredients/ingredient/pagination?page=1&pageSize=50`,
         {
           headers: {
             "Authorization": user?.token ? `Bearer ${user.token}` : "",
@@ -55,10 +56,10 @@ export default function IngredientsManagement() {
           "Authorization": `Bearer ${user.token}`,
         },
         body: JSON.stringify({
-            name: " ",
-            measurementUnit:" ",
-            categoryId: 0,
-            pictureDirectory: null
+          name: " ",
+          measurementUnit: " ",
+          categoryId: 7,
+          pictureDirectory: null,
         }),
       });
   
@@ -69,38 +70,55 @@ export default function IngredientsManagement() {
         return;
       }
   
-      // Backend only returns plain text, so treat this as success
       if (raw.includes("success")) {
         console.log("Ingredient created successfully");
   
-        // Reload recipes
-        await loadIngredients();
+        // 🔹 Reload ingredients and then navigate using the fresh list
+        const res2 = await fetch(
+          `${API_BASE_URL}api/Ingredients/ingredient/pagination?page=1&pageSize=10`,
+          {
+            headers: {
+              "Authorization": user?.token ? `Bearer ${user.token}` : "",
+            },
+          }
+        );
+        const data = await res2.json();
   
-        // Navigate to the newest recipe (assuming API returns newest first)
-        if (ingredient.length > 0) {
-          const latest = ingredient.reduce((max, Ing) => Ing.ingredientsId > max.ingredientsId ? Ing: max, ingredient[0]);
-          router.push({
-            pathname: "./AddIngredients",
-            params: { ingredientsId: latest.ingredientsId.toString() },
-          });
-        }
+        const latest = data.ingredientList.reduce(
+          (max: any, ing: any) => (ing.ingredientsId > max.ingredientsId ? ing : max),
+          data.ingredientList[0]
+        );
+  
+        router.push({
+          pathname: "./AddIngredients",
+          params: { ingredientsId: latest.ingredientsId.toString() },
+        });
       }
     } catch (error) {
-      console.error("Error creating recipe:", error);
+      console.error("Error creating ingredient:", error);
     }
   };
   
+  const DeleteIng = async (ingredientsId: number) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}api/Ingredients/${ingredientsId}`, {
+        method: "DELETE",
+        headers: { "Authorization": user?.token ? `Bearer ${user.token}` : "" },
+      });
+      if (res.ok) {
+        console.log("Deleted successfully");
+        await loadIngredients();
+      } else {
+        console.error("Delete failed");
+      }
+    } catch (err) {
+      console.error("Error deleting ingredient:", err);
+    }
+  };
 
   const renderItem: ListRenderItem<Ingredient> = ({ item }) => (
-    <TouchableOpacity
-      style={styles.tableRow}
-      onPress={() =>
-        router.push({
-          pathname: "/Recipe/add-recipe/AddNewRecipe",
-          params: { ingredientsId: item.ingredientsId.toString() },
-        })
-      }
-    >
+      <View style={styles.tableRow}>
+
       <View style={styles.tableCellId}>
         <Text style={styles.tableCellText}>{item.ingredientsId}</Text>
       </View>
@@ -126,11 +144,35 @@ export default function IngredientsManagement() {
           </View>
         </View>
       </View>
-
-      <View>
+      {/* Three-dot icon */}
+      <TouchableOpacity
+      style={{marginRight: -1}}
+        onPress={() =>
+          setMenuVisibleId(menuVisibleId === item.ingredientsId ? null : item.ingredientsId)
+        }
+      >
         <Image source={require("assets/images/Union.png")} />
+      </TouchableOpacity>
+
+      {/* Context menu */}
+      {menuVisibleId === item.ingredientsId && (
+        <View style={styles.contextMenu}>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: "./EditIngredients",
+                params: { ingredientsId: item.ingredientsId.toString() },
+              })
+            }
+          >
+            <Text style={styles.menuItem}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => DeleteIng(item.ingredientsId)}>
+            <Text style={styles.menuItem}>Hard Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       </View>
-    </TouchableOpacity>
   );
 
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);

@@ -4,7 +4,7 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import AddRecipeStepForm from "../../../../components/forms/AddRecipeStepForm";
 
-export default function AddCookingRecipe() {
+export default function AddCookingRecipeStep() {
   const route = useRoute();
   const { recipeId } = useLocalSearchParams<{ recipeId: string }>();
 

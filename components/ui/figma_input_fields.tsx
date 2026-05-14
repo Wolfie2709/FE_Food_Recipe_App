@@ -7,6 +7,9 @@ type FieldProps = {
   onChangeText?: (text: string) => void;
   editable?: boolean;
   secureTextEntry?: boolean;
+  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
+  maxLength?: number;
+  multiline?: boolean;    
 };
 
 export default function Field({
@@ -14,7 +17,7 @@ export default function Field({
   value,
   onChangeText,
   editable = true,
-  secureTextEntry = true,
+  secureTextEntry = false,
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
 

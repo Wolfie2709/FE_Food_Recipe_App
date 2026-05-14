@@ -4,7 +4,8 @@ import { API_BASE_URL } from "@/utils/apiConfig";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
+import Field from "../ui/figma_input_fields";
 
 export default function AddCategoryForm() {
   const { user } = useUser();
@@ -92,18 +93,18 @@ export default function AddCategoryForm() {
     <View style={{ padding: 16 }}>
       <Text style={{ fontSize: 20, fontWeight: "bold" }}>Add Category Info</Text>
 
-      <TextInput
+      <Field
         placeholder="Category name"
         value={name}
         onChangeText={setName}
-        style={{ borderWidth: 1, marginVertical: 8, padding: 8 }}
+
       />
 
-      <TextInput
+      <Field
         placeholder="Description"
         value={description}
         onChangeText={setDescription}
-        style={{ borderWidth: 1, marginVertical: 8, padding: 8 }}
+
       />
 
       <Text style={{ marginVertical: 8 }}>Category Type:</Text>

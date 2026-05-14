@@ -1,3 +1,4 @@
+import { useUser } from "@/components/userContext";
 import { RecipeDetailStyles as styles } from "@/theme";
 import {
   RecipeDetailCompleteDto
@@ -9,6 +10,7 @@ import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RecipeDetail() {
+  const { user } = useUser();
   const { recipeId } = useLocalSearchParams<{ recipeId: string }>();
   const [recipe, setRecipe] = useState<RecipeDetailCompleteDto | null>(null);
 
@@ -33,6 +35,34 @@ export default function RecipeDetail() {
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
   const imageUri = recipe.pictureDirectory?.[0];
 
+
+  // 🔹 Start cooking session before navigating
+  const startCooking = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}api/UserCookingSessions/start/${recipeId}`, {
+        method: "POST",
+        headers: {
+          Authorization: user?.token ? `Bearer ${user.token}` : "",
+        },
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        console.error("Failed to start cooking session:", err);
+        return;
+      }
+
+      console.log("Cooking session started!");
+
+      // 🔹 Navigate to step list after starting session
+      router.push({
+        pathname: "/(main)/Recipe/[recipeId]/RecipeStepList",
+        params: { recipeId, steps: JSON.stringify(recipe.recipeSteps) },
+      });
+    } catch (error) {
+      console.error("Error starting cooking session:", error);
+    }
+  };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       {/* Only ScrollView (and FlatList) supports contentContainerStyle */}
@@ -76,6 +106,12 @@ export default function RecipeDetail() {
             </TouchableOpacity>
           </View>
         </View>
+        {/* Description */}
+        <View style={styles.DescriptionCard}>
+          <Text style={styles.DescriptionLabel}>DESCRIPTION</Text>
+          <Text style={styles.DescriptionContent}>{recipe.description}</Text>
+        </View>
+
         {/* Info Bar: Serving Size, Cooking time */}
         <View style={styles.InfoBar}>
           <View style={[styles.InfoCard, { marginRight: 16 }]}>
@@ -87,11 +123,7 @@ export default function RecipeDetail() {
             <Text style={styles.InfoDetail}>{recipe.cookingTime} mins</Text>
           </View>
         </View>
-        {/* Description */}
-        <View style={styles.DescriptionCard}>
-          <Text style={styles.DescriptionLabel}>DESCRIPTION</Text>
-          <Text style={styles.DescriptionContent}>{recipe.description}</Text>
-        </View>
+
         {/* INGREDIENT LIST */}
         <Text style={{ marginTop: 24, fontSize: 18, fontWeight: "600" }}>Ingredients</Text>
         {recipe.ingredients && recipe.ingredients.map((ing, index) => (
@@ -131,13 +163,3 @@ export default function RecipeDetail() {
     </SafeAreaView>
   );
 }
-
-// {
-//   recipe.recipeSteps && recipe.recipeSteps.map((step) => (
-//     <View key={step.recipeStepId} style={{ marginVertical: 8 }}>
-//       <Text style={{ fontWeight: "500" }}>{step.name}</Text>
-//       <Text>{step.description}</Text>
-//       {/* {step.imageUrl && <Image source={{ uri: step.imageUrl }} style={{ width: 100, height: 100, marginTop: 4 }} />} */}
-//     </View>
-//   ))
-// }

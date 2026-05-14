@@ -7,20 +7,22 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
+  Platform,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import Button from "../ui/button";
+import Field from "../ui/figma_input_fields";
 import { useUser } from "../userContext";
 
 export default function AddIngredientForm() {
-    const {user} = useUser();
+  const { user } = useUser();
   const { ingredientsId } = useLocalSearchParams(); // utensilId passed in
   const [name, setName] = useState("");
-  const [ingredientCategory, setIngCategory] = useState<IngredientCategoryDto[]>([{categoriesId: null}]);
+  const [measurementUnit, setMeasurementUnit] = useState("");
+  const [ingredientCategory, setIngCategory] = useState<IngredientCategoryDto[]>([{ categoriesId: null }]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [pictureDirectory, setPictureDirectory] = useState<string | null>(null);
   const router = useRouter();
@@ -58,17 +60,55 @@ export default function AddIngredientForm() {
       allowsEditing: true,
       quality: 0.8,
     });
+
     if (!result.canceled) {
-      setPictureDirectory(result.assets[0].uri);
+      let uri = result.assets[0].uri;
+
+      // 🔹 Normalize URI for Android
+      if (Platform.OS === "android" && uri.startsWith("file://")) {
+        uri = uri.replace("file://", "");
+      }
+
+      setPictureDirectory(uri);
+      console.log("Picked image URI:", uri);
+
+      // 🔹 Upload immediately
+      try {
+        const formData = new FormData();
+        formData.append("file", {
+          uri,
+          name: "ingredient.jpg",
+          type: "image/jpeg",
+        } as any);
+
+        const response = await fetch(
+          `${API_BASE_URL}api/Ingredients/update/image/ingredient/${ingredientsId}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: user?.token ? `Bearer ${user.token}` : "",
+            },
+            body: formData,
+          }
+        );
+
+        if (!response.ok) {
+          const text = await response.text();
+          console.error("Image upload failed:", text);
+        } else {
+          console.log("✅ Image uploaded successfully");
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+      }
     }
   };
 
   const saveIngredient = async () => {
     const payload = {
-      name,
-      categoryId: ingredientCategory.filter(iC => iC.categoriesId !== null).map(iC =>({
-        categoryId: iC.categoriesId
-      })),
+      name,                                     
+      measurementUnit: "",                      
+      categoryId: ingredientCategory.find(iC => iC.categoriesId !== null)?.categoriesId ?? 0,
       pictureDirectory: pictureDirectory || "",
     };
 
@@ -92,20 +132,20 @@ export default function AddIngredientForm() {
 
       if (!response.ok) {
         const rawError = await response.text();
-        console.error("Utensil update failed:", response.status, rawError);
+        console.error("Ingredient update failed:", response.status, rawError);
         return;
       }
 
-      router.push("./KitchenUtensilManagement");
+      router.push("./IngredientsManagement");
     } catch (error) {
-      console.error("Error updating utensil:", error);
+      console.error("Error updating ingredient:", error);
     }
   };
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }} contentContainerStyle={{ padding: 16 }}>
       <Text style={styles.header}>Add Ingredient</Text>
-  
+
       {/* Utensil Image */}
       <Text style={styles.sectionTitle}>Ingredient Image</Text>
       <TouchableOpacity onPress={pickImage}>
@@ -117,16 +157,24 @@ export default function AddIngredientForm() {
           </View>
         )}
       </TouchableOpacity>
-  
-      {/* Utensil Name */}
+
+      {/* Ingredients Name */}
       <Text>Ingredient Name:</Text>
-      <TextInput
-        style={styles.input}
+      <Field
+        keyboardType="default"
         value={name}
         onChangeText={setName}
         placeholder="Enter ingredient name"
       />
-  
+
+<Text>Measurement Unit:</Text>
+      <Field
+        keyboardType="default"
+        value={measurementUnit}
+        onChangeText={setMeasurementUnit}
+        placeholder="Enter measurement unit"
+      />
+
       {/* Category */}
       <Text style={styles.sectionTitle}>Categories</Text>
       {ingredientCategory.map((item, index) => (
@@ -151,8 +199,10 @@ export default function AddIngredientForm() {
           </Picker>
         </View>
       ))}
-  
+
       <Button title="Save Ingredient" onPress={saveIngredient} />
     </ScrollView>
   );
 }
+
+

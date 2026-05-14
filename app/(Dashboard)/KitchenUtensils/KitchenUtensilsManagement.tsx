@@ -10,6 +10,7 @@ import Button from "../../../components/ui/button";
 export default function KitchenUtensilsManagement() {
   const {user} = useUser();
   const [kitchenUtensil, setKU] = useState<KitchenUtensil[]>([]);
+  const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
   const router = useRouter();
 
   // Load all recipes
@@ -90,19 +91,29 @@ export default function KitchenUtensilsManagement() {
   };
   
 
-  const renderItem: ListRenderItem<KitchenUtensil> = ({ item }) => (
-    <TouchableOpacity
-      style={styles.tableRow}
-      onPress={() =>
-        router.push({
-          pathname: "./Recipe/add-recipe/AddNewRecipe",
-          params: { kitchenUtensilId: item.kitchenUtensilId.toString() },
-        })
+  const DeleteKU = async (kitchenUtensilId: number) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}api/Recipes/${kitchenUtensilId}`, {
+        method: "DELETE",
+        headers: { "Authorization": user?.token ? `Bearer ${user.token}` : "" },
+      });
+      if (res.ok) {
+        console.log("Hard deleted successfully");
+        await loadKitchenUtensils();
+      } else {
+        console.error("Hard delete failed");
       }
-    >
+    } catch (err) {
+      console.error("Error hard deleting recipe:", err);
+    }
+  };
+
+  const renderItem: ListRenderItem<KitchenUtensil> = ({ item }) => (
+      <View style={styles.tableRow}>
       <View style={styles.tableCellId}>
         <Text style={styles.tableCellText}>{item.kitchenUtensilId}</Text>
       </View>
+
 
       <View style={styles.tableCellProduct}>
         <View style={styles.ProductCell}>
@@ -126,10 +137,36 @@ export default function KitchenUtensilsManagement() {
         </View>
       </View>
 
-      <View>
+{/* Three-dot icon */}
+<TouchableOpacity
+      style={{marginRight: -1}}
+        onPress={() =>
+          setMenuVisibleId(menuVisibleId === item.kitchenUtensilId ? null : item.kitchenUtensilId)
+        }
+      >
         <Image source={require("assets/images/Union.png")} />
+      </TouchableOpacity>
+
+      {/* Context menu */}
+      {menuVisibleId === item.kitchenUtensilId && (
+        <View style={styles.contextMenu}>
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: "./EditKitchenUtensils",
+                params: { kitchenUtensilId: item.kitchenUtensilId.toString() },
+              })
+            }
+          >
+            <Text style={styles.menuItem}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => DeleteKU(item.kitchenUtensilId)}>
+            <Text style={styles.menuItem}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       </View>
-    </TouchableOpacity>
+
   );
 
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);

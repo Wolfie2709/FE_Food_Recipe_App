@@ -11,6 +11,7 @@ import Button from "../../../components/ui/button";
 export default function IngredientsManagement() {
   const {user} = useUser();
   const [userInfo, setUserInfo] = useState<User[]>([]);
+  const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
   const router = useRouter();
 
   // Load all recipes
@@ -41,49 +42,83 @@ export default function IngredientsManagement() {
     loadUsers();
   }, []);
 
+  const DeleteUsers = async (id: number) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}api/Users/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": user?.token ? `Bearer ${user.token}` : "" },
+      });
+      if (res.ok) {
+        console.log("Deleted successfully");
+        await loadUsers();
+      } else {
+        console.error("Delete failed");
+      }
+    } catch (err) {
+      console.error("Error deleting user:", err);
+    }
+  };
+
   
 
   const renderItem: ListRenderItem<User> = ({ item }) => (
-    <TouchableOpacity
-      style={styles.tableRow}
-      onPress={() =>
-        router.push({
-          pathname: "/Recipe/add-recipe/AddNewRecipe",
-          params: { ingredientsId: item.id.toString() },
-        })
-      }
-    >
-      <View style={styles.tableCellId}>
-        <Text style={styles.tableCellText}>{item.id}</Text>
-      </View>
+    <View style={styles.tableRow}>
 
-      <View style={styles.tableCellProduct}>
-        <View style={styles.ProductCell}>
-          <View>
-            <Image
-              source={
-                item.pictureId
-                  ? { uri: `${URL}${item.pictureId}` }
-                  : require("assets/images/icon.png")
-              }
-              style={styles.ImageContent}
-              resizeMode="cover"
-            />
-          </View>
+    <View style={styles.tableCellId}>
+      <Text style={styles.tableCellText}>{item.id}</Text>
+    </View>
 
-          <View style={styles.ProductInformation}>
-            <Text style={styles.tableCellText}>
-              {item.username || "Untitled"}
-            </Text>
-          </View>
+    <View style={styles.tableCellProduct}>
+      <View style={styles.ProductCell}>
+        <View>
+          <Image
+            source={
+              item.pictureId
+                ? { uri: `${URL}${item.pictureId}` }
+                : require("assets/images/icon.png")
+            }
+            style={styles.ImageContent}
+            resizeMode="cover"
+          />
+        </View>
+
+        <View style={styles.ProductInformation}>
+          <Text style={styles.tableCellText}>
+            {item.username || "Untitled"}
+          </Text>
         </View>
       </View>
-
-      <View>
-        <Image source={require("assets/images/Union.png")} />
-      </View>
+    </View>
+    {/* Three-dot icon */}
+    <TouchableOpacity
+    style={{marginRight: -1}}
+      onPress={() =>
+        setMenuVisibleId(menuVisibleId === item.id ? null : item.id)
+      }
+    >
+      <Image source={require("assets/images/Union.png")} />
     </TouchableOpacity>
-  );
+
+    {/* Context menu */}
+    {menuVisibleId === item.id && (
+      <View style={styles.contextMenu}>
+        <TouchableOpacity
+          onPress={() =>
+            router.push({
+              pathname: "./EditIngredients",
+              params: { ingredientsId: item.id.toString() },
+            })
+          }
+        >
+          <Text style={styles.menuItem}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => DeleteUsers(item.id)}>
+          <Text style={styles.menuItem}>Hard Delete</Text>
+        </TouchableOpacity>
+      </View>
+    )}
+    </View>
+);
 
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
   return (

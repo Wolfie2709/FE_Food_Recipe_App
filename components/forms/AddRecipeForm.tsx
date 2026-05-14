@@ -7,6 +7,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -15,6 +16,7 @@ import {
 } from "react-native";
 import Button from "../ui/button";
 import { MinusIcon } from "../ui/figma_Icons";
+import Field from "../ui/figma_input_fields";
 import { useUser } from "../userContext";
 
 export default function AddNewRecipeForm() {
@@ -149,41 +151,88 @@ export default function AddNewRecipeForm() {
     setRecipeKU([...recipeKU, { kitchenUtensilId: null }]);
   };
 
+  const uploadRecipeImage = async (recipeId: number, imageUri: string) => {
+    try {
+      let uri = imageUri;
+      if (Platform.OS === "android" && uri.startsWith("file://")) {
+        uri = uri.replace("file://", "");
+      }
+  
+      const formData = new FormData();
+      formData.append("file", {
+        uri,
+        name: "recipe.jpg",
+        type: "image/jpeg",
+      } as any);
+  
+      console.log("Uploading to:", `${API_BASE_URL}api/Pictures/add-picture-for-recipe-${recipeId}`);
+      console.log("File URI:", uri);
+  
+      const response = await fetch(
+        `${API_BASE_URL}api/Pictures/add-picture-for-recipe-${recipeId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: user?.token ? `Bearer ${user.token}` : "",
+          },
+          body: formData,
+        }
+      );
+  
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("Image upload failed:", text);
+      } else {
+        console.log("✅ Image uploaded successfully");
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+    }
+  };
+  
+  // 🔹 Pick image and upload immediately
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 0.8,
     });
+
     if (!result.canceled) {
-      setRecipeImage(result.assets[0].uri);
+      const uri = result.assets[0].uri;
+      setRecipeImage(uri);
+      console.log("Picked image URI:", uri);
+
+      if (recipeId) {
+        await uploadRecipeImage(Number(recipeId), uri);
+      }
     }
   };
 
+  // 🔹 Save recipe and go to cooking steps
   const goToCookingSteps = async () => {
     const payload: CreateRecipeRequestDto = {
-  name,
-  description: description || null,
-  servingSize: parseInt(serves, 10),
-  cookingTime: parseInt(cookTime, 10),
-  ingredients: recipeIngredients
-    .filter(rI => rI.ingredientsId !== null)
-    .map(rI => ({
-      ingredientsId: rI.ingredientsId!,   // ✅ match RecipeIngredient type
-      quantity: rI.quantity
-    })),
-  categories: recipeCategories
-    .filter(rC => rC.categoriesId !== null)
-    .map(rC => ({
-      categoriesId: rC.categoriesId!      // ✅ match RecipeCategoryInfoDto type
-    })),
-kitchenUtensils: recipeKU
-    .filter(rKU => rKU.kitchenUtensilId !== null)
-    .map(rKU => ({
-      kitchenUtensilId: rKU.kitchenUtensilId! // ✅ matches RecipeKitchenUtensilsInfoDto
-    })),
-};
-
+      name,
+      description: description || null,
+      servingSize: parseInt(serves, 10),
+      cookingTime: parseInt(cookTime, 10),
+      ingredients: recipeIngredients
+        .filter((rI) => rI.ingredientsId !== null)
+        .map((rI) => ({
+          ingredientsId: rI.ingredientsId!,
+          quantity: rI.quantity,
+        })),
+      categories: recipeCategories
+        .filter((rC) => rC.categoriesId !== null)
+        .map((rC) => ({
+          categoriesId: rC.categoriesId!,
+        })),
+      kitchenUtensils: recipeKU
+        .filter((rKU) => rKU.kitchenUtensilId !== null)
+        .map((rKU) => ({
+          kitchenUtensilId: rKU.kitchenUtensilId!,
+        })),
+    };
 
     try {
       if (!user?.token) {
@@ -191,15 +240,17 @@ kitchenUtensils: recipeKU
         return;
       }
 
-      console.log("payload: ", payload);
-      const response = await fetch(`${API_BASE_URL}api/Recipes/update/complete-recipe-info/${recipeId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${user.token}`,
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}api/Recipes/update/complete-recipe-info/${recipeId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
         const rawError = await response.text();
@@ -207,12 +258,15 @@ kitchenUtensils: recipeKU
         return;
       }
 
-      // Navigate using the same id we received
+      // 🔹 Upload image if selected
+      if (recipeImage) {
+        await uploadRecipeImage(Number(recipeId), recipeImage);
+      }
+
       router.push({
         pathname: "./AddCookingSteps",
         params: { recipeId: recipeId.toString() },
       });
-
     } catch (error) {
       console.error("Error updating recipe:", error);
     }
@@ -241,8 +295,7 @@ kitchenUtensils: recipeKU
 
       {/* Recipe Name */}
       <Text>Recipe Name:</Text>
-      <TextInput
-        style={styles.input}
+      <Field
         value={name}
         onChangeText={setName}
         placeholder="Enter recipe name"
@@ -250,8 +303,7 @@ kitchenUtensils: recipeKU
 
       {/* Description */}
       <Text>Description:</Text>
-      <TextInput
-        style={styles.input}
+      <Field
         value={description}
         onChangeText={setDescription}
         placeholder="Enter recipe description"
@@ -259,8 +311,7 @@ kitchenUtensils: recipeKU
       />
       {/* Serves */}
       <Text>Serves:</Text>
-      <TextInput
-        style={styles.input}
+      <Field
         keyboardType="numeric"
         value={serves}
         onChangeText={setServes}
@@ -269,8 +320,7 @@ kitchenUtensils: recipeKU
 
       {/* Cook Time */}
       <Text>Cook Time (minutes):</Text>
-      <TextInput
-        style={styles.input}
+      <Field
         keyboardType="numeric"
         value={cookTime}
         onChangeText={setCookTime}

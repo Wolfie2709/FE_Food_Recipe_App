@@ -1,3 +1,4 @@
+import { useUser } from "@/components/userContext";
 import { RecipeStepListStyles as styles } from "@/theme";
 import { RecipeDetailStepListDto } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
@@ -7,6 +8,7 @@ import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RecipeStepList() {
+  const {user} = useUser();
   const { recipeId } = useLocalSearchParams<{ recipeId: string }>();
   const [steps, setSteps] = useState<RecipeDetailStepListDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,6 +46,23 @@ export default function RecipeStepList() {
   if (loading) return <Text>Loading steps...</Text>;
   if (!steps.length) return <Text>No steps found for this recipe.</Text>;
 
+  const finishSession = async () => {
+    try {
+      await fetch(`${API_BASE_URL}api/UserCookingSessions/finish`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: user?.token ? `Bearer ${user.token}` : "",
+        },
+        body: JSON.stringify({ RecipeId: Number(recipeId) }),
+      });
+      console.log("Cooking session finished!");
+      router.push("./RecipeDetail");
+    } catch (error) {
+      console.error("Error finishing session:", error);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
@@ -53,8 +72,8 @@ export default function RecipeStepList() {
             style={styles.infoBox}
             onPress={() =>
               router.push({
-                pathname: "/(main)/Recipe/[recipeId]/RecipeStepDetail",
-                params: { id: step.recipeStepId.toString(), recipeId },
+                pathname: "./RecipeStepDetail",
+                params: { recipeStepId: step.recipeStepId.toString(), recipeId },
               })
             }
           >
@@ -75,7 +94,7 @@ export default function RecipeStepList() {
           </TouchableOpacity>
         ))}
 
-        <TouchableOpacity style={styles.finishButton}>
+        <TouchableOpacity style={styles.finishButton} onPress={finishSession}>
           <Text style={styles.finishButtonText}>Finish this recipe</Text>
         </TouchableOpacity>
       </ScrollView>

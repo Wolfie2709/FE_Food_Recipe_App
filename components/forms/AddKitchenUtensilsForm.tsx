@@ -9,11 +9,11 @@ import {
   Image,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import Button from "../ui/button";
+import Field from "../ui/figma_input_fields";
 import { useUser } from "../userContext";
 
 export default function AddKitchenUtensilForm() {
@@ -120,8 +120,7 @@ export default function AddKitchenUtensilForm() {
   
       {/* Utensil Name */}
       <Text>Utensil Name:</Text>
-      <TextInput
-        style={styles.input}
+      <Field
         value={name}
         onChangeText={setName}
         placeholder="Enter utensil name"

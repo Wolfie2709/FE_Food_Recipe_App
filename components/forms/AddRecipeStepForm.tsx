@@ -16,6 +16,7 @@ type Props = {
 export default function AddCookingSteps({ recipeId }: Props) {
   const { user } = useUser();
   const [recipeSteps, setRecipeSteps] = useState<RecipeStepInfo[]>([]);
+  const [name, setName] = useState("");
   const [currentDescription, setCurrentDescription] = useState("");
   const router = useRouter();
 
@@ -38,8 +39,9 @@ export default function AddCookingSteps({ recipeId }: Props) {
     if (!currentDescription.trim()) return;
     setRecipeSteps([
       ...recipeSteps,
-      {  recipeStepId: Date.now() * -1, name: currentDescription, description: currentDescription },
+      {  recipeStepId: Date.now() * -1, name: name, description: currentDescription },
     ]);
+    setName("");
     setCurrentDescription("");
   };
 
@@ -68,7 +70,7 @@ export default function AddCookingSteps({ recipeId }: Props) {
           console.error("Failed to save step:", res.status, rawError);
         }
         router.push({
-          pathname: "../RecipeManagement",
+          pathname: "../Recipe/RecipeManagement",
           params: { id: recipeId.toString() },
         });
       }
@@ -83,11 +85,21 @@ export default function AddCookingSteps({ recipeId }: Props) {
       <Text style={styles.header}>Create Recipe</Text>
       <Text style={styles.sectionTitle}>Steps</Text>
 
+      <Field
+        placeholder="Instruction Name"
+        value={name}
+        keyboardType="default"
+        onChangeText={setName}
+        maxLength={100}
+      />
+
       {/* Input for new step */}
       <Field
         placeholder="Instruction description"
         value={currentDescription}
+        keyboardType="default"
         onChangeText={setCurrentDescription}
+        maxLength={100}
       />
       <Button title="Add new step" onPress={addStep} />
 

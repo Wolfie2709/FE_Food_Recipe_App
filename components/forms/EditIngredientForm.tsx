@@ -6,17 +6,17 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    Image,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import Button from "../ui/button";
+import Field from "../ui/figma_input_fields";
 import { useUser } from "../userContext";
 
-export default function AddIngredientForm() {
+export default function EditIngredientForm() {
     const {user} = useUser();
   const { ingredientsId } = useLocalSearchParams(); 
   const [name, setName] = useState("");
@@ -56,6 +56,7 @@ export default function AddIngredientForm() {
 
   useEffect(() => {
     if(!ingredientsId) return;
+    console.log("Ingredients Id:", ingredientsId)
     const fetchIngDetails = async () => {
         try {
             const res = await fetch (`${API_BASE_URL}api/Ingredients/${ingredientsId}`,{
@@ -70,8 +71,9 @@ export default function AddIngredientForm() {
         } catch(err){
             console.error("Error fetching ingredient details:", err);
         }
-    }
-  })
+    };
+    fetchIngDetails();
+  }, [ingredientsId])
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -117,7 +119,7 @@ export default function AddIngredientForm() {
         return;
       }
 
-      router.push("./KitchenUtensilManagement");
+      router.push("./IngredientsManagement");
     } catch (error) {
       console.error("Error updating utensil:", error);
     }
@@ -141,8 +143,7 @@ export default function AddIngredientForm() {
   
       {/* Utensil Name */}
       <Text>Ingredient Name:</Text>
-      <TextInput
-        style={styles.input}
+      <Field
         value={name}
         onChangeText={setName}
         placeholder="Enter ingredient name"

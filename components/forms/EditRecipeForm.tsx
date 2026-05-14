@@ -23,6 +23,7 @@ import {
 } from "react-native";
 import Button from "../ui/button";
 import { MinusIcon } from "../ui/figma_Icons";
+import Field from "../ui/figma_input_fields";
 import { useUser } from "../userContext";
 
 export default function EditRecipeForm() {
@@ -76,7 +77,7 @@ export default function EditRecipeForm() {
     if (!recipeId) return;
     const fetchRecipeDetails = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}api/Recipes/${recipeId}`, {
+        const res = await fetch(`${API_BASE_URL}api/Recipes/recipe/detail/${recipeId}`, {
           headers: { Authorization: user?.token ? `Bearer ${user.token}` : "" },
         });
         if (!res.ok) return;
@@ -86,7 +87,12 @@ export default function EditRecipeForm() {
         setDescription(data.description || "");
         setServes(data.servingSize?.toString() || "1");
         setCookTime(data.cookingTime?.toString() || "0");
-        setRecipeIngredients(data.ingredients || []);
+        setRecipeIngredients(
+          (data.ingredients || []).map((ing: any) => ({
+            ingredientsId: ing.id,   // map backend "id" to frontend "ingredientsId"
+            quantity: ing.quantity?.toString() || ""
+          }))
+        );
         setRecipeCategories(data.categories || []);
         setRecipeKU(data.kitchenUtensils || []);
         setRecipeImage(data.imageUrl || null);
@@ -170,8 +176,7 @@ export default function EditRecipeForm() {
 
       {/* Recipe Name */}
       <Text>Recipe Name:</Text>
-      <TextInput
-        style={styles.input}
+      <Field
         value={name}
         onChangeText={setName}
         placeholder="Enter recipe name"
@@ -179,8 +184,8 @@ export default function EditRecipeForm() {
 
       {/* Description */}
       <Text>Description:</Text>
-      <TextInput
-        style={styles.input}
+      <Field
+        
         value={description}
         onChangeText={setDescription}
         placeholder="Enter recipe description"
@@ -189,8 +194,7 @@ export default function EditRecipeForm() {
 
       {/* Serves */}
       <Text>Serves:</Text>
-      <TextInput
-        style={styles.input}
+      <Field
         keyboardType="numeric"
         value={serves}
         onChangeText={setServes}
@@ -198,8 +202,7 @@ export default function EditRecipeForm() {
 
       {/* Cook Time */}
       <Text>Cook Time (minutes):</Text>
-      <TextInput
-        style={styles.input}
+      <Field
         keyboardType="numeric"
         value={cookTime}
         onChangeText={setCookTime}
