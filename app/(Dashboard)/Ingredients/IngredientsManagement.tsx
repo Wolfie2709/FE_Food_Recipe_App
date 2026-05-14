@@ -115,14 +115,13 @@ export default function IngredientsManagement() {
         <Text style={styles.tableCellText}>{item.ingredientsId}</Text>
       </View>
 
-
       <View style={styles.tableCellProduct}>
         <View style={styles.ProductCell}>
           <View>
             <Image
               source={
                 item.pictureDirectory
-                  ? { uri: `${URL}${item.pictureDirectory}` }
+                  ? { uri: `${API_BASE_URL}${item.pictureDirectory.replace(/^\/+/, "")}` }
                   : require("assets/images/icon.png")
               }
               style={styles.ImageContent}
