@@ -1,27 +1,26 @@
 import { RecipeFormStyles as styles } from "@/theme";
-import { Category, IngredientCategoryDto } from "@/types";
+import { Category, KitchenUtensilCategoryDto } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
+    Image,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Button from "../ui/button";
 import Field from "../ui/figma_input_fields";
 import { useUser } from "../userContext";
 
-export default function AddIngredientForm() {
-  const { user } = useUser();
-  const { ingredientsId } = useLocalSearchParams(); // utensilId passed in
+export default function EditIngredientForm() {
+    const {user} = useUser();
+  const { kitchenUtensilId } = useLocalSearchParams(); 
   const [name, setName] = useState("");
-  const [measurementUnit, setMeasurementUnit] = useState("");
-  const [ingredientCategory, setIngCategory] = useState<IngredientCategoryDto[]>([{ categoriesId: null }]);
+  const [kUCategory, setKUCategory] = useState<KitchenUtensilCategoryDto[]>([{categoriesId: null}]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [pictureDirectory, setPictureDirectory] = useState<string | null>(null);
   const router = useRouter();
@@ -53,54 +52,46 @@ export default function AddIngredientForm() {
       .catch((err) => console.error("Error loading categories:", err));
   }, []);
 
+  //Fetch Ingredient Details if editing
+
+  useEffect(() => {
+    if(!kitchenUtensilId) return;
+    console.log("kitchen Utensil Id:", kitchenUtensilId)
+    const fetchKUDetails = async () => {
+        try {
+            const res = await fetch (`${API_BASE_URL}api/Ingredients/${kitchenUtensilId}`,{
+                headers: {Authorization: user?.token ? `Bearer ${user.token}` : ""},
+            });
+            if(!res.ok) return;
+            const data = await res.json();
+
+            setName(data.name || "");
+            setKUCategory(data.categories||[]);
+            setPictureDirectory(data.pictureDirectory|| "");
+        } catch(err){
+            console.error("Error fetching ingredient details:", err);
+        }
+    };
+    fetchKUDetails();
+  }, [kitchenUtensilId])
+
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 0.8,
     });
-  
     if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setPictureDirectory(uri);
-      console.log("Picked image URI:", uri);
-  
-      try {
-        const formData = new FormData();
-        formData.append("file", {
-          uri, // keep full URI
-          name: "ingredient.jpg",
-          type: "image/jpeg",
-        } as any);
-  
-        const response = await fetch(
-          `${API_BASE_URL}api/Ingredients/update/image/ingredient/${ingredientsId}`,
-          {
-            method: "PUT",
-            headers: {
-              Authorization: user?.token ? `Bearer ${user.token}` : "",
-              // ❌ don’t set Content-Type manually
-            },
-            body: formData,
-          }
-        );
-  
-        if (!response.ok) {
-          const text = await response.text();
-          console.error("Image upload failed:", text);
-        } else {
-          console.log("✅ Image uploaded successfully");
-        }
-      } catch (error) {
-        console.error("Error uploading image:", error);
-      }
+      setPictureDirectory(result.assets[0].uri);
     }
   };
-  const saveIngredient = async () => {
+
+  const saveKitchenUtensil = async () => {
     const payload = {
-      name,                                     
-      measurementUnit: "",                      
-      categoryId: ingredientCategory.find(iC => iC.categoriesId !== null)?.categoriesId ?? 0,
+      name,
+      categoryId: kUCategory.filter(iKU => iKU.categoriesId !== null).map(iKU =>({
+        categoryId: iKU.categoriesId
+      })),
       pictureDirectory: pictureDirectory || "",
     };
 
@@ -111,7 +102,7 @@ export default function AddIngredientForm() {
       }
 
       const response = await fetch(
-        `${API_BASE_URL}api/Ingredients/update-ingredient/${ingredientsId}`,
+        `${API_BASE_URL}api/Ingredients/update-ingredient/${kitchenUtensilId}`,
         {
           method: "PUT",
           headers: {
@@ -124,20 +115,20 @@ export default function AddIngredientForm() {
 
       if (!response.ok) {
         const rawError = await response.text();
-        console.error("Ingredient update failed:", response.status, rawError);
+        console.error("Utensil update failed:", response.status, rawError);
         return;
       }
 
       router.push("./IngredientsManagement");
     } catch (error) {
-      console.error("Error updating ingredient:", error);
+      console.error("Error updating utensil:", error);
     }
   };
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }} contentContainerStyle={{ padding: 16 }}>
       <Text style={styles.header}>Add Ingredient</Text>
-
+  
       {/* Utensil Image */}
       <Text style={styles.sectionTitle}>Ingredient Image</Text>
       <TouchableOpacity onPress={pickImage}>
@@ -149,35 +140,26 @@ export default function AddIngredientForm() {
           </View>
         )}
       </TouchableOpacity>
-
-      {/* Ingredients Name */}
+  
+      {/* Utensil Name */}
       <Text>Ingredient Name:</Text>
       <Field
-        keyboardType="default"
         value={name}
         onChangeText={setName}
         placeholder="Enter ingredient name"
       />
-
-<Text>Measurement Unit:</Text>
-      <Field
-        keyboardType="default"
-        value={measurementUnit}
-        onChangeText={setMeasurementUnit}
-        placeholder="Enter measurement unit"
-      />
-
+  
       {/* Category */}
       <Text style={styles.sectionTitle}>Categories</Text>
-      {ingredientCategory.map((item, index) => (
+      {kUCategory.map((item, index) => (
         <View key={index} style={styles.ingredientRow}>
           <Picker
             selectedValue={item.categoriesId ?? ""}
             style={{ flex: 1 }}
             onValueChange={(val) => {
-              const updated = [...ingredientCategory];
+              const updated = [...kUCategory];
               updated[index].categoriesId = val === "" ? null : Number(val);
-              setIngCategory(updated);
+              setKUCategory(updated);
             }}
           >
             <Picker.Item label="Select category..." value="" />
@@ -191,10 +173,8 @@ export default function AddIngredientForm() {
           </Picker>
         </View>
       ))}
-
-      <Button title="Save Ingredient" onPress={saveIngredient} />
+  
+      <Button title="Save Kitchen Utensil" onPress={saveKitchenUtensil} />
     </ScrollView>
   );
 }
-
-

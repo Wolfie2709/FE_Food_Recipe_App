@@ -17,7 +17,7 @@ export default function IngredientsManagement() {
   const loadIngredients = async () => {
     try {
       const res = await fetch(
-        `${API_BASE_URL}api/Ingredients/ingredient/pagination?page=1&pageSize=50`,
+        `${API_BASE_URL}api/Ingredients/ingredient/pagination?page=1&pageSize=60`,
         {
           headers: {
             "Authorization": user?.token ? `Bearer ${user.token}` : "",
@@ -26,14 +26,14 @@ export default function IngredientsManagement() {
       );
 
       if (!res.ok) {
-        console.error("Failed to load ingredients:", res.status, res.statusText);
+        console.error("Failed to load  kitchen utensils:", res.status, res.statusText);
         return;
       }
 
       const data = await res.json();
       setIngredient(data.ingredientList);
     } catch (error) {
-      console.error("Error loading ingredients:", error);
+      console.error("Error loading kitchen utensils:", error);
     }
   };
 
@@ -56,10 +56,10 @@ export default function IngredientsManagement() {
           "Authorization": `Bearer ${user.token}`,
         },
         body: JSON.stringify({
-          name: " ",
-          measurementUnit: " ",
-          categoryId: 7,
-          pictureDirectory: null,
+            name: " ",
+            measurementUnit: " ",
+            categoryId: 7,
+            pictureDirectory: null
         }),
       });
   
@@ -70,58 +70,51 @@ export default function IngredientsManagement() {
         return;
       }
   
+      // Backend only returns plain text, so treat this as success
       if (raw.includes("success")) {
         console.log("Ingredient created successfully");
   
-        // 🔹 Reload ingredients and then navigate using the fresh list
-        const res2 = await fetch(
-          `${API_BASE_URL}api/Ingredients/ingredient/pagination?page=1&pageSize=10`,
-          {
-            headers: {
-              "Authorization": user?.token ? `Bearer ${user.token}` : "",
-            },
-          }
-        );
-        const data = await res2.json();
+        // Reload recipes
+        await loadIngredients();
   
-        const latest = data.ingredientList.reduce(
-          (max: any, ing: any) => (ing.ingredientsId > max.ingredientsId ? ing : max),
-          data.ingredientList[0]
-        );
-  
-        router.push({
-          pathname: "./AddIngredients",
-          params: { ingredientsId: latest.ingredientsId.toString() },
-        });
+        // Navigate to the newest recipe (assuming API returns newest first)
+        if (ingredient.length > 0) {
+          const latest = ingredient.reduce((max, ing) => ing.ingredientsId > max.ingredientsId ? ing: max, ingredient[0]);
+          router.push({
+            pathname: "./AddIngredients",
+            params: { ingredientsId: latest.ingredientsId.toString() },
+          });
+        }
       }
     } catch (error) {
       console.error("Error creating ingredient:", error);
     }
   };
   
-  const DeleteIng = async (ingredientsId: number) => {
+
+  const DeleteKU = async (ingredientsId: number) => {
     try {
-      const res = await fetch(`${API_BASE_URL}api/Ingredients/${ingredientsId}`, {
+      const res = await fetch(`${API_BASE_URL}api/Recipes/${ingredientsId}`, {
         method: "DELETE",
         headers: { "Authorization": user?.token ? `Bearer ${user.token}` : "" },
       });
       if (res.ok) {
-        console.log("Deleted successfully");
+        console.log("Hard deleted successfully");
         await loadIngredients();
       } else {
-        console.error("Delete failed");
+        console.error("Hard delete failed");
       }
     } catch (err) {
-      console.error("Error deleting ingredient:", err);
+      console.error("Error hard deleting recipe:", err);
     }
   };
 
   const renderItem: ListRenderItem<Ingredient> = ({ item }) => (
       <View style={styles.tableRow}>
-
       <View style={styles.tableCellId}>
         <Text style={styles.tableCellText}>{item.ingredientsId}</Text>
       </View>
+
 
       <View style={styles.tableCellProduct}>
         <View style={styles.ProductCell}>
@@ -144,8 +137,9 @@ export default function IngredientsManagement() {
           </View>
         </View>
       </View>
-      {/* Three-dot icon */}
-      <TouchableOpacity
+
+{/* Three-dot icon */}
+<TouchableOpacity
       style={{marginRight: -1}}
         onPress={() =>
           setMenuVisibleId(menuVisibleId === item.ingredientsId ? null : item.ingredientsId)
@@ -160,19 +154,20 @@ export default function IngredientsManagement() {
           <TouchableOpacity
             onPress={() =>
               router.push({
-                pathname: "./EditIngredients",
-                params: { ingredientsId: item.ingredientsId.toString() },
+                pathname: "./EditKitchenUtensils",
+                params: { kitchenUtensilId: item.ingredientsId.toString() },
               })
             }
           >
             <Text style={styles.menuItem}>Edit</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => DeleteIng(item.ingredientsId)}>
-            <Text style={styles.menuItem}>Hard Delete</Text>
+          <TouchableOpacity onPress={() => DeleteKU(item.ingredientsId)}>
+            <Text style={styles.menuItem}>Delete</Text>
           </TouchableOpacity>
         </View>
       )}
       </View>
+
   );
 
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
@@ -182,7 +177,7 @@ export default function IngredientsManagement() {
 
       {/* Search bar */}
       <View style={styles.searchBar}>
-        <TextInput style={styles.searchText} placeholder="Search recipes..." />
+        <TextInput style={styles.searchText} placeholder="Search ingredients..." />
         <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
       </View>
 
