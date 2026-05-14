@@ -85,7 +85,7 @@ export type Ingredient = {
   name: string;
   categoryId: number;
   categoryName: string;
-  pictureDirectory: string;
+  imageDirectory: string;
 };
 export type RecipeBoxDTO = {
   id: number;

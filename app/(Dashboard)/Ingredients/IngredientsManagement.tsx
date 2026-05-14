@@ -120,8 +120,8 @@ export default function IngredientsManagement() {
           <View>
             <Image
               source={
-                item.pictureDirectory
-                  ? { uri: `${API_BASE_URL}${item.pictureDirectory.replace(/^\/+/, "")}` }
+                item.imageDirectory
+                  ? { uri: `${URL}${item.imageDirectory}` }
                   : require("assets/images/icon.png")
               }
               style={styles.ImageContent}
@@ -153,8 +153,8 @@ export default function IngredientsManagement() {
           <TouchableOpacity
             onPress={() =>
               router.push({
-                pathname: "./EditKitchenUtensils",
-                params: { kitchenUtensilId: item.ingredientsId.toString() },
+                pathname: "./EditIngredients",
+                params: { ingredientsId : item.ingredientsId.toString() },
               })
             }
           >
@@ -170,6 +170,7 @@ export default function IngredientsManagement() {
   );
 
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
+  console.log("URL: ", ingredient);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Ingredients Management</Text>

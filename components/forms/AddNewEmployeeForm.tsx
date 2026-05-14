@@ -5,11 +5,11 @@ import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    Alert,
-    ScrollView,
-    Text,
-    TextInput,
-    View
+  Alert,
+  ScrollView,
+  Text,
+  TextInput,
+  View
 } from "react-native";
 import Field from "../ui/figma_input_fields";
 import { useUser } from "../userContext";
@@ -28,90 +28,90 @@ export default function AddNewEmployeeForm() {
   const router = useRouter();
 
   const AddNewEmployee = async () => {
-    console.log("Register pressed");
+  console.log("Register pressed");
 
-    const payload = {
-      firstname: firstname.trim(),
-      lastname: lastname.trim(),
-      username: username.trim(),
-      email: email.trim(),
-      password: password.trim(),
-      phonenumber: phonenumber.trim(),
-      sex: sex.trim(),
-    };
+  const payload = {
+    firstname: firstname.trim(),
+    lastname: lastname.trim(),
+    username: username.trim(),
+    email: email.trim(),
+    password: password.trim(),
+    phonenumber: phonenumber.trim(),
+    sex: sex.trim(),
+  };
 
-    try {
-      // Step 1: Register
-      const response = await fetch(`${API_BASE_URL}api/Auth/register`, {
-        method: "POST",
+  try {
+    // Step 1: Register
+    const response = await fetch(`${API_BASE_URL}api/Auth/register`, {
+      method: "POST",
+      headers: {
+        Authorization: user?.token ? `Bearer ${user.token}` : "",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const text = await response.text();
+    if (!response.ok) {
+      console.error("Registration failed:", text);
+      Alert.alert("Registration failed", text || "Please check your details");
+      return;
+    }
+
+    console.log("Registration response (text):", text);
+
+    // Step 2: Fetch user by username using pagination
+    const lookupRes = await fetch(
+      `${API_BASE_URL}api/Users/users/pagination?username=${encodeURIComponent(username)}&page=1&pageSize=10`,
+      {
+        headers: {
+          Authorization: user?.token ? `Bearer ${user.token}` : "",
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (!lookupRes.ok) {
+      const errText = await lookupRes.text();
+      console.error("User lookup failed:", errText);
+      Alert.alert("Error", "Could not fetch user after registration");
+      return;
+    }
+
+    const lookupData = await lookupRes.json();
+    console.log("Fetched user pagination:", lookupData);
+
+    // 🔹 Assuming API returns { userList: [...] }
+    const latestUser = lookupData.userList?.[0];
+
+    // Step 3: Update role
+    if (latestUser?.id) {
+      const updateResponse = await fetch(`${API_BASE_URL}api/Users/user/role/change/${latestUser.id}`, {
+        method: "PUT",
         headers: {
           Authorization: user?.token ? `Bearer ${user.token}` : "",
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ role }),
       });
 
-      const text = await response.text();
-      if (!response.ok) {
-        console.error("Registration failed:", text);
-        Alert.alert("Registration failed", text || "Please check your details");
+      const updateText = await updateResponse.text();
+      if (!updateResponse.ok) {
+        console.error("Role update failed:", updateText);
+        Alert.alert("Role update failed", updateText);
         return;
       }
 
-      console.log("Registration response (text):", text);
-
-      // Step 2: Fetch all users and get the latest one
-      const lookupRes = await fetch(`${API_BASE_URL}api/Users/all`, {
-        headers: {
-          Authorization: user?.token ? `Bearer ${user.token}` : "",
-          "Content-Type": "application/json"
-        }
-      });
-
-      if (!lookupRes.ok) {
-        const errText = await lookupRes.text();
-        console.error("User lookup failed:", errText);
-        Alert.alert("Error", "Could not fetch users after registration");
-        return;
-      }
-
-      const allUsers = await lookupRes.json();
-      console.log("Fetched all users:", allUsers);
-
-      // Assume newest user is the one with the highest id
-      const latestUser = allUsers.reduce((prev: any, curr: any) =>
-        prev.id > curr.id ? prev : curr
-      );
-
-      console.log("Latest user:", latestUser);
-
-      // Step 3: Update role
-      if (latestUser?.id) {
-        const updateResponse = await fetch(`${API_BASE_URL}api/Users/user/role/change/${latestUser.id}`, {
-          method: "PUT",
-          headers: {
-            Authorization: user?.token ? `Bearer ${user.token}` : "",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ role }),
-        });
-
-        const updateText = await updateResponse.text();
-        if (!updateResponse.ok) {
-          console.error("Role update failed:", updateText);
-          Alert.alert("Role update failed", updateText);
-          return;
-        }
-
-        console.log("Role update success:", updateText);
-        Alert.alert("Success", `Employee registered and role set to ${role}`);
-        router.push("../UserManagement");
-      }
-    } catch (error) {
-      console.error("Registration error:", error);
-      Alert.alert("Error", "Could not connect to server");
+      console.log("Role update success:", updateText);
+      Alert.alert("Success", `Employee registered and role set to ${role}`);
+      router.push("../UserManagement");
     }
-  };
+  } catch (error) {
+    console.error("Registration error:", error);
+    Alert.alert("Error", "Could not connect to server");
+  }
+};
+
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }} contentContainerStyle={{ padding: 16 }}>
