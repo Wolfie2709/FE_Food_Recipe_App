@@ -76,7 +76,7 @@ export default function AddNewRecipeForm() {
 
   useEffect(() => {
     console.log("Updating recipe with id:", recipeId);
-    fetch(`${API_BASE_URL}api/Categories/all`, {
+    fetch(`${API_BASE_URL}api/Categories/category/pagination?page=1&pageSize=50&type=Recipe`, {
       headers: {
         "Authorization": user?.token ? `Bearer ${user.token}` : "",
       },
@@ -377,7 +377,7 @@ export default function AddNewRecipeForm() {
               source={{
                 uri:
                   ingredients.find((ing) => ing.ingredientsId === item.ingredientsId)
-                    ?.pictureDirectory || "",
+                    ?.imageDirectory || "",
               }}
               style={{ width: 40, height: 40 }}
             />

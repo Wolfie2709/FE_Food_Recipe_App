@@ -1,15 +1,14 @@
-// import { useAuthStore } from "@/components/Store/authStore";
 import Button from "@/components/ui/button";
 import NavigationBar from "@/components/ui/figma_navbar";
 import { useUser } from "@/components/userContext";
-import { colors, fonts, spacing, profilePageStyles as styles } from "@/theme";
-import { RecipeBox, User, UserRecipeHistory } from "@/types";
+import { profilePageStyles as styles } from "@/theme";
+import { User } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { RecipeCard } from "../../Search";
+
 
 export default function ProfilePage() {
   // const { accessToken } = useAuthStore();
@@ -40,46 +39,13 @@ export default function ProfilePage() {
     if (accessToken) fetchProfile();
   }, [accessToken]);
 
-  const loadHistory = async () => {
-    try {
-          const response = await fetch(`${API_BASE_URL}api/UserRecipeHistory`,
-          {
-            headers: {
-              Authorization: `Bearer ${userObject.user?.token}`,
-            },
-          });
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          const res: UserRecipeHistory[] = await response.json();
-          setHistory(res);
-    
-          // Fetch recipe details for each recipeId
-          const recipePromises = res.map(async (h) => {
-            const r = await fetch(`${API_BASE_URL}api/Recipes/recipe/detail/${h.recipeId}`);
-            return await r.json();
-          });
-    
-          const recipeResults = await Promise.all(recipePromises);
-          setRecipes(recipeResults);
-        } catch (err) {
-          console.error("Error loading history:", err);
-        } finally {
-          setLoading(false);
-        }
-      };
-    
-      useEffect(() => {
-        loadHistory();
-      }, []);
-
-      if (!user) {
-        return (
-          <View style={styles.container}>
-            <Text style={styles.message}>Loading profile...</Text>
-          </View>
-        );
-      }
-    
-      if (loading) return <Text>Loading history...</Text>;
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>Loading profile...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -87,16 +53,14 @@ export default function ProfilePage() {
         <View>
           <Image
             source={require("../../../../assets/images/SettingsIcon.png")}
-            style={styles.settings}
-          />
+            style={styles.settings} />
         </View>
         <View style={styles.headerInfo}>
           {/* Avatar */}
           {user.pictureId ? (
             <Image
               source={{ uri: user.pictureId.toString() }}
-              style={styles.avatar}
-            />
+              style={styles.avatar} />
           ) : (
             <View style={[styles.avatar, styles.avatarPlaceholder]}>
               <Text style={[styles.username]}>
@@ -112,9 +76,8 @@ export default function ProfilePage() {
               size="large"
               onPress={() => {
                 console.log("Admin button pressed");
-                router.push("/(Dashboard)/AdminDashboard")
-              }}
-            />
+                router.push("/(Dashboard)/AdminDashboard");
+              }} />
           )}
           {/* Username */}
           <Text style={styles.username}>{user.username}</Text>
@@ -143,44 +106,20 @@ export default function ProfilePage() {
               {new Date(user.createDate).toLocaleDateString()}
             </Text>
           </View>
-          <Button 
-          title = "Edit Profile"
-          variant="primary"
-          size = "small"
-          onPress={() => {
-            console.log("Edit profile button pressed")
-            router.push("./EditProfile")
-          } }
-          />
+          <Button
+            title="Edit Profile"
+            variant="primary"
+            size="small"
+            onPress={() => {
+              console.log("Edit profile button pressed");
+              router.push("./EditProfile");
+            }} />
         </View>
       </View>
       <View>
-      <Text style={{fontSize: 30, fontFamily: fonts.semiBold, color: colors.textDark, marginBottom: spacing.sm, textAlign: "center"}}>RECENT RECIPES</Text>
-      <FlatList 
-        data = {recipes}
-        keyExtractor={(item) => item.recipeId.toString()}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
-        renderItem={({ item }) => (
-            <TouchableOpacity
-                onPress={() => 
-                router.push({
-                    pathname:"./[recipeId]/RecipeDetail",
-                    params: { recipeId: item.recipeId.toString() },
-                })
-            }
-            >
-                <View style = {{marginTop: 16,marginBottom: 16}}>
-                    <RecipeCard {...item}/>
-                </View>
-            </TouchableOpacity>
-        )}
-        />
-      </View>
-      <View>
-                {/* Bottom navigation bar */}
-                {user && <NavigationBar user={user} />}
+        {/* Bottom navigation bar */}
+        {user && <NavigationBar user={user} />}
       </View>
     </SafeAreaView>
   );
 }
-

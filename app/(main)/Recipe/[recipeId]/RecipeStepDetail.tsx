@@ -1,4 +1,5 @@
 import { useUser } from "@/components/userContext";
+import { UpdateStepRequest } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -6,7 +7,7 @@ import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } fr
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type RecipeStep = {
-  id: number;
+  stepId: number;
   name: string;
   description: string;
   pictureDirectory?: string;
@@ -18,12 +19,25 @@ export default function RecipeStepDetail() {
   const [step, setStep] = useState<RecipeStep | null>(null);
 
   useEffect(() => {
+    const payload: UpdateStepRequest = {
+      recipeId: Number(recipeId),
+      stepId: Number(recipeStepId),
+    };
     const fetchStep = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}api/RecipeSteps/recipe/step-${recipeStepId}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setStep(data);
+
+        await fetch(`${API_BASE_URL}api/UserCookingSessions/step`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload),
+        });
+        console.log("Update current step", payload);
       } catch (err) {
         console.error("Failed to load step:", err);
         Alert.alert("Error", "Could not load step.");
@@ -36,22 +50,6 @@ export default function RecipeStepDetail() {
 
   const URL = API_BASE_URL.slice(0, -1);
 
-
-  const updateStep = async (stepId: number) => {
-    try {
-      await fetch(`${API_BASE_URL}api/UserCookingSessions/step`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: user?.token ? `Bearer ${user.token}` : "",
-        },
-        body: JSON.stringify({ RecipeId: Number(recipeId), StepId: stepId }),
-      });
-      console.log("Updated current step:", stepId);
-    } catch (error) {
-      console.error("Error updating step:", error);
-    }
-  };
     const finishSession = async () => {
       try {
         await fetch(`${API_BASE_URL}api/UserCookingSessions/finish`, {
@@ -63,7 +61,7 @@ export default function RecipeStepDetail() {
           body: JSON.stringify({ RecipeId: Number(recipeId) }),
         });
         console.log("Cooking session finished!");
-        router.push("/(main)/home");
+        router.push("./RecipeDetail");
       } catch (error) {
         console.error("Error finishing session:", error);
       }
@@ -73,7 +71,7 @@ export default function RecipeStepDetail() {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* Step number/title */}
-        <Text style={styles.stepNumber}>Step {step.id}</Text>
+        <Text style={styles.stepNumber}>Step {step.stepId}</Text>
 
         {/* Step image */}
         {step.pictureDirectory && (
@@ -104,7 +102,7 @@ export default function RecipeStepDetail() {
               // Example: go to next step (id+1)
               const nextId = Number(recipeStepId) + 1;
               router.push({
-                pathname: "/(main)/Recipe/[recipeId]/RecipeStepDetail",
+                pathname: "./RecipeStepDetail",
                 params: { recipeStepId: nextId.toString(), recipeId },
               });
             }}

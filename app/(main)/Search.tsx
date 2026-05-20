@@ -10,7 +10,7 @@ const screenWidth = Dimensions.get("window").width;
 const spacing = 10;
 const itemWidth = screenWidth / 3 - spacing;
 
-function RecipeCard({ name, authorName, rating, imageDirectory, avatar }: RecipeBox) {
+export function RecipeCard({ name, authorName, rating, imageDirectory, avatar }: RecipeBox) {
   let URL = API_BASE_URL.slice(0, -1);
   return (
     <View style={styles.recipeCardStyle}>

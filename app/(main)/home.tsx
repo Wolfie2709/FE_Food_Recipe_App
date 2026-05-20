@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Alert, Dimensions, FlatList, Image, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { homeStyles as styles } from "../../theme";
-import { RecipeBox, RecipePagination } from "../../types";
+import { RecipeBox, RecipePagination, UserRecipeHistory } from "../../types";
 
 const screenWidth = Dimensions.get("window").width;
 const spacing = 10;
@@ -57,6 +57,8 @@ export default function Home() {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const [recipes, setRecipes] = useState<RecipeBox[]>([]);
+  const [history, setHistory] = useState<UserRecipeHistory[]>([]);
   console.log("Home sees user:", user);
 
   const loadData = async (pageToLoad: number) => {
@@ -95,6 +97,39 @@ export default function Home() {
     loadData(1);
   }, []);
 
+  const loadHistory = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}api/UserRecipeHistory`,
+      {
+        headers: {
+          "Authorization": user?.token ? `Bearer ${user.token}` : "",
+        },
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const res: UserRecipeHistory[] = await response.json();
+      setHistory(res);
+
+      // Fetch recipe details for each recipeId
+      const recipePromises = res.map(async (h) => {
+        const r = await fetch(`${API_BASE_URL}api/Recipes/recipe/detail/${h.recipeId}`);
+        return await r.json();
+      });
+
+      const recipeResults = await Promise.all(recipePromises);
+      setRecipes(recipeResults);
+    } catch (err) {
+      console.error("Error loading history:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  if (isLoading) return <Text>Loading history...</Text>;
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView style={styles.container}>
@@ -126,11 +161,14 @@ export default function Home() {
             {/* map creators here */}
           </View>
         </View>
-        {/* Recent recipes */}
+        {/* All recipes */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent recipes</Text>
-            <Text style={styles.link}>See all</Text>
+            <Text style={styles.sectionTitle}>All recipes</Text>
+            <TouchableOpacity>
+            <Text style={styles.link} onPress={() => {router.push({pathname: "/(main)/Recipe/AllRecipe"})}}>See all</Text>
+            </TouchableOpacity>
+            
           </View>
           <FlatList
             data={data}
@@ -144,7 +182,54 @@ export default function Home() {
               <TouchableOpacity
                 onPress={() => {
                   router.push({
-                    pathname: "/(main)/Recipe/[recipeId]/RecipeDetail",
+                    pathname: "./Recipe/[recipeId]/RecipeDetail",
+                    params: { recipeId: item.recipeId.toString() },
+                  })
+                }}
+              >
+                <View style={{ width: itemWidth }}>
+                  <RecipeCard {...item} />
+                </View>
+              </TouchableOpacity>
+            )}
+            ItemSeparatorComponent={() => <View style={{ width: spacing }} />}
+            onMomentumScrollEnd={(event) => {
+              const offsetX = event.nativeEvent.contentOffset.x;
+              const currentIndex = Math.floor(offsetX / (itemWidth + spacing));
+              if (
+                currentIndex >= data.length - 4 &&
+                page < totalPages &&
+                !isLoading
+              ) {
+                const nextPage = page + 1;
+                setPage(nextPage);
+                loadData(nextPage);
+              }
+            }}
+          />
+        </View>
+        {/* Recent recipes */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recent recipes</Text>
+            <TouchableOpacity>
+            <Text style={styles.link} onPress={() => {router.push({pathname: "/(main)/Recipe/RecipeHistory"})}}>See all</Text>
+            </TouchableOpacity>
+            
+          </View>
+          <FlatList
+            data={recipes}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.recipeId.toString()}
+            snapToInterval={itemWidth + spacing}
+            decelerationRate="fast"
+            contentContainerStyle={{ paddingHorizontal: spacing }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  router.push({
+                    pathname: "./Recipe/[recipeId]/RecipeDetail",
                     params: { recipeId: item.recipeId.toString() },
                   })
                 }}

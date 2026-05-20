@@ -13,6 +13,7 @@ export default function RecipeStepList() {
   const [steps, setSteps] = useState<RecipeDetailStepListDto[]>([]);
   const [loading, setLoading] = useState(true);
 
+
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
 
   useEffect(() => {
@@ -45,6 +46,7 @@ export default function RecipeStepList() {
   
   if (loading) return <Text>Loading steps...</Text>;
   if (!steps.length) return <Text>No steps found for this recipe.</Text>;
+
 
   const finishSession = async () => {
     try {

@@ -29,10 +29,11 @@ export default function RecipeDetail() {
     fetchRecipe();
   }, [recipeId]);
 
+  const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
+
   if (!recipe) return <Text>Loading...</Text>;
   console.log("recipe detail: ", recipe);
 
-  const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
   const imageUri = recipe.pictureDirectory?.[0];
 
 
@@ -148,14 +149,8 @@ export default function RecipeDetail() {
         {/* <Text style={{ marginTop: 16, fontSize: 18, fontWeight: "600" }}>Steps</Text> */}
         {/* UTENSIL */}
         <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: "/(main)/Recipe/[recipeId]/RecipeStepList",
-              params: { recipeId, steps: JSON.stringify(recipe.recipeSteps) },
-            })
-          }
         >
-          <Text style={[styles.RecipeDetailPageButton, styles.StepButton]}>
+          <Text style={[styles.RecipeDetailPageButton, styles.StepButton]} onPress={startCooking}>
             LET'S GET COOKING
           </Text>
         </TouchableOpacity>

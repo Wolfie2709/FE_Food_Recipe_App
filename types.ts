@@ -61,6 +61,10 @@ export type RecipePagination = {
   recipeList: Array<RecipeBox>;
 };
 
+export type RecipeHistory = {
+  recipeList: Array<RecipeBox>
+}
+
 export type KitchenUtensilPagination = {
   page: number;
   pageSize: number;
@@ -245,3 +249,16 @@ export type IngredientCategoryDto = {
   categoriesId: number | null;
 }
 
+export type UpdateStepRequest = {
+  recipeId: number;
+  stepId: number;
+}
+
+export type UserRecipeHistory = {
+  id: number;
+  userId: number;
+  recipeId: number;
+  cookedAt: string;
+  ratingGiven?: number | null;
+  note?: string | null;
+};
