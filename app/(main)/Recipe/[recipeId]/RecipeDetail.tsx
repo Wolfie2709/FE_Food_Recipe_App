@@ -149,7 +149,9 @@ export default function RecipeDetail() {
         {recipe.ingredients && recipe.ingredients.map((ing, index) => (
           <View key={`${ing.id}-${index}`} style={styles.CardList}>
             <View style={styles.CardListItem}>
-              <Image source={require("assets/images/icon.png")} style={styles.CardListItemImage} />
+              <Image source={ing.pictureDirectory ?
+            { uri: `${URL}${ing.pictureDirectory}` }
+            : require("assets/images/figma_images/Image1.png")} style={styles.CardListItemImage} />
               <Text style={styles.CardListItemName}>{ing.name}</Text>
             </View>
             <Text style={{ fontSize: 16, fontWeight: "600", color: "#3c3c3c" }}>{ing.quantity} {ing.measurementUnit || "g"}</Text>

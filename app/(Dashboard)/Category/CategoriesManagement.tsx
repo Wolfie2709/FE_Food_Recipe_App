@@ -9,6 +9,7 @@ import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, Vie
 
 export default function CategoryManagement() {
   const { user } = useUser();
+  const [searchText, setSearchText] = useState("");
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
@@ -35,6 +36,29 @@ export default function CategoryManagement() {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  const searchCategory = async (name: string) => {
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}api/Categories/category/pagination?categoryName=${encodeURIComponent(name)}&page=1&pageSize=10&type=all`,
+        {
+          headers: {
+            "Authorization": user?.token ? `Bearer ${user.token}` : "",
+          },
+        }
+      );
+  
+      if (!res.ok) {
+        console.error("Failed to search ingredients:", res.status, await res.text());
+        return;
+      }
+  
+      const data = await res.json();
+      setCategories(data.categoryList);
+    } catch (error) {
+      console.error("Error searching ingredients:", error);
+    }
+  };
 
   // Create empty category then navigate to AddCategoryForm
   const createCategory = async () => {
@@ -178,12 +202,23 @@ return (
   <View style={styles.container}>
     <Text style={styles.title}>Categories Management</Text>
 
-    {/* Search bar */}
-    <View style={styles.searchBar}>
-      <TextInput style={styles.searchText} placeholder="Search categories..." />
-      <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
-    </View>
-
+ {/* Search bar */}
+     <View style={styles.searchBar}>
+  <TextInput
+    style={styles.searchText}
+    placeholder="Search ingredients..."
+    value={searchText}
+    onChangeText={(text) => {
+      setSearchText(text);
+      if (text.trim().length > 0) {
+        searchCategory(text);
+      } else {
+        fetchCategories(); // fallback to full list
+      }
+    }}
+  />
+  <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+</View>
     {/* Filter + Add New Recipe buttons */}
     <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
       <Button title="Filter" onPress={() => { }} />

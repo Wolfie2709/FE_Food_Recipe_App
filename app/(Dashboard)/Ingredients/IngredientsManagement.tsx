@@ -12,6 +12,7 @@ export default function IngredientsManagement() {
   const [ingredient, setIngredient] = useState<Ingredient[]>([]);
   const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
   const router = useRouter();
+  const [searchText, setSearchText] = useState("");
 
   // Load all recipes
   const loadIngredients = async () => {
@@ -109,6 +110,29 @@ export default function IngredientsManagement() {
     }
   };
 
+  const searchIngredients = async (name: string) => {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}api/Ingredients/ingredient/pagination?ingredientName=${encodeURIComponent(name)}&page=1&pageSize=10`,
+      {
+        headers: {
+          "Authorization": user?.token ? `Bearer ${user.token}` : "",
+        },
+      }
+    );
+
+    if (!res.ok) {
+      console.error("Failed to search ingredients:", res.status, await res.text());
+      return;
+    }
+
+    const data = await res.json();
+    setIngredient(data.ingredientList);
+  } catch (error) {
+    console.error("Error searching ingredients:", error);
+  }
+};
+
   const renderItem: ListRenderItem<Ingredient> = ({ item }) => (
       <View style={styles.tableRow}>
       <View style={styles.tableCellId}>
@@ -176,10 +200,22 @@ export default function IngredientsManagement() {
       <Text style={styles.title}>Ingredients Management</Text>
 
       {/* Search bar */}
-      <View style={styles.searchBar}>
-        <TextInput style={styles.searchText} placeholder="Search ingredients..." />
-        <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
-      </View>
+     <View style={styles.searchBar}>
+  <TextInput
+    style={styles.searchText}
+    placeholder="Search ingredients..."
+    value={searchText}
+    onChangeText={(text) => {
+      setSearchText(text);
+      if (text.trim().length > 0) {
+        searchIngredients(text);
+      } else {
+        loadIngredients(); // fallback to full list
+      }
+    }}
+  />
+  <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+</View>
 
       {/* Filter + Add New Recipe buttons */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
