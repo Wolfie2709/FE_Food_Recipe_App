@@ -1,15 +1,17 @@
 import { useUser } from "@/components/userContext";
 import { User } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
+import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
+  Image,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 export default function EditProfile() {
@@ -17,11 +19,15 @@ export default function EditProfile() {
   const token = userObject.user?.token;
 
   const [profile, setProfile] = useState<User | null>(null);
+  const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch full profile
+  // Fetch profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -35,9 +41,14 @@ export default function EditProfile() {
         const data: User = await res.json();
         setProfile(data);
 
-        // Initialize form fields
+        setUsername(data.username || "");
         setFirstName(data.firstName || "");
         setLastName(data.lastName || "");
+        setEmail(data.email || "");
+        setPhoneNumber(data.phoneNumber || "");
+        if (data.pictureDirectory) {
+          setAvatarUri(`${API_BASE_URL}${data.pictureDirectory}`);
+        }
       } catch (err) {
         console.error("Failed to load profile:", err);
         Alert.alert("Error", "Could not load profile.");
@@ -49,32 +60,97 @@ export default function EditProfile() {
     if (token) fetchProfile();
   }, [token]);
 
-  const handleSave = async () => {
+  // Image picker
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setAvatarUri(result.assets[0].uri);
+    }
+  };
+  const parseResponse = async (res: Response) => {
     try {
-      const res = await fetch(`${API_BASE_URL}api/Users/me`, {
-        method: "PUT", // or PATCH depending on your API
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-        }),
-      });
+      return await res.json();
+    } catch {
+      return await res.text();
+    }
+  };
+  
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const updatedUser: User = await res.json();
+  // Save profile info
+  // Save profile info
+const saveProfileInfo = async () => {
+  const res = await fetch(`${API_BASE_URL}api/Users/edit/profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      username,
+      firstName,
+      lastName,
+      phoneNumber,
+      email,
+    }),
+  });
 
-      setProfile(updatedUser); // update local state
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await parseResponse(res);
+};
+
+// Save avatar
+const saveAvatar = async () => {
+  if (!avatarUri || avatarUri.startsWith("http")) return null;
+
+  const formData = new FormData();
+  const filename = avatarUri.split("/").pop()!;
+  const match = /\.(\w+)$/.exec(filename);
+  const type = match ? `image/${match[1]}` : `image`;
+
+  formData.append("file", {
+    uri: avatarUri,
+    name: filename,
+    type,
+  } as any);
+
+  const res = await fetch(`${API_BASE_URL}api/Users/avatar/profile`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await parseResponse(res);
+};
+
+
+  // Save all
+  const handleSaveAll = async () => {
+    try {
+      const updatedProfile = await saveProfileInfo();
+      const updatedAvatar = await saveAvatar();
+  
+      // If backend returned JSON user object, update state
+      if (typeof updatedProfile === "object") setProfile(updatedProfile);
+      else if (typeof updatedAvatar === "object") setProfile(updatedAvatar);
+  
       Alert.alert("Success", "Profile updated successfully!");
-      console.log("Updated user:", updatedUser);
+      console.log("Profile response:", updatedProfile);
+      console.log("Avatar response:", updatedAvatar);
     } catch (err) {
       console.error("Failed to update profile:", err);
       Alert.alert("Error", "Could not update profile.");
     }
   };
-
+  
   if (loading) {
     return (
       <View style={styles.container}>
@@ -82,53 +158,60 @@ export default function EditProfile() {
       </View>
     );
   }
+
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Edit Profile</Text>
       </View>
 
-      {/* Profile Picture */}
+      {/* Avatar */}
       <View style={styles.avatarContainer}>
-        {/* <Image
-          source={require("../../../assets/images/Unsplashnsze2hlxozo.png")}
-          style={styles.avatar}
-        /> */}
-        <Text style={styles.label}>Profile picture</Text>
+        {avatarUri ? (
+          <Image source={{ uri: avatarUri }} style={styles.avatar} />
+        ) : (
+          <View style={[styles.avatar, styles.avatarPlaceholder]}>
+            <Text style={styles.label}>No avatar</Text>
+          </View>
+        )}
+        <TouchableOpacity onPress={pickImage}>
+          <Text style={styles.link}>Choose Image</Text>
+        </TouchableOpacity>
       </View>
+
+      {/* Username */}
+      <Text style={styles.label}>Username</Text>
+      <TextInput style={styles.input} value={username} onChangeText={setUsername} />
 
       {/* First Name */}
       <Text style={styles.label}>First name</Text>
-      <TextInput
-        style={styles.input}
-        value={firstName}
-        onChangeText={setFirstName}
-        placeholder="Enter first name"
-      />
+      <TextInput style={styles.input} value={firstName} onChangeText={setFirstName} />
 
       {/* Last Name */}
       <Text style={styles.label}>Last name</Text>
+      <TextInput style={styles.input} value={lastName} onChangeText={setLastName} />
+
+      {/* Email */}
+      <Text style={styles.label}>Email</Text>
       <TextInput
         style={styles.input}
-        value={lastName}
-        onChangeText={setLastName}
-        placeholder="Enter last name"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
       />
 
-      {/* Description */}
-      {/* <Text style={styles.label}>Description</Text>
+      {/* Phone Number */}
+      <Text style={styles.label}>Phone Number</Text>
       <TextInput
-        style={[styles.input, styles.textArea]}
-        value={description}
-        onChangeText={setDescription}
-        placeholder="Enter description"
-        multiline
-      /> */}
+        style={styles.input}
+        value={phoneNumber}
+        onChangeText={setPhoneNumber}
+        keyboardType="phone-pad"
+      />
 
       {/* Save Button */}
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Save edit</Text>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSaveAll}>
+        <Text style={styles.saveButtonText}>Save All</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -140,6 +223,11 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 24, fontWeight: "700", color: "#303030" },
   avatarContainer: { alignItems: "center", marginVertical: 20 },
   avatar: { width: 120, height: 120, borderRadius: 60 },
+  avatarPlaceholder: {
+    backgroundColor: "#EEE",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   label: { fontSize: 16, color: "#303030", marginVertical: 8 },
   input: {
     borderWidth: 1,
@@ -149,7 +237,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     backgroundColor: "#FFF",
   },
-  textArea: { height: 100, textAlignVertical: "top" },
   saveButton: {
     backgroundColor: "#E23E3E",
     borderRadius: 10,
@@ -158,4 +245,5 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   saveButtonText: { color: "#FFF", fontSize: 16, fontWeight: "600" },
+  link: { color: "#E23E3E", marginTop: 8 },
 });

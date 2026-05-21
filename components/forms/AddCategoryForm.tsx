@@ -1,10 +1,11 @@
 import Button from "@/components/ui/button";
 import { useUser } from "@/components/userContext";
+import { RecipeFormStyles as styles } from "@/theme";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Field from "../ui/figma_input_fields";
 
 export default function AddCategoryForm() {
@@ -90,43 +91,76 @@ export default function AddCategoryForm() {
   };
 
   return (
-    <View style={{ padding: 16 }}>
-      <Text style={{ fontSize: 20, fontWeight: "bold" }}>Add Category Info</Text>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: "#fff" }}
+      contentContainerStyle={{ padding: 16 }}
+    >
+      <Text style={styles.header}>Add Category Info</Text>
 
-      <Field
-        placeholder="Category name"
-        value={name}
-        onChangeText={setName}
-
-      />
-
-      <Field
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-
-      />
-
-      <Text style={{ marginVertical: 8 }}>Category Type:</Text>
-      <TouchableOpacity onPress={() => { setIngredientCategory(true); setKitchenCategory(false); }}>
-        <Text>{ingredientCategory ? "Ingredient ✅" : "Ingredient ❌"}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => { setIngredientCategory(false); setKitchenCategory(true); }}>
-        <Text>{kitchenCategory ? "Kitchen ✅" : "Kitchen ❌"}</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => { setIngredientCategory(false); setKitchenCategory(false); }}>
-        <Text>{(!ingredientCategory && !kitchenCategory) ? "Recipe ✅" : "Recipe ❌"}</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={pickImage} style={{ marginVertical: 12 }}>
+      {/* Category Image */}
+      <Text style={styles.sectionTitle}>Category Image</Text>
+      <TouchableOpacity onPress={pickImage}>
         {image ? (
-          <Image source={{ uri: image }} style={{ width: 100, height: 100 }} />
+          <Image source={{ uri: image }} style={styles.recipeImage} />
         ) : (
-          <Text>Select Image</Text>
+          <View
+            style={[
+              styles.recipeImage,
+              { justifyContent: "center", alignItems: "center", backgroundColor: "#eee" },
+            ]}
+          >
+            <Text>Tap to select an image</Text>
+          </View>
         )}
       </TouchableOpacity>
 
+      {/* Category Name */}
+      <Text style={styles.sectionTitle}>Category Name</Text>
+      <Field
+        keyboardType="default"
+        value={name}
+        onChangeText={setName}
+        placeholder="Enter category name"
+      />
+
+      {/* Description */}
+      <Text style={styles.sectionTitle}>Description</Text>
+      <Field
+        keyboardType="default"
+        value={description}
+        onChangeText={setDescription}
+        placeholder="Enter description"
+      />
+
+      {/* Category Type */}
+      <Text style={styles.sectionTitle}>Category Type</Text>
+      <TouchableOpacity
+        onPress={() => {
+          setIngredientCategory(true);
+          setKitchenCategory(false);
+        }}
+      >
+        <Text>{ingredientCategory ? "Ingredient ✅" : "Ingredient ❌"}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => {
+          setIngredientCategory(false);
+          setKitchenCategory(true);
+        }}
+      >
+        <Text>{kitchenCategory ? "Kitchen ✅" : "Kitchen ❌"}</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => {
+          setIngredientCategory(false);
+          setKitchenCategory(false);
+        }}
+      >
+        <Text>{!ingredientCategory && !kitchenCategory ? "Recipe ✅" : "Recipe ❌"}</Text>
+      </TouchableOpacity>
+
+      {/* Save Button */}
       <Button title="Save Category" onPress={updateCategory} />
-    </View>
+    </ScrollView>
   );
 }

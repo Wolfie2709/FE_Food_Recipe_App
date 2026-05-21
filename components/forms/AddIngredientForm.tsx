@@ -28,7 +28,7 @@ export default function AddIngredientForm() {
 
   // Load available categories
   useEffect(() => {
-    fetch(`${API_BASE_URL}api/Categories/all`, {
+    fetch(`${API_BASE_URL}api/Categories/category/pagination?page=1&pageSize=30&type=ingredient`, {
       headers: {
         "Authorization": user?.token ? `Bearer ${user.token}` : "",
       },

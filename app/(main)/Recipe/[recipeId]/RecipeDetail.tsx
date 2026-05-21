@@ -1,3 +1,4 @@
+import Button from "@/components/ui/button";
 import { useUser } from "@/components/userContext";
 import { RecipeDetailStyles as styles } from "@/theme";
 import {
@@ -6,7 +7,7 @@ import {
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RecipeDetail() {
@@ -35,6 +36,20 @@ export default function RecipeDetail() {
   console.log("recipe detail: ", recipe);
 
   const imageUri = recipe.pictureDirectory?.[0];
+
+  const saveToWishlist = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}api/Wishlists/${recipeId}`, {
+        method: "POST",
+        headers: {
+          Authorization: user?.token ? `Bearer ${user.token}` : "",
+        },
+      });
+      Alert.alert("Saved to wishlist")
+    } catch (err) {
+      console.error("Failed to start save to wishlist:", err);
+    }
+  }
 
 
   // 🔹 Start cooking session before navigating
@@ -106,6 +121,10 @@ export default function RecipeDetail() {
               <Text style={styles.RecipeDetailPageButton}>Follow</Text>
             </TouchableOpacity>
           </View>
+          <Button
+            title="Save to wishlist"
+            onPress={saveToWishlist}
+          />
         </View>
         {/* Description */}
         <View style={styles.DescriptionCard}>

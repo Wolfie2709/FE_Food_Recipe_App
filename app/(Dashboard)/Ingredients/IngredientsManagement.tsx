@@ -120,8 +120,8 @@ export default function IngredientsManagement() {
           <View>
             <Image
               source={
-                item.imageDirectory
-                  ? { uri: `${URL}${item.imageDirectory}` }
+                item.pictureDirectory
+                  ? { uri: `${URL}${item.pictureDirectory}` }
                   : require("assets/images/icon.png")
               }
               style={styles.ImageContent}

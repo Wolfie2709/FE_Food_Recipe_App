@@ -10,7 +10,8 @@ export type User = {
   sex: string | null;
   birthdate: string; // ISO date
   isActive: boolean;
-  pictureId: number;
+  pictureId?: number;
+  pictureDirectory?: string;
   role: "user" | "admin";
   token: string;
 };
@@ -89,7 +90,7 @@ export type Ingredient = {
   name: string;
   categoryId: number;
   categoryName: string;
-  imageDirectory: string;
+  pictureDirectory: string;
 };
 export type RecipeBoxDTO = {
   id: number;
@@ -181,6 +182,7 @@ export type RecipeDetailIngredientListDto = {
   name?: string;
   measurementUnit?: string;
   quantity?: number;
+  pictureDirectory?: string;
 };
 
 export type RecipeDetailCategoryListDto = {
@@ -244,6 +246,14 @@ export type CategoryPagination = {
   categoryList: Array<CategoryBoxDto>;
 };
 
+export type ChangePasswordDto = {
+  username: string;
+  password: string;
+}
+
+export type WishlistDto = {
+  recipeId: number;
+}
 
 export type IngredientCategoryDto = {
   categoriesId: number | null;

@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Alert, Dimensions, FlatList, Image, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { homeStyles as styles } from "../../theme";
-import { RecipeBox, RecipePagination, UserRecipeHistory } from "../../types";
+import { RecipeBox, RecipePagination, UserRecipeHistory, WishlistDto } from "../../types";
 
 const screenWidth = Dimensions.get("window").width;
 const spacing = 10;
@@ -59,6 +59,7 @@ export default function Home() {
   const router = useRouter();
   const [recipes, setRecipes] = useState<RecipeBox[]>([]);
   const [history, setHistory] = useState<UserRecipeHistory[]>([]);
+const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
   console.log("Home sees user:", user);
 
   const loadData = async (pageToLoad: number) => {
@@ -127,6 +128,38 @@ export default function Home() {
   useEffect(() => {
     loadHistory();
   }, []);
+
+  const loadWishlist = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}api/Wishlists/all`, {
+        headers: {
+          Authorization: user?.token ? `Bearer ${user.token}` : "",
+        },
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const res: WishlistDto[] = await response.json();
+
+      // Fetch recipe details for each recipeId
+      const recipePromises = res.map(async (w) => {
+        const r = await fetch(
+          `${API_BASE_URL}api/Recipes/recipe/detail/${w.recipeId}`
+        );
+        return await r.json();
+      });
+
+      const recipeResults = await Promise.all(recipePromises);
+      setWishlistRecipes(recipeResults);
+    } catch (err) {
+      console.error("Error loading wishlist:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadWishlist();
+  }, []);
+
 
   if (isLoading) return <Text>Loading history...</Text>;
 
@@ -219,6 +252,53 @@ export default function Home() {
           </View>
           <FlatList
             data={recipes}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.recipeId.toString()}
+            snapToInterval={itemWidth + spacing}
+            decelerationRate="fast"
+            contentContainerStyle={{ paddingHorizontal: spacing }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  router.push({
+                    pathname: "./Recipe/[recipeId]/RecipeDetail",
+                    params: { recipeId: item.recipeId.toString() },
+                  })
+                }}
+              >
+                <View style={{ width: itemWidth }}>
+                  <RecipeCard {...item} />
+                </View>
+              </TouchableOpacity>
+            )}
+            ItemSeparatorComponent={() => <View style={{ width: spacing }} />}
+            onMomentumScrollEnd={(event) => {
+              const offsetX = event.nativeEvent.contentOffset.x;
+              const currentIndex = Math.floor(offsetX / (itemWidth + spacing));
+              if (
+                currentIndex >= data.length - 4 &&
+                page < totalPages &&
+                !isLoading
+              ) {
+                const nextPage = page + 1;
+                setPage(nextPage);
+                loadData(nextPage);
+              }
+            }}
+          />
+        </View>
+        {/* Recent recipes */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Wishlist recipes</Text>
+            <TouchableOpacity>
+            <Text style={styles.link} onPress={() => {router.push({pathname: "/(main)/Recipe/WishlistRecipe"})}}>See all</Text>
+            </TouchableOpacity>
+            
+          </View>
+          <FlatList
+            data={wishlistRecipes}
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.recipeId.toString()}
