@@ -45,12 +45,25 @@ export default function RecipeDetail() {
           Authorization: user?.token ? `Bearer ${user.token}` : "",
         },
       });
-      Alert.alert("Saved to wishlist")
+  
+      const text = await res.text();
+  
+      if (!res.ok) {
+        if (text.includes("Recipe existed in the wishlist")) {
+          Alert.alert("Error", "Recipe existed in the wishlist");
+        } else {
+          Alert.alert("Error", `Failed to save: ${text}`);
+        }
+        return;
+      }
+  
+      Alert.alert("Success", "Saved to wishlist");
     } catch (err) {
       console.error("Failed to start save to wishlist:", err);
+      Alert.alert("Error", "Could not connect to server");
     }
-  }
-
+  };
+  
 
   // 🔹 Start cooking session before navigating
   const startCooking = async () => {
@@ -142,6 +155,14 @@ export default function RecipeDetail() {
             <Text style={styles.InfoLabel}>Cook Time </Text>
             <Text style={styles.InfoDetail}>{recipe.cookingTime} mins</Text>
           </View>
+          <View style={styles.InfoCard}>
+  <Text style={styles.InfoLabel}>Category </Text>
+  <Text style={styles.InfoDetail}>
+    {recipe.categories && recipe.categories.length > 0
+      ? recipe.categories.map((c) => c.name).join(", ")
+      : "Uncategorized"}
+  </Text>
+</View>
         </View>
 
         {/* INGREDIENT LIST */}

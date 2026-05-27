@@ -207,7 +207,7 @@ const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
             data={data}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.recipeId.toString()}
+            keyExtractor={(item) => `all-${item.recipeId}`}
             snapToInterval={itemWidth + spacing}
             decelerationRate="fast"
             contentContainerStyle={{ paddingHorizontal: spacing }}
@@ -254,7 +254,7 @@ const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
             data={recipes}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.recipeId.toString()}
+            keyExtractor={(item) => `recent-${item.recipeId}`}
             snapToInterval={itemWidth + spacing}
             decelerationRate="fast"
             contentContainerStyle={{ paddingHorizontal: spacing }}
@@ -301,7 +301,7 @@ const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
             data={wishlistRecipes}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.recipeId.toString()}
+            keyExtractor={(item) => `wishlist-${item.recipeId}`}
             snapToInterval={itemWidth + spacing}
             decelerationRate="fast"
             contentContainerStyle={{ paddingHorizontal: spacing }}
@@ -362,7 +362,7 @@ const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
             data={data}
             horizontal
             showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.recipeId.toString()}
+            keyExtractor={(item) => `trending-${item.recipeId}`}
             snapToInterval={itemWidth + spacing}
             decelerationRate="fast"
             contentContainerStyle={{ paddingHorizontal: spacing }}

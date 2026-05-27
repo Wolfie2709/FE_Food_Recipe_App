@@ -59,11 +59,12 @@ export default function RecipeStepList() {
         body: JSON.stringify({ RecipeId: Number(recipeId) }),
       });
       console.log("Cooking session finished!");
-      router.push("./RecipeDetail");
+      router.push("./ReviewRecipe");
     } catch (error) {
       console.error("Error finishing session:", error);
     }
   };
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>

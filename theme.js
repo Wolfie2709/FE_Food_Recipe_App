@@ -1085,3 +1085,46 @@ export const SearchPageStyle = StyleSheet.create({
     marginRight: 8,
   },
 });
+
+export const ReviewStyles = StyleSheet.create({
+  headerButton: { width: 24, height: 24 },
+  container: { flex: 1, backgroundColor: "#fff", padding: 16 },
+  header: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
+  sectionTitle: { fontSize: 18, fontWeight: "600", marginVertical: 10 },
+  starRow: { flexDirection: "row", marginBottom: 20 },
+  star: { fontSize: 32, marginHorizontal: 5 },
+  textArea: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    minHeight: 100,
+    textAlignVertical: "top",
+    marginBottom: 20,
+  },
+  imageBox: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    height: 150,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  imagePreview: { width: "100%", height: "100%", borderRadius: 8 },
+  thumbWrapper: { marginHorizontal: 20 },
+  thumbCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#FFF", // default white circle
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#CCC",
+  },
+  thumbIcon: {
+    fontSize: 32,
+    color: "#007BFF", // default blue thumb
+  },
+});

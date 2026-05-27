@@ -61,7 +61,7 @@ export default function RecipeStepDetail() {
           body: JSON.stringify({ RecipeId: Number(recipeId) }),
         });
         console.log("Cooking session finished!");
-        router.push("./RecipeDetail");
+        router.push("./ReviewRecipe");
       } catch (error) {
         console.error("Error finishing session:", error);
       }
