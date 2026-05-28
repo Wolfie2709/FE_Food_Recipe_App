@@ -12,7 +12,6 @@ export default function AllRecipe() {
   const [recipes, setRecipes] = useState<RecipeBox[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<{ categoriesId: number; name: string }[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
 
   const loadRecipes = async () => {
@@ -35,7 +34,16 @@ export default function AllRecipe() {
       );
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const res = await response.json();
-      setCategories(res.categoryList || []);
+
+      // Normalize: only keep categories with a valid numeric ID
+      const validCategories = (res.categoryList || [])
+        .filter((c: any) => typeof c.categoryId === "number")
+        .map((c: any) => ({
+          categoriesId: c.categoryId,
+          name: c.name || "Unnamed",
+        }));
+
+      setCategories(validCategories);
     } catch (err) {
       console.error("Error loading categories:", err);
       setCategories([]);
@@ -47,12 +55,11 @@ export default function AllRecipe() {
     loadCategories();
   }, []);
 
-  const filteredRecipes = selectedCategory
-  ? recipes.filter((r) =>
-      r.categories?.some((c) => c.categoriesId === selectedCategory)
-    )
-  : recipes;
-
+  const filteredRecipes = activeCategory
+    ? recipes.filter((r) =>
+        r.categories?.some((c) => c.categoriesId === activeCategory)
+      )
+    : recipes;
 
   if (loading) return <Text>Loading recipes...</Text>;
 
@@ -78,38 +85,21 @@ export default function AllRecipe() {
         </Text>
       </View>
 
-      {/* Category Filter */}
+      {/* Category Picker */}
       <View style={{ marginHorizontal: 16, marginBottom: 12 }}>
-      <Picker
-  selectedValue={selectedCategory}
-  onValueChange={(value) => setSelectedCategory(value)}
->
-  <Picker.Item label="All Categories" value={null} />
-  {categories.map((cat) => (
-    <Picker.Item
-      key={cat.categoriesId || cat.categoriesId}
-      label={cat.name}
-      value={cat.categoriesId || cat.categoriesId}
-    />
-  ))}
-</Picker>
-
-
-        {/* Filter Button */}
-        <TouchableOpacity
-          style={{
-            backgroundColor: colors.primary,
-            padding: 10,
-            borderRadius: 6,
-            marginTop: 8,
-            alignItems: "center",
-          }}
-          onPress={() => setActiveCategory(selectedCategory)}
+        <Picker
+          selectedValue={activeCategory}
+          onValueChange={(value) => setActiveCategory(value)}
         >
-          <Text style={{ color: "#fff", fontFamily: fonts.semiBold }}>
-            Apply Filter
-          </Text>
-        </TouchableOpacity>
+          <Picker.Item label="All Categories" value={null} />
+          {categories.map((c) => (
+            <Picker.Item
+              key={c.categoriesId}
+              label={c.name}
+              value={c.categoriesId}
+            />
+          ))}
+        </Picker>
       </View>
 
       <FlatList

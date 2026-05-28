@@ -73,41 +73,38 @@ export default function ShoppingCart() {
 
     {/* Ingredients header */}
     <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 10 }}>
-      Ingredients
-    </Text>
+  Ingredients
+</Text>
 
-    {/* Filter ingredients belonging to this recipe */}
-    {shoppingList.ingredients
-      .filter((ing: any) => ing.recipeId === recipe.recipeId)
-      .map((ing: any, index: number) => (
-        <View
-          key={`${ing.ingredientsId}-${index}`}
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 10,
-            borderWidth: 1,
-            borderColor: "#D9D9D9",
-            borderRadius: 10,
-            padding: 8,
-          }}
-        >
-          <Image
-            source={
-              ing.pictureDirectory
-                ? { uri: `${API_BASE_URL}${ing.pictureDirectory}` }
-                : require("assets/images/icon.png")
-            }
-            style={{ width: 40, height: 40, marginRight: 10, borderRadius: 6 }}
-          />
-          <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 16, color: "#303030" }}>{ing.name}</Text>
-          </View>
-          <Text style={{ fontSize: 16, color: "#303030" }}>
-            {ing.quantity} {ing.measurementUnit}
-          </Text>
-        </View>
-      ))}
+{recipe.ingredients.map((ing: any, index: number) => (
+  <View
+    key={`${ing.ingredientsId}-${index}`}
+    style={{
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+      borderWidth: 1,
+      borderColor: "#D9D9D9",
+      borderRadius: 10,
+      padding: 8,
+    }}
+  >
+    <Image
+      source={
+        ing.pictureDirectory
+          ? { uri: `${API_BASE_URL}${ing.pictureDirectory}` }
+          : require("assets/images/icon.png")
+      }
+      style={{ width: 40, height: 40, marginRight: 10, borderRadius: 6 }}
+    />
+    <View style={{ flex: 1 }}>
+      <Text style={{ fontSize: 16, color: "#303030" }}>{ing.name}</Text>
+    </View>
+    <Text style={{ fontSize: 16, color: "#303030" }}>
+      {ing.quantity} {ing.measurementUnit}
+    </Text>
+  </View>
+))}
   </View>
 ))}
 

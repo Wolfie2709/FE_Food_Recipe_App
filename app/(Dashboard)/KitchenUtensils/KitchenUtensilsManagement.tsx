@@ -11,6 +11,7 @@ export default function KitchenUtensilsManagement() {
   const {user} = useUser();
   const [kitchenUtensil, setKU] = useState<KitchenUtensil[]>([]);
   const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
+    const [searchText, setSearchText] = useState("");
   const router = useRouter();
 
   // Load all recipes
@@ -87,6 +88,29 @@ export default function KitchenUtensilsManagement() {
       }
     } catch (error) {
       console.error("Error creating recipe:", error);
+    }
+  };
+
+    const searchKitchenUtensils = async (name: string) => {
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}api/KitchenUtensils/utensil/pagination?utensilName=${encodeURIComponent(name)}&page=1&pageSize=10`,
+        {
+          headers: {
+            "Authorization": user?.token ? `Bearer ${user.token}` : "",
+          },
+        }
+      );
+  
+      if (!res.ok) {
+        console.error("Failed to search utensils:", res.status, await res.text());
+        return;
+      }
+  
+      const data = await res.json();
+      setKU(data.utensilList);
+    } catch (error) {
+      console.error("Error searching utensils:", error);
     }
   };
   
@@ -176,11 +200,21 @@ export default function KitchenUtensilsManagement() {
       <Text style={styles.title}>Kitchen Utensils Management</Text>
 
       {/* Search bar */}
-      <View style={styles.searchBar}>
-        <TextInput style={styles.searchText} placeholder="Search recipes..." />
-        <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
-      </View>
-
+    <View style={styles.searchBar}>
+  <TextInput
+    style={styles.searchText}
+    placeholder="Search ingredients..."
+    value={searchText}
+    onChangeText={(text) => {
+      setSearchText(text);
+      if (text.trim().length > 0) {
+        searchKitchenUtensils(text);
+      } else {
+        loadKitchenUtensils(); // fallback to full list
+      }
+    }}
+  />
+</View>
       {/* Filter + Add New Recipe buttons */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
         <Button title="Filter" onPress={() => { }} />

@@ -53,7 +53,7 @@ export type RecipeBox = {
   imageDirectory: string;
   authorName: string;
   avatar?: string | null;
-  categories?: Array<RecipeDetailCategoryListDto>;
+  categories?: Array<RecipeDetailCategoryIdDto>;
 };
 
 export type RecipePagination = {
@@ -186,6 +186,9 @@ export type RecipeDetailIngredientListDto = {
   pictureDirectory?: string;
 };
 
+export type RecipeDetailCategoryIdDto ={
+  categoriesId: number;
+}
 export type RecipeDetailCategoryListDto = {
   categoriesId: number;
   name?: string;
