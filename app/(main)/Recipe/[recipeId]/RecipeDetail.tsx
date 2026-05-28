@@ -5,6 +5,7 @@ import {
   RecipeDetailCompleteDto
 } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -14,6 +15,8 @@ export default function RecipeDetail() {
   const { user } = useUser();
   const { recipeId } = useLocalSearchParams<{ recipeId: string }>();
   const [recipe, setRecipe] = useState<RecipeDetailCompleteDto | null>(null);
+  const [notes, setNotes] = useState<{ content: string }[]>([]);
+
 
   type UserPlaceholder = { pictureAvatarDirectory: string, Name?: string }
   const userPlaceholder: UserPlaceholder = {
@@ -27,7 +30,23 @@ export default function RecipeDetail() {
       const data = await res.json();
       setRecipe(data);
     };
+    const fetchNotes = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}api/Notes/note/recipe/${recipeId}`, {
+          headers: {
+            Authorization: user?.token ? `Bearer ${user.token}` : "",
+          },
+        });
+        if (!res.ok) throw new Error("Failed to load notes");
+        const data = await res.json();
+        setNotes(Array.isArray(data) ? data : [data]);
+      } catch (err) {
+        console.error("Error fetching notes:", err);
+      }
+    };
+
     fetchRecipe();
+    fetchNotes();
   }, [recipeId]);
 
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
@@ -45,9 +64,9 @@ export default function RecipeDetail() {
           Authorization: user?.token ? `Bearer ${user.token}` : "",
         },
       });
-  
+
       const text = await res.text();
-  
+
       if (!res.ok) {
         if (text.includes("Recipe existed in the wishlist")) {
           Alert.alert("Error", "Recipe existed in the wishlist");
@@ -56,14 +75,31 @@ export default function RecipeDetail() {
         }
         return;
       }
-  
+
       Alert.alert("Success", "Saved to wishlist");
     } catch (err) {
       console.error("Failed to start save to wishlist:", err);
       Alert.alert("Error", "Could not connect to server");
     }
   };
-  
+
+  const addToShoppingList = async (recipeId: number) => {
+    try {
+      const stored = await AsyncStorage.getItem("shoppingList");
+      const list = stored ? JSON.parse(stored) : [];
+
+      // Avoid duplicates
+      if (!list.includes(recipeId)) {
+        list.push(recipeId);
+        await AsyncStorage.setItem("shoppingList", JSON.stringify(list));
+        Alert.alert("Success", "Recipe added to shopping list!");
+      } else {
+        Alert.alert("Info", "Recipe already in shopping list.");
+      }
+    } catch (err) {
+      console.error("Error saving shopping list:", err);
+    }
+  };
 
   // 🔹 Start cooking session before navigating
   const startCooking = async () => {
@@ -134,11 +170,28 @@ export default function RecipeDetail() {
               <Text style={styles.RecipeDetailPageButton}>Follow</Text>
             </TouchableOpacity>
           </View>
+
+          <Button title="Add to Shopping List" onPress={() => addToShoppingList(recipe.recipeId)} />
+
           <Button
             title="Save to wishlist"
             onPress={saveToWishlist}
           />
         </View>
+        {/* Personal Notes */}
+        <View style={{ marginTop: 24 }}>
+          <Text style={{ fontSize: 18, fontWeight: "600" }}>My Notes</Text>
+          {notes.length > 0 ? (
+            notes.map((note, index) => (
+              <View key={index} style={styles.DescriptionCard}>
+                <Text style={styles.DescriptionContent}>{note.content}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={{ color: "#666", marginTop: 8 }}>No notes yet for this recipe.</Text>
+          )}
+        </View>
+
         {/* Description */}
         <View style={styles.DescriptionCard}>
           <Text style={styles.DescriptionLabel}>DESCRIPTION</Text>
@@ -156,13 +209,13 @@ export default function RecipeDetail() {
             <Text style={styles.InfoDetail}>{recipe.cookingTime} mins</Text>
           </View>
           <View style={styles.InfoCard}>
-  <Text style={styles.InfoLabel}>Category </Text>
-  <Text style={styles.InfoDetail}>
-    {recipe.categories && recipe.categories.length > 0
-      ? recipe.categories.map((c) => c.name).join(", ")
-      : "Uncategorized"}
-  </Text>
-</View>
+            <Text style={styles.InfoLabel}>Category </Text>
+            <Text style={styles.InfoDetail}>
+              {recipe.categories && recipe.categories.length > 0
+                ? recipe.categories.map((c) => c.name).join(", ")
+                : "Uncategorized"}
+            </Text>
+          </View>
         </View>
 
         {/* INGREDIENT LIST */}
@@ -171,8 +224,8 @@ export default function RecipeDetail() {
           <View key={`${ing.id}-${index}`} style={styles.CardList}>
             <View style={styles.CardListItem}>
               <Image source={ing.pictureDirectory ?
-            { uri: `${URL}${ing.pictureDirectory}` }
-            : require("assets/images/figma_images/Image1.png")} style={styles.CardListItemImage} />
+                { uri: `${URL}${ing.pictureDirectory}` }
+                : require("assets/images/figma_images/Image1.png")} style={styles.CardListItemImage} />
               <Text style={styles.CardListItemName}>{ing.name}</Text>
             </View>
             <Text style={{ fontSize: 16, fontWeight: "600", color: "#3c3c3c" }}>{ing.quantity} {ing.measurementUnit || "g"}</Text>

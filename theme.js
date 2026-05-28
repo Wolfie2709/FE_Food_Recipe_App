@@ -408,6 +408,30 @@ export const ManagementStyles = StyleSheet.create({
     paddingHorizontal: 12,
     fontSize: 14,
   },
+  overlayMenu: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    elevation: 10, // Android shadow
+    shadowColor: "#000", // iOS shadow
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    zIndex: 999,
+  },
+  menuItem: {
+    fontSize: 16,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    textAlign: "center",
+  },
+  
 });
 
 export const uiKitsStyles = StyleSheet.create({

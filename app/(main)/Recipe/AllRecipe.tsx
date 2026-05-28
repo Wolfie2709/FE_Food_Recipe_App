@@ -11,7 +11,7 @@ import { RecipeCard } from "../Search";
 export default function AllRecipe() {
   const [recipes, setRecipes] = useState<RecipeBox[]>([]);
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<{ categoryId: number; name: string }[]>([]);
+  const [categories, setCategories] = useState<{ categoriesId: number; name: string }[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
 
@@ -47,11 +47,12 @@ export default function AllRecipe() {
     loadCategories();
   }, []);
 
-  const filteredRecipes = activeCategory
-    ? recipes.filter((r) =>
-        r.categories?.some((c) => c.categoriesId === activeCategory)
-      )
-    : recipes;
+  const filteredRecipes = selectedCategory
+  ? recipes.filter((r) =>
+      r.categories?.some((c) => c.categoriesId === selectedCategory)
+    )
+  : recipes;
+
 
   if (loading) return <Text>Loading recipes...</Text>;
 
@@ -79,19 +80,20 @@ export default function AllRecipe() {
 
       {/* Category Filter */}
       <View style={{ marginHorizontal: 16, marginBottom: 12 }}>
-        <Picker
-          selectedValue={selectedCategory}
-          onValueChange={(value) => setSelectedCategory(value)}
-        >
-          <Picker.Item label="All Categories" value={null} />
-          {categories.map((cat) => (
-            <Picker.Item
-              key={cat.categoryId}
-              label={cat.name}
-              value={cat.categoryId}
-            />
-          ))}
-        </Picker>
+      <Picker
+  selectedValue={selectedCategory}
+  onValueChange={(value) => setSelectedCategory(value)}
+>
+  <Picker.Item label="All Categories" value={null} />
+  {categories.map((cat) => (
+    <Picker.Item
+      key={cat.categoriesId || cat.categoriesId}
+      label={cat.name}
+      value={cat.categoriesId || cat.categoriesId}
+    />
+  ))}
+</Picker>
+
 
         {/* Filter Button */}
         <TouchableOpacity

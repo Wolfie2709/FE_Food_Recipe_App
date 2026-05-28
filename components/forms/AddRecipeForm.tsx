@@ -7,12 +7,11 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Image,
-  Platform,
   ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import Button from "../ui/button";
 import { MinusIcon } from "../ui/figma_Icons";
@@ -39,6 +38,7 @@ export default function AddNewRecipeForm() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [kitchenUtensils, setKitchenUtensils] = useState<KitchenUtensil[]>([]);
   const [recipeImage, setRecipeImage] = useState<string | null>(null);
+  const [pictureDirectory, setPictureDirectory] = useState<string | null>(null);
   const router = useRouter();
 
   // Load available ingredients
@@ -75,14 +75,13 @@ export default function AddNewRecipeForm() {
   }, []);
 
   useEffect(() => {
-    console.log("Updating recipe with id:", recipeId);
     fetch(`${API_BASE_URL}api/Categories/category/pagination?page=1&pageSize=50&type=recipe`, {
       headers: {
         "Authorization": user?.token ? `Bearer ${user.token}` : "",
       },
     })
       .then(async (res) => {
-        const raw = await res.text(); // read once
+        const raw = await res.text();
         if (!res.ok) {
           console.error("Failed to load categories:", res.status, res.statusText, raw);
           return [];
@@ -94,18 +93,19 @@ export default function AddNewRecipeForm() {
         try {
           return JSON.parse(raw);
         } catch {
-          console.error("Categories  response was not valid JSON:", raw);
+          console.error("Categories response was not valid JSON:", raw);
           return [];
         }
       })
       .then((data) => {
-        // Normalize: if backend returns a single object, wrap it in an array
-        const normalized = Array.isArray(data) ? data : [data];
+        // ✅ Extract categoryList
+        const list = data?.categoryList || [];
+        const normalized = Array.isArray(list) ? list : [list];
         setCategories(normalized);
       })
-      .catch((err) => console.error("Error loading Categories :", err));
+      .catch((err) => console.error("Error loading Categories:", err));
   }, []);
-
+  
   useEffect(() => {
     console.log("Updating recipe with id:", recipeId);
     fetch(`${API_BASE_URL}api/KitchenUtensils/all`, {
@@ -151,45 +151,6 @@ export default function AddNewRecipeForm() {
     setRecipeKU([...recipeKU, { kitchenUtensilId: null }]);
   };
 
-  const uploadRecipeImage = async (recipeId: number, imageUri: string) => {
-    try {
-      let uri = imageUri;
-      if (Platform.OS === "android" && uri.startsWith("file://")) {
-        uri = uri.replace("file://", "");
-      }
-  
-      const formData = new FormData();
-      formData.append("file", {
-        uri,
-        name: "recipe.jpg",
-        type: "image/jpeg",
-      } as any);
-  
-      console.log("Uploading to:", `${API_BASE_URL}api/Pictures/add-picture-for-recipe-${recipeId}`);
-      console.log("File URI:", uri);
-  
-      const response = await fetch(
-        `${API_BASE_URL}api/Pictures/add-picture-for-recipe-${recipeId}`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: user?.token ? `Bearer ${user.token}` : "",
-          },
-          body: formData,
-        }
-      );
-  
-      if (!response.ok) {
-        const text = await response.text();
-        console.error("Image upload failed:", text);
-      } else {
-        console.log("✅ Image uploaded successfully");
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-    }
-  };
-  
   // 🔹 Pick image and upload immediately
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -197,18 +158,45 @@ export default function AddNewRecipeForm() {
       allowsEditing: true,
       quality: 0.8,
     });
-
+  
     if (!result.canceled) {
       const uri = result.assets[0].uri;
-      setRecipeImage(uri);
-      console.log("Picked image URI:", uri);
-
-      if (recipeId) {
-        await uploadRecipeImage(Number(recipeId), uri);
+      setRecipeImage(uri); // show preview in UI
+      console.log("Picked recipe image URI:", uri);
+  
+      try {
+        const formData = new FormData();
+        formData.append("file", {
+          uri,
+          name: "recipe.jpg",
+          type: "image/jpeg",
+        } as any);
+  
+        const response = await fetch(
+          `${API_BASE_URL}api/Pictures/add-picture-for-recipe-${recipeId}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: user?.token ? `Bearer ${user.token}` : "",
+              // ❌ don’t set Content-Type manually
+            },
+            body: formData,
+          }
+        );
+  
+        if (!response.ok) {
+          const text = await response.text();
+          console.error("Recipe image upload failed:", text);
+        } else {
+          console.log("✅ Recipe image uploaded successfully");
+        }
+      } catch (error) {
+        console.error("Error uploading recipe image:", error);
       }
     }
   };
-
+  
+  
   // 🔹 Save recipe and go to cooking steps
   const goToCookingSteps = async () => {
     const payload: CreateRecipeRequestDto = {
@@ -256,11 +244,6 @@ export default function AddNewRecipeForm() {
         const rawError = await response.text();
         console.error("Recipe update failed:", response.status, rawError);
         return;
-      }
-
-      // 🔹 Upload image if selected
-      if (recipeImage) {
-        await uploadRecipeImage(Number(recipeId), recipeImage);
       }
 
       router.push({

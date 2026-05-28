@@ -28,7 +28,7 @@ import { useUser } from "../userContext";
 
 export default function EditRecipeForm() {
   const { user } = useUser();
-  const { recipeId } = useLocalSearchParams(); // recipeId passed from RecipeManagement
+  const { recipeId } = useLocalSearchParams();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [serves, setServes] = useState("1");
@@ -40,6 +40,7 @@ export default function EditRecipeForm() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [kitchenUtensils, setKitchenUtensils] = useState<KitchenUtensil[]>([]);
   const [recipeImage, setRecipeImage] = useState<string | null>(null);
+  const [originalRecipe, setOriginalRecipe] = useState<any>(null);
   const router = useRouter();
 
   // Load available ingredients, categories, utensils
@@ -83,17 +84,25 @@ export default function EditRecipeForm() {
         if (!res.ok) return;
         const data = await res.json();
 
+        setOriginalRecipe(data); // snapshot for comparison
+
         setName(data.name || "");
         setDescription(data.description || "");
         setServes(data.servingSize?.toString() || "1");
         setCookTime(data.cookingTime?.toString() || "0");
         setRecipeIngredients(
           (data.ingredients || []).map((ing: any) => ({
-            ingredientsId: ing.id,   // map backend "id" to frontend "ingredientsId"
+            ingredientsId: ing.id,
             quantity: ing.quantity?.toString() || ""
           }))
         );
-        setRecipeCategories(data.categories || []);
+        setRecipeCategories(
+          (data.categories || []).filter(
+            (cat: any, index: number, self: any[]) =>
+              index === self.findIndex((c) => c.categoriesId === cat.categoriesId)
+          )
+        );
+        
         setRecipeKU(data.kitchenUtensils || []);
         setRecipeImage(data.imageUrl || null);
       } catch (err) {
@@ -109,12 +118,47 @@ export default function EditRecipeForm() {
       allowsEditing: true,
       quality: 0.8,
     });
+
     if (!result.canceled) {
-      setRecipeImage(result.assets[0].uri);
+      const uri = result.assets[0].uri;
+      setRecipeImage(uri);
+      try {
+        const formData = new FormData();
+        formData.append("file", {
+          uri,
+          name: "recipe.jpg",
+          type: "image/jpeg",
+        } as any);
+
+        const response = await fetch(
+          `${API_BASE_URL}api/Pictures/add-picture-for-recipe-${recipeId}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: user?.token ? `Bearer ${user.token}` : "",
+            },
+            body: formData,
+          }
+        );
+
+        if (!response.ok) {
+          console.error("Recipe image upload failed:", await response.text());
+        } else {
+          console.log("✅ Recipe image uploaded successfully");
+        }
+      } catch (error) {
+        console.error("Error uploading recipe image:", error);
+      }
     }
   };
 
   const saveRecipe = async () => {
+    // Deduplicate categories
+    const uniqueCategories = recipeCategories.filter(
+      (cat, index, self) =>
+        index === self.findIndex((c) => c.categoriesId === cat.categoriesId)
+    );    
+
     const payload: CreateRecipeRequestDto = {
       name,
       description: description || null,
@@ -124,13 +168,23 @@ export default function EditRecipeForm() {
         ingredientsId: rI.ingredientsId!,
         quantity: rI.quantity,
       })),
-      categories: recipeCategories.map((rC) => ({
+      categories: uniqueCategories.map((rC) => ({
         categoriesId: rC.categoriesId!,
       })),
       kitchenUtensils: recipeKU.map((rKU) => ({
         kitchenUtensilId: rKU.kitchenUtensilId!,
       })),
     };
+
+    // Skip save if nothing changed
+    if (originalRecipe && JSON.stringify(payload) === JSON.stringify(originalRecipe)) {
+      console.log("No changes detected, skipping save.");
+      router.push({
+        pathname: "./EditRecipeStep",
+        params: { recipeId: recipeId.toString() },
+      });
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -151,8 +205,7 @@ export default function EditRecipeForm() {
       }
 
       router.push({
-        pathname: "./AddCookingSteps",
-        params: { recipeId: recipeId.toString() },
+        pathname: "../RecipeManagement",
       });
     } catch (error) {
       console.error("Error updating recipe:", error);
@@ -176,37 +229,19 @@ export default function EditRecipeForm() {
 
       {/* Recipe Name */}
       <Text>Recipe Name:</Text>
-      <Field
-        value={name}
-        onChangeText={setName}
-        placeholder="Enter recipe name"
-      />
+      <Field value={name} onChangeText={setName} placeholder="Enter recipe name" />
 
       {/* Description */}
       <Text>Description:</Text>
-      <Field
-        
-        value={description}
-        onChangeText={setDescription}
-        placeholder="Enter recipe description"
-        multiline
-      />
+      <Field value={description} onChangeText={setDescription} placeholder="Enter recipe description" multiline />
 
       {/* Serves */}
       <Text>Serves:</Text>
-      <Field
-        keyboardType="numeric"
-        value={serves}
-        onChangeText={setServes}
-      />
+      <Field keyboardType="numeric" value={serves} onChangeText={setServes} />
 
       {/* Cook Time */}
       <Text>Cook Time (minutes):</Text>
-      <Field
-        keyboardType="numeric"
-        value={cookTime}
-        onChangeText={setCookTime}
-      />
+      <Field keyboardType="numeric" value={cookTime} onChangeText={setCookTime} />
 
       {/* Ingredients */}
       <Text style={styles.sectionTitle}>Ingredients</Text>
@@ -249,29 +284,46 @@ export default function EditRecipeForm() {
           </TouchableOpacity>
         </View>
       ))}
-      <Button title="Add new ingredient" onPress={() => setRecipeIngredients([...recipeIngredients, { ingredientsId: null, quantity: "" }])} />
+      <Button
+        title="Add new ingredient"
+        onPress={() => setRecipeIngredients([...recipeIngredients, { ingredientsId: null, quantity: "" }])}
+      />
 
       {/* Categories */}
       <Text style={styles.sectionTitle}>Categories</Text>
-      {recipeCategories.map((item, index) => (
-        <View key={index} style={styles.ingredientRow}>
-          <Picker
-            selectedValue={item.categoriesId ?? ""}
-            style={{ flex: 1 }}
-            onValueChange={(val) => {
-              const updated = [...recipeCategories];
-              updated[index].categoriesId = val === "" ? null : Number(val);
-              setRecipeCategories(updated);
-            }}
-          >
-            <Picker.Item label="Select category..." value="" />
-            {categories.map((cat) => (
-              <Picker.Item key={cat.categoryId} label={cat.name} value={cat.categoryId} />
-            ))}
-          </Picker>
-        </View>
-      ))}
-      <Button title="Add new category" onPress={() => setRecipeCategories([...recipeCategories, { categoriesId: null }])} />
+      {recipeCategories
+  .filter((cat, index, self) =>
+    index === self.findIndex((c) => c.categoriesId === cat.categoriesId)
+  )
+  .map((item, index) => (
+    <View key={index} style={styles.ingredientRow}>
+      <Picker
+        selectedValue={item.categoriesId ?? ""}
+        style={{ flex: 1 }}
+        onValueChange={(val) => {
+          const updated = [...recipeCategories];
+          updated[index].categoriesId = val === "" ? null : Number(val);
+          setRecipeCategories(updated);
+        }}
+      >
+        <Picker.Item label="Select category..." value="" />
+        {categories.map((cat) => (
+          <Picker.Item key={cat.categoryId} label={cat.name} value={cat.categoryId} />
+        ))}
+      </Picker>
+
+      {/* Delete row button */}
+      <TouchableOpacity
+        onPress={() => {
+          const updated = recipeCategories.filter((_, i) => i !== index);
+          setRecipeCategories(updated);
+        }}
+        style={{ marginLeft: 8 }}
+      >
+        <MinusIcon size={20} color="#E23E3E" />
+      </TouchableOpacity>
+    </View>
+))}
 
       {/* Kitchen Utensils */}
       <Text style={styles.sectionTitle}>Kitchen Utensils</Text>
@@ -291,12 +343,26 @@ export default function EditRecipeForm() {
               <Picker.Item key={ku.kitchenUtensilId} label={ku.name} value={ku.kitchenUtensilId} />
             ))}
           </Picker>
+
+          {/* Delete row button */}
+          <TouchableOpacity
+            onPress={() => {
+              const updated = recipeKU.filter((_, i) => i !== index);
+              setRecipeKU(updated);
+            }}
+            style={{ marginLeft: 8 }}
+          >
+            <MinusIcon size={20} color="#E23E3E" />
+          </TouchableOpacity>
         </View>
       ))}
-      <Button title="Add new utensil" onPress={() => setRecipeKU([...recipeKU, { kitchenUtensilId: null }])} />
+      <Button
+        title="Add new utensil"
+        onPress={() => setRecipeKU([...recipeKU, { kitchenUtensilId: null }])}
+      />
 
       {/* Save and go to cooking steps */}
-      <Button title="Save & Edit Cooking Steps" onPress={saveRecipe} />
+      <Button title="Save Recipe" onPress={saveRecipe} />
     </ScrollView>
   );
 }

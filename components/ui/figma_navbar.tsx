@@ -49,12 +49,12 @@ export default function NavigationBar({ user }: { user?: Partial<User> }) {
         <TouchableOpacity style={styles.navItem} onPress={() => router.push("/home")}>
           <HomeIcon />
         </TouchableOpacity>
-        {/* <TouchableOpacity style={styles.navItem} onPress={() => router.push("/shield")}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/Search")}>
           <ShieldIcon />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/circle")}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/ShoppingList")}>
           <CircleIcon />
-        </TouchableOpacity> */}
+        </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => router.push("/User/me/profilePage")}

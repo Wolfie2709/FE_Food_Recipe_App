@@ -3,15 +3,18 @@ import { RecipeStepStyles as styles } from "@/theme";
 import { RecipeStepInfo } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import * as ImagePicker from "expo-image-picker";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Image, Text, View } from "react-native";
 import Button from "../ui/button";
 import Field from "../ui/figma_input_fields";
 
-export default function EditCookingSteps() {
+type EditRecipeStepFormProps = {
+  recipeId: string;
+};
+
+export default function EditCookingSteps({ recipeId }: EditRecipeStepFormProps) {
   const { user } = useUser();
-  const { recipeId } = useLocalSearchParams(); // passed via navigation
   const [recipeSteps, setRecipeSteps] = useState<RecipeStepInfo[]>([]);
   const [currentDescription, setCurrentDescription] = useState("");
   const router = useRouter();
@@ -50,14 +53,15 @@ export default function EditCookingSteps() {
   };
 
   // Add new step row
-  const addStep = () => {
-    if (!currentDescription.trim()) return;
-    setRecipeSteps([
-        ...recipeSteps,
-        {  recipeStepId: Date.now() * -1, name: currentDescription, description: currentDescription },
-      ]);
-    setCurrentDescription("");
-  };
+ // Add new step row
+const addStep = () => {
+  if (!currentDescription.trim()) return;
+  setRecipeSteps([
+    ...recipeSteps,
+    { recipeStepId: null, name: currentDescription, description: currentDescription },
+  ]);
+  setCurrentDescription("");
+};
 
   // Save steps (PUT for existing, POST for new)
   const saveSteps = async () => {
@@ -68,13 +72,14 @@ export default function EditCookingSteps() {
           description: step.description,
           imageUrl: step.imageUrl || null,
         };
-
-        const url = step.recipeStepId
+  
+        const isExisting = step.recipeStepId && step.recipeStepId > 0; // only positive IDs are valid
+        const url = isExisting
           ? `${API_BASE_URL}api/RecipeSteps/update-step-${step.recipeStepId}`
           : `${API_BASE_URL}api/RecipeSteps/create-step-for-${recipeId}`;
-
-        const method = step.recipeStepId ? "PUT" : "POST";
-
+  
+        const method = isExisting ? "PUT" : "POST";
+  
         const res = await fetch(url, {
           method,
           headers: {
@@ -83,21 +88,21 @@ export default function EditCookingSteps() {
           },
           body: JSON.stringify(payload),
         });
-
+  
         if (!res.ok) {
           console.error("Failed to save step:", await res.text());
         }
       }
-
+  
       router.push({
         pathname: "../RecipeManagement",
-        params: { id: recipeId.toString() },
+        params: { recipeId: recipeId.toString() },
       });
     } catch (err) {
       console.error("Error saving steps:", err);
     }
   };
-
+  
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Edit Cooking Steps</Text>

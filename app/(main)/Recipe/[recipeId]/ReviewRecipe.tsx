@@ -8,12 +8,14 @@ import React, { useState } from "react";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function ReviewRecipe() {
-  const {user} = useUser();
+  const { user } = useUser();
   const { recipeId } = useLocalSearchParams();
   const router = useRouter();
   const [isLiked, setIsLiked] = useState<boolean | null>(null);
   const [comment, setComment] = useState("");
   const [image, setImage] = useState<string | null>(null);
+  const [note, setNote] = useState("");
+
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -24,6 +26,31 @@ export default function ReviewRecipe() {
       setImage(result.assets[0].uri);
     }
   };
+
+  const submitNote = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}api/Notes/recipe/${recipeId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.token}`,
+        },
+        body: JSON.stringify({ content: note }),
+      });
+
+      if (!res.ok) {
+        console.error("Failed to submit note:", res.status, await res.text());
+        return;
+      }
+
+      console.log("Note submitted successfully");
+      setNote(""); // clear after submit
+      router.push("./RecipeDetail");
+    } catch (err) {
+      console.error("Error submitting note:", err);
+    }
+  };
+
 
   const submitReview = async () => {
     try {
@@ -53,55 +80,55 @@ export default function ReviewRecipe() {
 
   return (
     <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.headerButton}
-            onPress={() => {
-              router.push({
-                pathname: "/(main)/home",
-              })
-            }}
-          >
-            <Image source={require("assets/images/Arrow-Left.png")} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton}>
-            <Image source={require("assets/images/More.png")} />
-          </TouchableOpacity>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.headerButton}
+          onPress={() => {
+            router.push({
+              pathname: "/(main)/home",
+            })
+          }}
+        >
+          <Image source={require("assets/images/Arrow-Left.png")} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.headerButton}>
+          <Image source={require("assets/images/More.png")} />
+        </TouchableOpacity>
 
-          <Text style={styles.header}>Recipe Review</Text>
-        </View>
+        <Text style={styles.header}>Recipe Review</Text>
+      </View>
 
 
       {/* Thumb Rating */}
       <Text style={styles.sectionTitle}>Do you like this recipe?</Text>
       <View style={{ flexDirection: "row", justifyContent: "center", marginVertical: 12 }}>
-  {/* Thumbs Up */}
-  <TouchableOpacity onPress={() => setIsLiked(true)} style={styles.thumbWrapper}>
-    <View
-      style={[
-        styles.thumbCircle,
-        isLiked === true && { backgroundColor: "#007BFF" }, // blue when selected
-      ]}
-    >
-      <Text style={[styles.thumbIcon, isLiked === true && { color: "#FFF" }]}>
-        👍
-      </Text>
-    </View>
-  </TouchableOpacity>
+        {/* Thumbs Up */}
+        <TouchableOpacity onPress={() => setIsLiked(true)} style={styles.thumbWrapper}>
+          <View
+            style={[
+              styles.thumbCircle,
+              isLiked === true && { backgroundColor: "#007BFF" }, // blue when selected
+            ]}
+          >
+            <Text style={[styles.thumbIcon, isLiked === true && { color: "#FFF" }]}>
+              👍
+            </Text>
+          </View>
+        </TouchableOpacity>
 
-  {/* Thumbs Down */}
-  <TouchableOpacity onPress={() => setIsLiked(false)} style={styles.thumbWrapper}>
-    <View
-      style={[
-        styles.thumbCircle,
-        isLiked === false && { backgroundColor: "#FF3366" }, // red when selected
-      ]}
-    >
-      <Text style={[styles.thumbIcon, isLiked === false && { color: "#FFF" }]}>
-        👎
-      </Text>
-    </View>
-  </TouchableOpacity>
-</View>
+        {/* Thumbs Down */}
+        <TouchableOpacity onPress={() => setIsLiked(false)} style={styles.thumbWrapper}>
+          <View
+            style={[
+              styles.thumbCircle,
+              isLiked === false && { backgroundColor: "#FF3366" }, // red when selected
+            ]}
+          >
+            <Text style={[styles.thumbIcon, isLiked === false && { color: "#FFF" }]}>
+              👎
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
 
 
       {/* Comment Box */}
@@ -113,6 +140,18 @@ export default function ReviewRecipe() {
         value={comment}
         onChangeText={setComment}
       />
+
+      {/* Note Box */}
+      <Text style={styles.sectionTitle}>Add a personal note:</Text>
+      <TextInput
+        style={styles.textArea}
+        multiline
+        placeholder="Write a note for yourself..."
+        value={note}
+        onChangeText={setNote}
+      />
+      <Button title="Save Note" onPress={submitNote} />
+
 
       {/* Image Picker */}
       {/* <Text style={styles.sectionTitle}>Add a picture:</Text>
