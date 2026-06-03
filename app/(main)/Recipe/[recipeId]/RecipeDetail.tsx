@@ -1,4 +1,5 @@
 import Button from "@/components/ui/button";
+import { ReviewCard } from "@/components/ui/reviewcard";
 import { useUser } from "@/components/userContext";
 import { RecipeDetailStyles as styles } from "@/theme";
 import {
@@ -17,7 +18,7 @@ export default function RecipeDetail() {
   const { recipeId } = useLocalSearchParams<{ recipeId: string }>();
   const [recipe, setRecipe] = useState<RecipeDetailCompleteDto | null>(null);
   const [notes, setNotes] = useState<{ content: string }[]>([]);
-  const [review, setReview] = useState<Review|null>(null);
+  const [review, setReview] = useState<Review[]>([]);
 
 
   type UserPlaceholder = { pictureAvatarDirectory: string, Name?: string }
@@ -55,7 +56,15 @@ export default function RecipeDetail() {
         });
         if(!res.ok) throw new Error ("Failed to load reviews");
         const data = await res.json();
-        setReview(data);
+        const mappedReviews: Review[] = data.map((r: any) => ({
+          username: r.user.username,
+          content: r.content,
+          isLiked: r.isLiked,
+          date: new Date(r.createdAt),
+          recipeId: r.recipeId,
+        }));
+    
+        setReview(mappedReviews);
         } catch (err){
           console.error("Error fetching reviews:", err);
         }
@@ -230,6 +239,18 @@ export default function RecipeDetail() {
             </Text>
           </View>
         </View>
+
+        <View style={{ marginTop: 24 }}>
+  <Text style={{ fontSize: 18, fontWeight: "600" }}>Reviews</Text>
+  {review.length > 0 ? (
+    review.map((rev, index) => (
+      <ReviewCard key={index} review={rev} avatar={null} />
+    ))
+  ) : (
+    <Text style={{ color: "#666", marginTop: 8 }}>No reviews yet.</Text>
+  )}
+</View>
+
 
         {/* INGREDIENT LIST */}
         <Text style={{ marginTop: 24, fontSize: 18, fontWeight: "600" }}>Ingredients</Text>
