@@ -121,10 +121,10 @@ export type KitchenUtensil = {
 
 export type Review = {
   username: string;
-  image: string;
   content: string;
-  rating: number;
+  isLiked: boolean;
   date: Date;
+  recipeId: number;
 };
 
 export type Wishlist = {

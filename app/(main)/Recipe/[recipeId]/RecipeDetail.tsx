@@ -2,7 +2,8 @@ import Button from "@/components/ui/button";
 import { useUser } from "@/components/userContext";
 import { RecipeDetailStyles as styles } from "@/theme";
 import {
-  RecipeDetailCompleteDto
+  RecipeDetailCompleteDto,
+  Review
 } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -16,6 +17,7 @@ export default function RecipeDetail() {
   const { recipeId } = useLocalSearchParams<{ recipeId: string }>();
   const [recipe, setRecipe] = useState<RecipeDetailCompleteDto | null>(null);
   const [notes, setNotes] = useState<{ content: string }[]>([]);
+  const [review, setReview] = useState<Review|null>(null);
 
 
   type UserPlaceholder = { pictureAvatarDirectory: string, Name?: string }
@@ -44,7 +46,21 @@ export default function RecipeDetail() {
         console.error("Error fetching notes:", err);
       }
     };
-
+    const fetchReviews = async () =>{
+      try {
+        const res =  await fetch(`${API_BASE_URL}api/Reviews/recipe/${recipeId}`,{
+          headers: {
+            Authorization: user?.token ? `Bearer ${user.token}` : "",
+          },
+        });
+        if(!res.ok) throw new Error ("Failed to load reviews");
+        const data = await res.json();
+        setReview(data);
+        } catch (err){
+          console.error("Error fetching reviews:", err);
+        }
+    };
+    fetchReviews();
     fetchRecipe();
     fetchNotes();
   }, [recipeId]);
@@ -166,9 +182,6 @@ export default function RecipeDetail() {
                 style={styles.RecipeAuthorAvatar} />
               <Text style={styles.RecipeAuthorName}>{recipe.username}</Text>
             </View>
-            <TouchableOpacity>
-              <Text style={styles.RecipeDetailPageButton}>Follow</Text>
-            </TouchableOpacity>
           </View>
 
           <Button title="Add to Shopping List" onPress={() => addToShoppingList(recipe.recipeId)} />
@@ -193,7 +206,7 @@ export default function RecipeDetail() {
         </View>
 
         {/* Description */}
-        <View style={styles.DescriptionCard}>
+        <View style={[styles.DescriptionCard, {marginBottom: 10}]}>
           <Text style={styles.DescriptionLabel}>DESCRIPTION</Text>
           <Text style={styles.DescriptionContent}>{recipe.description}</Text>
         </View>
@@ -204,7 +217,7 @@ export default function RecipeDetail() {
             <Text style={styles.InfoLabel}>Serves </Text>
             <Text style={styles.InfoDetail}>{recipe.servingSize}</Text>
           </View>
-          <View style={styles.InfoCard}>
+          <View style={[styles.InfoCard, { marginRight: 16 }]}>
             <Text style={styles.InfoLabel}>Cook Time </Text>
             <Text style={styles.InfoDetail}>{recipe.cookingTime} mins</Text>
           </View>
