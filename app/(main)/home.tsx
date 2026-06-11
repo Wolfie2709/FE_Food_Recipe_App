@@ -59,7 +59,9 @@ export default function Home() {
   const router = useRouter();
   const [recipes, setRecipes] = useState<RecipeBox[]>([]);
   const [history, setHistory] = useState<UserRecipeHistory[]>([]);
-const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
+  const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
+  const [categories, setCategories] = useState<{ categoriesId: number; name: string }[]>([]);
+  const [activeCategory, setActiveCategory] = useState<number | null>(null);
   console.log("Home sees user:", user);
 
   const loadData = async (pageToLoad: number) => {
@@ -101,11 +103,11 @@ const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
   const loadHistory = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}api/UserRecipeHistory`,
-      {
-        headers: {
-          "Authorization": user?.token ? `Bearer ${user.token}` : "",
-        },
-      });
+        {
+          headers: {
+            "Authorization": user?.token ? `Bearer ${user.token}` : "",
+          },
+        });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const res: UserRecipeHistory[] = await response.json();
       setHistory(res);
@@ -160,6 +162,28 @@ const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
     loadWishlist();
   }, []);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}api/Categories/category/pagination?page=1&pageSize=10&type=recipe`, {
+          headers: { Authorization: `Bearer ${user?.token}` },
+        });
+        if (!res.ok) throw new Error("Failed to load categories");
+        const data = await res.json();
+        setCategories(Array.isArray(data) ? data : [data]);
+      } catch (err) {
+        console.error("Error loading categories:", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const filteredRecipes = activeCategory
+    ? recipes.filter((r) =>
+      r.categories?.some((c) => c.categoriesId === activeCategory)
+    )
+    : recipes;
+
 
   if (isLoading) return <Text>Loading history...</Text>;
 
@@ -199,9 +223,9 @@ const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>All recipes</Text>
             <TouchableOpacity>
-            <Text style={styles.link} onPress={() => {router.push({pathname: "/(main)/Recipe/AllRecipe"})}}>See all</Text>
+              <Text style={styles.link} onPress={() => { router.push({ pathname: "/(main)/Recipe/AllRecipe" }) }}>See all</Text>
             </TouchableOpacity>
-            
+
           </View>
           <FlatList
             data={data}
@@ -246,9 +270,9 @@ const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent recipes</Text>
             <TouchableOpacity>
-            <Text style={styles.link} onPress={() => {router.push({pathname: "/(main)/Recipe/RecipeHistory"})}}>See all</Text>
+              <Text style={styles.link} onPress={() => { router.push({ pathname: "/(main)/Recipe/RecipeHistory" }) }}>See all</Text>
             </TouchableOpacity>
-            
+
           </View>
           <FlatList
             data={recipes}
@@ -293,9 +317,9 @@ const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Wishlist recipes</Text>
             <TouchableOpacity>
-            <Text style={styles.link} onPress={() => {router.push({pathname: "/(main)/Recipe/WishlistRecipe"})}}>See all</Text>
+              <Text style={styles.link} onPress={() => { router.push({ pathname: "/(main)/Recipe/WishlistRecipe" }) }}>See all</Text>
             </TouchableOpacity>
-            
+
           </View>
           <FlatList
             data={wishlistRecipes}
@@ -339,19 +363,45 @@ const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Popular categories</Text>
           <View style={styles.categoryRow}>
-            {["Salad", "Breakfast", "Appetizer", "Noodle", "Lunch"].map((cat) => (
-              <Text
-                key={cat}
-                style={[
-                  styles.category,
-                  cat === "Breakfast" && styles.categoryActive,
-                ]}
+            {categories.map((cat) => (
+              <TouchableOpacity
+                key={cat.categoriesId}
+                onPress={() => setActiveCategory(cat.categoriesId)}
               >
-                {cat}
-              </Text>
+                <Text
+                  style={[
+                    styles.category,
+                    activeCategory === cat.categoriesId && styles.categoryActive,
+                  ]}
+                >
+                  {cat.name}
+                </Text>
+              </TouchableOpacity>
             ))}
           </View>
+          <FlatList
+  data={filteredRecipes}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  keyExtractor={(item) => `filtered-${item.recipeId}`}
+  renderItem={({ item }) => (
+    <TouchableOpacity
+      onPress={() =>
+        router.push({
+          pathname: "./Recipe/[recipeId]/RecipeDetail",
+          params: { recipeId: item.recipeId.toString() },
+        })
+      }
+    >
+      <View style={{ width: itemWidth }}>
+        <RecipeCard {...item} />
+      </View>
+    </TouchableOpacity>
+  )}
+/>
+
         </View>
+
         {/* Trending */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>

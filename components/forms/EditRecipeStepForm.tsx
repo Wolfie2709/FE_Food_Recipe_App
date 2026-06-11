@@ -23,7 +23,7 @@ export default function EditCookingSteps({ recipeId }: EditRecipeStepFormProps) 
   useEffect(() => {
     const fetchSteps = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}api/RecipeSteps/${recipeId}`, {
+        const res = await fetch(`${API_BASE_URL}api/RecipeSteps/recipe-  ${recipeId}`, {
           headers: {
             "Authorization": user?.token ? `Bearer ${user.token}` : "",
           },

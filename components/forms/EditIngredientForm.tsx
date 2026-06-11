@@ -10,70 +10,67 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "../ui/button";
 import Field from "../ui/figma_input_fields";
 import { useUser } from "../userContext";
 
 export default function EditIngredientForm() {
-    const {user} = useUser();
-  const { ingredientsId } = useLocalSearchParams(); 
+  const { user } = useUser();
+  const { ingredientsId } = useLocalSearchParams();
   const [name, setName] = useState("");
-  const [ingredientCategory, setIngCategory] = useState<IngredientCategoryDto[]>([{categoriesId: null}]);
+  const [ingredientCategory, setIngCategory] = useState<IngredientCategoryDto[]>([{ categoriesId: null }]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [pictureDirectory, setPictureDirectory] = useState<string | null>(null);
   const router = useRouter();
 
   // Load available categories
   useEffect(() => {
-    fetch(`${API_BASE_URL}api/Categories/category/pagination?page=1&pageSize=30&type=Ingredients`, {
-      headers: {
-        "Authorization": user?.token ? `Bearer ${user.token}` : "",
-      },
-    })
-      .then(async (res) => {
-        const raw = await res.text();
-        if (!res.ok) {
-          console.error("Failed to load categories:", res.status, raw);
-          return [];
-        }
-        try {
-          return JSON.parse(raw);
-        } catch {
-          console.error("Categories response was not valid JSON:", raw);
-          return [];
-        }
-      })
-      .then((data) => {
-        const normalized = Array.isArray(data) ? data : [data];
-        setCategories(normalized);
-      })
-      .catch((err) => console.error("Error loading categories:", err));
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(
+          `${API_BASE_URL}api/Categories/category/pagination?page=1&pageSize=30&type=ingredient`,
+          {
+            headers: {
+              Authorization: user?.token ? `Bearer ${user.token}` : "",
+            },
+          }
+        );
+        if (!res.ok) throw new Error("Failed to load categories");
+        const data = await res.json();
+  
+        // ✅ Fix: use categoryList from the response
+        setCategories(Array.isArray(data.categoryList) ? data.categoryList : []);
+      } catch (err) {
+        console.error("Error loading categories:", err);
+      }
+    };
+    fetchCategories();
   }, []);
+  
 
-  //Fetch Ingredient Details if editing
-
+  // Fetch ingredient details if editing
   useEffect(() => {
-    if(!ingredientsId) return;
-    console.log("Ingredients Id:", ingredientsId)
+    if (!ingredientsId) return;
     const fetchIngDetails = async () => {
-        try {
-            const res = await fetch (`${API_BASE_URL}api/Ingredients/${ingredientsId}`,{
-                headers: {Authorization: user?.token ? `Bearer ${user.token}` : ""},
-            });
-            if(!res.ok) return;
-            const data = await res.json();
+      try {
+        const res = await fetch(`${API_BASE_URL}api/Ingredients/${ingredientsId}`, {
+          headers: { Authorization: user?.token ? `Bearer ${user.token}` : "" },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
 
-            setName(data.name || "");
-            setIngCategory(data.categories||[]);
-            setPictureDirectory(data.pictureDirectory|| "");
-        } catch(err){
-            console.error("Error fetching ingredient details:", err);
-        }
+        setName(data.name || "");
+        setIngCategory(data.categories?.length ? data.categories : [{ categoriesId: null }]);
+        setPictureDirectory(data.pictureDirectory || "");
+      } catch (err) {
+        console.error("Error fetching ingredient details:", err);
+      }
     };
     fetchIngDetails();
-  }, [ingredientsId])
+  }, [ingredientsId]);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -89,9 +86,9 @@ export default function EditIngredientForm() {
   const saveIngredient = async () => {
     const payload = {
       name,
-      categoryId: ingredientCategory.filter(iC => iC.categoriesId !== null).map(iC =>({
-        categoryId: iC.categoriesId
-      })),
+      categoryId: ingredientCategory
+        .filter((iC) => iC.categoriesId !== null)
+        .map((iC) => ({ categoryId: iC.categoriesId })),
       pictureDirectory: pictureDirectory || "",
     };
 
@@ -107,7 +104,7 @@ export default function EditIngredientForm() {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${user.token}`,
+            Authorization: `Bearer ${user.token}`,
           },
           body: JSON.stringify(payload),
         }
@@ -115,66 +112,92 @@ export default function EditIngredientForm() {
 
       if (!response.ok) {
         const rawError = await response.text();
-        console.error("Utensil update failed:", response.status, rawError);
+        console.error("Ingredient update failed:", response.status, rawError);
         return;
       }
 
       router.push("./IngredientsManagement");
     } catch (error) {
-      console.error("Error updating utensil:", error);
+      console.error("Error updating ingredient:", error);
     }
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#fff" }} contentContainerStyle={{ padding: 16 }}>
-      <Text style={styles.header}>Add Ingredient</Text>
-  
-      {/* Utensil Image */}
-      <Text style={styles.sectionTitle}>Ingredient Image</Text>
-      <TouchableOpacity onPress={pickImage}>
-        {pictureDirectory ? (
-          <Image source={{ uri: pictureDirectory }} style={styles.recipeImage} />
-        ) : (
-          <View style={[styles.recipeImage, { justifyContent: "center", alignItems: "center", backgroundColor: "#eee" }]}>
-            <Text>Tap to select an image</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, padding: 16 }}
+      >
+        <Text style={styles.header}>Edit Ingredient</Text>
+
+        {/* Ingredient Image */}
+        <Text style={styles.sectionTitle}>Ingredient Image</Text>
+        <TouchableOpacity onPress={pickImage}>
+          {pictureDirectory ? (
+            <Image source={{ uri: pictureDirectory }} style={styles.recipeImage} />
+          ) : (
+            <View
+              style={[
+                styles.recipeImage,
+                {
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#eee",
+                },
+              ]}
+            >
+              <Text>Tap to select an image</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
+        {/* Ingredient Name */}
+        <Text>Ingredient Name:</Text>
+        <Field
+          value={name}
+          onChangeText={setName}
+          placeholder="Enter ingredient name"
+        />
+
+        {/* Categories */}
+        <Text style={styles.sectionTitle}>Categories</Text>
+        {ingredientCategory.map((item, index) => (
+          <View key={index} style={styles.ingredientRow}>
+            <Picker
+              selectedValue={item.categoriesId ?? ""}
+              style={{ flex: 1 }}
+              onValueChange={(val) => {
+                const updated = [...ingredientCategory];
+                updated[index].categoriesId = val === "" ? null : Number(val);
+                setIngCategory(updated);
+              }}
+            >
+              <Picker.Item label="Select category..." value="" />
+              {categories.map((cat) => (
+                <Picker.Item
+                  key={cat.categoryId}
+                  label={cat.name}
+                  value={cat.categoryId}
+                />
+              ))}
+            </Picker>
           </View>
-        )}
-      </TouchableOpacity>
-  
-      {/* Utensil Name */}
-      <Text>Ingredient Name:</Text>
-      <Field
-        value={name}
-        onChangeText={setName}
-        placeholder="Enter ingredient name"
-      />
-  
-      {/* Category */}
-      <Text style={styles.sectionTitle}>Categories</Text>
-      {ingredientCategory.map((item, index) => (
-        <View key={index} style={styles.ingredientRow}>
-          <Picker
-            selectedValue={item.categoriesId ?? ""}
-            style={{ flex: 1 }}
-            onValueChange={(val) => {
-              const updated = [...ingredientCategory];
-              updated[index].categoriesId = val === "" ? null : Number(val);
-              setIngCategory(updated);
-            }}
-          >
-            <Picker.Item label="Select category..." value="" />
-            {categories.map((cat) => (
-              <Picker.Item
-                key={cat.categoryId}
-                label={cat.name}
-                value={cat.categoryId}
-              />
-            ))}
-          </Picker>
-        </View>
-      ))}
-  
-      <Button title="Save Ingredient" onPress={saveIngredient} />
-    </ScrollView>
+        ))}
+
+        {/* Add another category row */}
+        <Button
+          title="Add another category"
+          onPress={() =>
+            setIngCategory([...ingredientCategory, { categoriesId: null }])
+          }
+        />
+
+        {/* Save button */}
+        <Button
+          title="Save Ingredient"
+          onPress={saveIngredient}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 }

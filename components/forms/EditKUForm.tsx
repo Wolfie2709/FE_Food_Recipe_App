@@ -6,11 +6,11 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    Image,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import Button from "../ui/button";
 import Field from "../ui/figma_input_fields";
@@ -27,7 +27,7 @@ export default function EditIngredientForm() {
 
   // Load available categories
   useEffect(() => {
-    fetch(`${API_BASE_URL}api/Categories/all`, {
+    fetch(`${API_BASE_URL}api/Categories/category/pagination?page=1&pageSize=30&type=utensil`, {
       headers: {
         "Authorization": user?.token ? `Bearer ${user.token}` : "",
       },
@@ -59,7 +59,7 @@ export default function EditIngredientForm() {
     console.log("kitchen Utensil Id:", kitchenUtensilId)
     const fetchKUDetails = async () => {
         try {
-            const res = await fetch (`${API_BASE_URL}api/Ingredients/${kitchenUtensilId}`,{
+            const res = await fetch (`${API_BASE_URL}api/KitchenUtensils/${kitchenUtensilId}`,{
                 headers: {Authorization: user?.token ? `Bearer ${user.token}` : ""},
             });
             if(!res.ok) return;
@@ -119,7 +119,7 @@ export default function EditIngredientForm() {
         return;
       }
 
-      router.push("./IngredientsManagement");
+      router.push("./KitchenUtensilsManagement");
     } catch (error) {
       console.error("Error updating utensil:", error);
     }
@@ -173,6 +173,13 @@ export default function EditIngredientForm() {
           </Picker>
         </View>
       ))}
+
+<Button
+          title="Add another category"
+          onPress={() =>
+            setKUCategory([...kUCategory, { categoriesId: null }])
+          }
+        />
   
       <Button title="Save Kitchen Utensil" onPress={saveKitchenUtensil} />
     </ScrollView>

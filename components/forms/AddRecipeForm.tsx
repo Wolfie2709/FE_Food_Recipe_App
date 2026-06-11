@@ -14,6 +14,7 @@ import {
   View
 } from "react-native";
 import Button from "../ui/button";
+import CategoryDropdown from "../ui/categoryDropdown";
 import { MinusIcon } from "../ui/figma_Icons";
 import Field from "../ui/figma_input_fields";
 import { useUser } from "../userContext";
@@ -372,28 +373,18 @@ export default function AddNewRecipeForm() {
       {/* Categories */}
       <Text style={styles.sectionTitle}>Categories</Text>
       {recipeCategories.map((item, index) => (
-        <View key={index} style={styles.ingredientRow}>
-          <Picker
-            selectedValue={item.categoriesId ?? ""}
-            style={{ flex: 1 }}
-            onValueChange={(val) => {
-              const updated = [...recipeCategories];
-              updated[index].categoriesId = val === "" ? null : Number(val);
-              setRecipeCategories(updated);
-            }}
-          >
-            <Picker.Item label="Select category..." value="" />
-            {categories.map((cat) => (
-              <Picker.Item
-                key={cat.categoryId}
-                label={cat.name}
-                value={cat.categoryId}
-              />
-            ))}
-          </Picker>
-
-        </View>
-      ))}
+  <CategoryDropdown
+    key={index}
+    label={`Category ${index + 1}`}
+    selectedCategoryId={item.categoriesId}
+    onSelect={(val) => {
+      const updated = [...recipeCategories];
+      updated[index].categoriesId = val;
+      setRecipeCategories(updated);
+    }}
+    type="recipe"
+  />
+))}
       <Button title="Add new category" onPress={addCategoryRow} />
 
       {/* Kitchen Utensils */}
