@@ -54,33 +54,44 @@ export default function SettingsPage() {
 
       {/* Account Settings */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Account Settings</Text>
-        <TouchableOpacity style={styles.row}>
-          <Text>Name</Text>
-          <Text>{userInfo ? `${userInfo.firstName} ${userInfo.lastName}` : "Loading..."}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.row}>
-          <Text>Username</Text>
-          <Text>{userInfo?.username || "—"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.row}>
-          <Text>Email</Text>
-          <Text>{userInfo?.email || "—"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.row}>
-          <Text>Phone Number</Text>
-          <Text>{userInfo?.phoneNumber || "—"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.row}>
-          <Text>Birthdate</Text>
-          <Text>{userInfo?.birthdate ? new Date(userInfo.birthdate).toLocaleDateString() : "—"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.row}>
-          <Text>Role</Text>
-          <Text>{userInfo?.role || "—"}</Text>
-        </TouchableOpacity>
-      </View>
+  <Text style={styles.sectionTitle}>Account Settings</Text>
 
+  {/* Name */}
+  <TouchableOpacity style={styles.infoBox}>
+    <Text style={styles.infoLabel}>Name</Text>
+    <Text style={styles.infoValue}>{userInfo?.firstName} {userInfo?.lastName}</Text>
+  </TouchableOpacity>
+
+  {/* Email */}
+  <TouchableOpacity style={styles.infoBox}>
+    <Text style={styles.infoLabel}>Email</Text>
+    <Text style={[styles.infoValue, { fontWeight: "600" }]}>{userInfo?.email}</Text>
+  </TouchableOpacity>
+
+  {/* Profile Picture */}
+  <TouchableOpacity style={styles.infoBox}>
+    <Text style={styles.infoLabel}>Profile Picture</Text>
+    <View style={styles.avatarCircle}>
+      <Text style={styles.avatarText}>{userInfo?.username?.charAt(0).toUpperCase()}</Text>
+    </View>
+  </TouchableOpacity>
+
+  {/* Password */}
+  <TouchableOpacity style={styles.infoBox}>
+    <Text style={styles.infoLabel}>Password</Text>
+    <Text style={styles.infoValue}>********</Text>
+  </TouchableOpacity>
+
+  {/* My Household */}
+  <TouchableOpacity style={styles.infoBox}>
+    <Text style={styles.infoLabel}>My Household</Text>
+  </TouchableOpacity>
+
+  {/* Delete Account */}
+  <TouchableOpacity style={styles.infoBox}>
+    <Text style={[styles.infoLabel, { color: "#E23E3E" }]}>Delete Account</Text>
+  </TouchableOpacity>
+</View>
       {/* Cooking Breakdown */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Cooking Breakdown</Text>
@@ -116,7 +127,6 @@ export default function SettingsPage() {
         <Text style={styles.logoutText}>LOG OUT</Text>
       </TouchableOpacity>
 
-      <Text style={styles.footer}>Sidekick by SortedFood v3.4.0 (build 4048)</Text>
     </ScrollView>
   );
 }
@@ -142,4 +152,41 @@ const styles = StyleSheet.create({
   },
   logoutText: { color: "#fff", fontSize: 16, fontWeight: "600" },
   footer: { textAlign: "center", color: "#999", marginTop: 16 },
+  infoBox: {
+  backgroundColor: "#fff",
+  borderRadius: 12,
+  paddingVertical: 14,
+  paddingHorizontal: 16,
+  marginBottom: 10,
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  shadowColor: "#000",
+  shadowOpacity: 0.05,
+  shadowRadius: 4,
+  elevation: 2,
+},
+infoLabel: {
+  fontSize: 16,
+  fontWeight: "500",
+  color: "#333",
+},
+infoValue: {
+  fontSize: 16,
+  color: "#000",
+},
+avatarCircle: {
+  width: 32,
+  height: 32,
+  borderRadius: 16,
+  backgroundColor: "#A8E063",
+  justifyContent: "center",
+  alignItems: "center",
+},
+avatarText: {
+  fontSize: 16,
+  fontWeight: "700",
+  color: "#000",
+},
+
 });

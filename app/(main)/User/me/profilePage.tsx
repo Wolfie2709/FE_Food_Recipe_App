@@ -42,44 +42,44 @@ export default function ProfilePage() {
 
   const loadHistory = async () => {
     try {
-          const response = await fetch(`${API_BASE_URL}api/UserRecipeHistory`,
-          {
-            headers: {
-              Authorization: `Bearer ${userObject.user?.token}`,
-            },
-          });
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          const res: UserRecipeHistory[] = await response.json();
-          setHistory(res);
-    
-          // Fetch recipe details for each recipeId
-          const recipePromises = res.map(async (h) => {
-            const r = await fetch(`${API_BASE_URL}api/Recipes/recipe/detail/${h.recipeId}`);
-            return await r.json();
-          });
-    
-          const recipeResults = await Promise.all(recipePromises);
-          setRecipes(recipeResults);
-        } catch (err) {
-          console.error("Error loading history:", err);
-        } finally {
-          setLoading(false);
-        }
-      };
-    
-      useEffect(() => {
-        loadHistory();
-      }, []);
+      const response = await fetch(`${API_BASE_URL}api/UserRecipeHistory`,
+        {
+          headers: {
+            Authorization: `Bearer ${userObject.user?.token}`,
+          },
+        });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const res: UserRecipeHistory[] = await response.json();
+      setHistory(res);
 
-      if (!user) {
-        return (
-          <View style={styles.container}>
-            <Text style={styles.message}>Loading profile...</Text>
-          </View>
-        );
-      }
-    
-      if (loading) return <Text>Loading history...</Text>;
+      // Fetch recipe details for each recipeId
+      const recipePromises = res.map(async (h) => {
+        const r = await fetch(`${API_BASE_URL}api/Recipes/recipe/detail/${h.recipeId}`);
+        return await r.json();
+      });
+
+      const recipeResults = await Promise.all(recipePromises);
+      setRecipes(recipeResults);
+    } catch (err) {
+      console.error("Error loading history:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.message}>Loading profile...</Text>
+      </View>
+    );
+  }
+
+  if (loading) return <Text>Loading history...</Text>;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -143,42 +143,52 @@ export default function ProfilePage() {
               {new Date(user.createDate).toLocaleDateString()}
             </Text>
           </View>
-          <Button 
-          title = "Edit Profile"
-          variant="primary"
-          size = "small"
-          onPress={() => {
-            console.log("Edit profile button pressed")
-            router.push("./EditProfile")
-          } }
+          <Button
+            title="Edit Profile"
+            variant="primary"
+            size="small"
+            onPress={() => {
+              console.log("Edit profile button pressed")
+              router.push("./EditProfile")
+            }}
           />
+          <Button
+            title="Settings"
+            variant="secondary"
+            size="small"
+            onPress={() => {
+              console.log("Settings button pressed");
+              router.push("./SettingsPage");
+            }}
+          />
+
         </View>
       </View>
       <View>
-      <Text style={{fontSize: 30, fontFamily: fonts.semiBold, color: colors.textDark, marginBottom: spacing.sm, textAlign: "center"}}>RECENT RECIPES</Text>
-      <FlatList 
-        data = {recipes}
-        keyExtractor={(item) => item.recipeId.toString()}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
-        renderItem={({ item }) => (
+        <Text style={{ fontSize: 30, fontFamily: fonts.semiBold, color: colors.textDark, marginBottom: spacing.sm, textAlign: "center" }}>RECENT RECIPES</Text>
+        <FlatList
+          data={recipes}
+          keyExtractor={(item) => item.recipeId.toString()}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
+          renderItem={({ item }) => (
             <TouchableOpacity
-                onPress={() => 
+              onPress={() =>
                 router.push({
-                    pathname:"./[recipeId]/RecipeDetail",
-                    params: { recipeId: item.recipeId.toString() },
+                  pathname: "./[recipeId]/RecipeDetail",
+                  params: { recipeId: item.recipeId.toString() },
                 })
-            }
+              }
             >
-                <View style = {{marginTop: 16,marginBottom: 16}}>
-                    <RecipeCard {...item}/>
-                </View>
+              <View style={{ marginTop: 16, marginBottom: 16 }}>
+                <RecipeCard {...item} />
+              </View>
             </TouchableOpacity>
-        )}
+          )}
         />
       </View>
       <View>
-                {/* Bottom navigation bar */}
-                {user && <NavigationBar user={user} />}
+        {/* Bottom navigation bar */}
+        {user && <NavigationBar user={user} />}
       </View>
     </SafeAreaView>
   );
