@@ -1,3 +1,4 @@
+import OverlayMenu from "@/components/ui/overlay-menu";
 import { useUser } from "@/components/userContext";
 import { ManagementStyles as styles } from "@/theme";
 import type { User } from "@/types";
@@ -8,7 +9,7 @@ import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, Vie
 import Button from "../../../components/ui/button";
 
 
-export default function IngredientsManagement() {
+export default function UserManagement() {
   const {user} = useUser();
   const [userInfo, setUserInfo] = useState<User[]>([]);
   const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
@@ -110,8 +111,8 @@ export default function IngredientsManagement() {
                   label: "Edit",
                   onPress: () =>
                     router.push({
-                      pathname: "./EditIngredients",
-                      params: { ingredientsId: item.id.toString() },
+                      pathname: "./EditUsers",
+                      params: { usersId: item.id.toString() },
                     }),
                 },
                 {

@@ -11,10 +11,11 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import Button from "../ui/button";
 import CategoryDropdown from "../ui/categoryDropdown";
+import ConfirmDialog from "../ui/confirm-dialog";
 import { MinusIcon } from "../ui/figma_Icons";
 import Field from "../ui/figma_input_fields";
 import { useUser } from "../userContext";
@@ -228,6 +229,50 @@ export default function AddNewRecipeForm() {
         console.error("No token available");
         return;
       }
+      const ok = await saveRecipe(payload);
+      if (ok) {
+        router.push({
+          pathname: "./AddCookingSteps",
+          params: { recipeId: recipeId.toString() },
+        });
+      }
+    } catch (error) {
+      console.error("Error updating recipe:", error);
+    }
+  };
+
+  // Save without navigating
+  const saveRecipe = async (payload?: CreateRecipeRequestDto) => {
+    try {
+      if (!user?.token) {
+        console.error("No token available");
+        return false;
+      }
+      if (!recipeId) {
+        console.error("No recipeId available to save");
+        return false;
+      }
+
+      const body = payload
+        ? JSON.stringify(payload)
+        : JSON.stringify({
+            name,
+            description: description || null,
+            servingSize: parseInt(serves, 10),
+            cookingTime: parseInt(cookTime, 10),
+            ingredients: recipeIngredients
+              .filter((rI) => rI.ingredientsId !== null)
+              .map((rI) => ({
+                ingredientsId: rI.ingredientsId!,
+                quantity: rI.quantity,
+              })),
+            categories: recipeCategories
+              .filter((rC) => rC.categoriesId !== null)
+              .map((rC) => ({ categoriesId: rC.categoriesId! })),
+            kitchenUtensils: recipeKU
+              .filter((rKU) => rKU.kitchenUtensilId !== null)
+              .map((rKU) => ({ kitchenUtensilId: rKU.kitchenUtensilId! })),
+          });
 
       const response = await fetch(
         `${API_BASE_URL}api/Recipes/update/complete-recipe-info/${recipeId}`,
@@ -237,28 +282,82 @@ export default function AddNewRecipeForm() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${user.token}`,
           },
-          body: JSON.stringify(payload),
+          body,
         }
       );
 
       if (!response.ok) {
         const rawError = await response.text();
-        console.error("Recipe update failed:", response.status, rawError);
-        return;
+        console.error("Recipe save failed:", response.status, rawError);
+        return false;
       }
 
-      router.push({
-        pathname: "./AddCookingSteps",
-        params: { recipeId: recipeId.toString() },
-      });
-    } catch (error) {
-      console.error("Error updating recipe:", error);
+      return true;
+    } catch (err) {
+      console.error("Error saving recipe:", err);
+      return false;
     }
+  };
+
+  const [confirmVisible, setConfirmVisible] = useState(false);
+
+  const deleteRecipe = async () => {
+    try {
+      if (!user?.token) {
+        console.error("No token available");
+        return false;
+      }
+      if (!recipeId) {
+        console.error("No recipeId available to delete");
+        return false;
+      }
+      const res = await fetch(`${API_BASE_URL}api/Recipes/${recipeId}`, {
+        method: "DELETE",
+        headers: { Authorization: user?.token ? `Bearer ${user.token}` : "" },
+      });
+      if (!res.ok) {
+        console.error("Hard delete failed");
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error("Error hard deleting recipe:", err);
+      return false;
+    }
+  };
+
+  const confirmExit = () => {
+    setConfirmVisible(true);
+  };
+
+  const handleSaveAndExit = async () => {
+    const ok = await saveRecipe();
+    setConfirmVisible(false);
+    if (ok) router.back();
+  };
+
+  const handleDeleteAndExit = async () => {
+    const ok = await deleteRecipe();
+    setConfirmVisible(false);
+    if (ok) router.back();
   };
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }} contentContainerStyle={{ padding: 16 }}>
-      <Text style={styles.header}>Create Recipe</Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <Text style={styles.header}>Create Recipe</Text>
+        <Button title="Cancel" variant="secondary" size="small" onPress={confirmExit} />
+      </View>
+      <ConfirmDialog
+        visible={confirmVisible}
+        title="Save changes"
+        message="Do you want to save before exiting?"
+        confirmLabel="Yes (Save)"
+        destructiveLabel="No (Delete)"
+        onConfirm={handleSaveAndExit}
+        onDestructive={handleDeleteAndExit}
+        onCancel={() => setConfirmVisible(false)}
+      />
 
       {/* Recipe Image */}
       <Text style={styles.sectionTitle}>Recipe Image</Text>

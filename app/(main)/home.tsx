@@ -1,4 +1,3 @@
-import Button from "@/components/ui/button";
 import NavigationBar from "@/components/ui/figma_navbar";
 import { useUser } from "@/components/userContext";
 import { API_BASE_URL } from "@/utils/apiConfig";
@@ -227,10 +226,6 @@ export default function Home() {
             <Image source={require("assets/images/Search.png")} />
           </View>
         </Pressable>
-        <Button
-                    title="Create New Recipe"
-                    onPress={() => router.push("../../(Dashboard)/Recipe/add-recipe/AddNewRecipe")}
-                  />
         {/* Popular creators */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>

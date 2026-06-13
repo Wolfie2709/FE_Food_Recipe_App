@@ -49,7 +49,7 @@ export default function NavigationBar({ user }: { user?: Partial<User> }) {
         <TouchableOpacity style={styles.navItem} onPress={() => router.push("/home")}>
           <HomeIcon />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/Search")}>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/(Dashboard)/Recipe/add-recipe/AddNewRecipe")}>
           <ShieldIcon />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push("/ShoppingList")}>
