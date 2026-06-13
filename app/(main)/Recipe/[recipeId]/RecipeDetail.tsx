@@ -96,6 +96,19 @@ export default function RecipeDetail() {
   const incrementServings = () => handleChangeServings(selectedServings + 1);
   const decrementServings = () => handleChangeServings(selectedServings - 1);
 
+  const calculateRecipeCost = () => {
+    if (!recipe?.ingredients || recipe.ingredients.length === 0) return 0;
+    const baseServings = recipe.servingSize ?? 1;
+    const scale = selectedServings / (baseServings || 1);
+    return recipe.ingredients.reduce((total, ing) => {
+      const quantity = (ing.quantity || 0) * scale;
+      const ingredientCost = (ing.price || 0) * quantity;
+      return total + ingredientCost;
+    }, 0);
+  };
+
+  const totalCost = calculateRecipeCost();
+
   if (!recipe) return <Text>Loading...</Text>;
   console.log("recipe detail: ", recipe);
 
@@ -258,6 +271,10 @@ export default function RecipeDetail() {
                 ? recipe.categories.map((c) => c.name).join(", ")
                 : "Uncategorized"}
             </Text>
+          </View>
+          <View style={styles.InfoCard}>
+            <Text style={styles.InfoLabel}>Total Cost </Text>
+            <Text style={styles.InfoDetail}>{totalCost.toLocaleString()}</Text>
           </View>
         </View>
 

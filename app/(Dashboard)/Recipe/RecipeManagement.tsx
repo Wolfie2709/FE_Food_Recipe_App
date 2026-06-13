@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Button from "../../../components/ui/button";
+import OverlayMenu from "../../../components/ui/overlay-menu";
 
 export default function RecipeManagement() {
   const { user } = useUser();
@@ -195,49 +196,42 @@ export default function RecipeManagement() {
       </View>
 
       {/* Overlay menu */}
-      {menuVisibleId && (
-        <View style={styles.overlayMenu}>
-          <TouchableOpacity
-            onPress={() => {
-              router.push({
-                pathname: "./edit-recipe/EditRecipe",
-                params: { recipeId: menuVisibleId.toString() },
-              });
-              setMenuVisibleId(null);
-            }}
-          >
-            <Text style={styles.menuItem}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              router.push({
-                pathname: "./edit-recipe/EditRecipeStep",
-                params: { recipeId: menuVisibleId.toString() },
-              });
-              setMenuVisibleId(null);
-            }}
-          >
-            <Text style={styles.menuItem}>Edit Recipe Step</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              softDeleteRecipe(menuVisibleId);
-              setMenuVisibleId(null);
-            }}
-          >
-            <Text style={styles.menuItem}>Soft Delete</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              hardDeleteRecipe(menuVisibleId);
-              setMenuVisibleId(null);
-            }}
-          >
-            <Text style={styles.menuItem}>Hard Delete</Text>
-          </TouchableOpacity>
-          <Button title="Close" onPress={() => setMenuVisibleId(null)} />
-        </View>
-      )}
+      <OverlayMenu
+        visible={!!menuVisibleId}
+        onClose={() => setMenuVisibleId(null)}
+        items={
+          menuVisibleId
+            ? [
+                {
+                  label: "Edit",
+                  onPress: () =>
+                    router.push({
+                      pathname: "./edit-recipe/EditRecipe",
+                      params: { recipeId: menuVisibleId.toString() },
+                    }),
+                },
+                {
+                  label: "Edit Recipe Step",
+                  onPress: () =>
+                    router.push({
+                      pathname: "./edit-recipe/EditRecipeStep",
+                      params: { recipeId: menuVisibleId.toString() },
+                    }),
+                },
+                {
+                  label: "Soft Delete",
+                  onPress: () => softDeleteRecipe(menuVisibleId),
+                  destructive: true,
+                },
+                {
+                  label: "Hard Delete",
+                  onPress: () => hardDeleteRecipe(menuVisibleId),
+                  destructive: true,
+                },
+              ]
+            : []
+        }
+      />
     </View>
   );
 }

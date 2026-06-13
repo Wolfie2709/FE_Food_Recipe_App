@@ -100,23 +100,29 @@ export default function IngredientsManagement() {
     </TouchableOpacity>
 
     {/* Context menu */}
-    {menuVisibleId === item.id && (
-      <View style={styles.contextMenu}>
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: "./EditIngredients",
-              params: { ingredientsId: item.id.toString() },
-            })
-          }
-        >
-          <Text style={styles.menuItem}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => DeleteUsers(item.id)}>
-          <Text style={styles.menuItem}>Hard Delete</Text>
-        </TouchableOpacity>
-      </View>
-    )}
+      <OverlayMenu
+        visible={menuVisibleId === item.id}
+        onClose={() => setMenuVisibleId(null)}
+        items={
+          menuVisibleId === item.id
+            ? [
+                {
+                  label: "Edit",
+                  onPress: () =>
+                    router.push({
+                      pathname: "./EditIngredients",
+                      params: { ingredientsId: item.id.toString() },
+                    }),
+                },
+                {
+                  label: "Hard Delete",
+                  onPress: () => DeleteUsers(item.id),
+                  destructive: true,
+                },
+              ]
+            : []
+        }
+      />
     </View>
 );
 

@@ -92,6 +92,7 @@ export type Ingredient = {
   categoryId: number;
   categoryName: string;
   pictureDirectory: string;
+  price?: number;
 };
 export type RecipeBoxDTO = {
   id: number;
@@ -184,6 +185,7 @@ export type RecipeDetailIngredientListDto = {
   measurementUnit?: string;
   quantity?: number;
   pictureDirectory?: string;
+  price?: number;
 };
 
 export type RecipeDetailCategoryIdDto ={

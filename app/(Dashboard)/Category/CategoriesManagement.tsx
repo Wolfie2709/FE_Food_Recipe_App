@@ -6,6 +6,7 @@ import { API_BASE_URL } from "@/utils/apiConfig";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, View } from "react-native";
+import OverlayMenu from "../../../components/ui/overlay-menu";
 
 export default function CategoryManagement() {
   const { user } = useUser();
@@ -175,23 +176,29 @@ export default function CategoryManagement() {
     </TouchableOpacity>
 
     {/* Context menu */}
-    {menuVisibleId === item.categoryId && (
-      <View style={styles.contextMenu}>
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: "./EditCategories",
-              params: { categoryId : item.categoryId.toString() },
-            })
-          }
-        >
-          <Text style={styles.menuItem}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => softDeleteCategory(item.categoryId)}>
-          <Text style={styles.menuItem}>Delete</Text>
-        </TouchableOpacity>
-      </View>
-    )}
+      <OverlayMenu
+        visible={menuVisibleId === item.categoryId}
+        onClose={() => setMenuVisibleId(null)}
+        items={
+          menuVisibleId === item.categoryId
+            ? [
+                {
+                  label: "Edit",
+                  onPress: () =>
+                    router.push({
+                      pathname: "./EditCategories",
+                      params: { categoryId: item.categoryId.toString() },
+                    }),
+                },
+                {
+                  label: "Delete",
+                  onPress: () => softDeleteCategory(item.categoryId),
+                  destructive: true,
+                },
+              ]
+            : []
+        }
+      />
     </View>
 
 );

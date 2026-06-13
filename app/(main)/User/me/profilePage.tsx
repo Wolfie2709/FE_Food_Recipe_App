@@ -7,7 +7,7 @@ import { RecipeBox, User, UserRecipeHistory } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RecipeCard } from "../../Search";
 
@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<"recent" | "history">("recent");
   const accessToken = userObject.user?.token;
   const [loading, setLoading] = useState(true);
-  const [history, setHistory] = useState<UserRecipeHistory[]>([]);
+  const [historyRecipes, setHistoryRecipes] = useState<Array<RecipeBox & { cookedAt: string; note?: string | null }>>([]);
   const [userRecipe, setUserRecipe] = useState<RecipeBox[]>([]);
 
   useEffect(() => {
@@ -50,7 +50,18 @@ export default function ProfilePage() {
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const res: UserRecipeHistory[] = await response.json();
-      setHistory(res);
+      const recipeDetails = await Promise.all(
+        res.map(async (item) => {
+          const r = await fetch(`${API_BASE_URL}api/Recipes/recipe/detail/${item.recipeId}`);
+          const data: RecipeBox = await r.json();
+          return {
+            ...data,
+            cookedAt: item.cookedAt,
+            note: item.note,
+          };
+        })
+      );
+      setHistoryRecipes(recipeDetails);
     } catch (err) {
       console.error("Error loading history:", err);
     }
@@ -90,10 +101,47 @@ export default function ProfilePage() {
 
   if (loading) return <Text>Loading history...</Text>;
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View style={styles.header}>
+  type HistoryRecipe = RecipeBox & { cookedAt: string; note?: string | null };
+
+  const renderRecentItem = ({ item }: { item: RecipeBox }) => (
+    <TouchableOpacity
+      onPress={() =>
+        router.push({
+          pathname: "./[recipeId]/RecipeDetail",
+          params: { recipeId: item.recipeId.toString() },
+        })
+      }
+    >
+      <View style={{ marginTop: 16, marginBottom: 16 }}>
+        <RecipeCard {...item} />
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderHistoryItem = ({ item }: { item: HistoryRecipe }) => (
+    <TouchableOpacity
+      onPress={() =>
+        router.push({
+          pathname: "./[recipeId]/RecipeDetail",
+          params: { recipeId: item.recipeId.toString() },
+        })
+      }
+    >
+      <View style={{ marginTop: 16, marginBottom: 16 }}>
+        <RecipeCard {...item} />
+        <View style={styles.historyItem}>
+          <Text style={styles.historyMeta}>
+            Cooked at {new Date(item.cookedAt).toLocaleDateString()}
+          </Text>
+          {item.note ? <Text style={styles.historyNote}>{item.note}</Text> : null}
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const ListHeader = () => (
+    <>
+      <View style={styles.header}>
         <View>
           <Image
             source={require("../../../../assets/images/SettingsIcon.png")}
@@ -122,7 +170,7 @@ export default function ProfilePage() {
               size="large"
               onPress={() => {
                 console.log("Admin button pressed");
-                router.push("/(Dashboard)/AdminDashboard")
+                router.push("/(Dashboard)/AdminDashboard");
               }}
             />
           )}
@@ -158,8 +206,8 @@ export default function ProfilePage() {
             variant="primary"
             size="small"
             onPress={() => {
-              console.log("Edit profile button pressed")
-              router.push("./EditProfile")
+              console.log("Edit profile button pressed");
+              router.push("./EditProfile");
             }}
           />
           <Button
@@ -171,7 +219,6 @@ export default function ProfilePage() {
               router.push("./SettingsPage");
             }}
           />
-
         </View>
       </View>
 
@@ -194,57 +241,45 @@ export default function ProfilePage() {
             </Text>
           </TouchableOpacity>
         </View>
-
-        {activeTab === "recent" ? (
-          <FlatList
-            data={userRecipe}
-            keyExtractor={(item) => item.recipeId.toString()}
-            nestedScrollEnabled
-            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() =>
-                  router.push({
-                    pathname: "./[recipeId]/RecipeDetail",
-                    params: { recipeId: item.recipeId.toString() },
-                  })
-                }
-              >
-                <View style={{ marginTop: 16, marginBottom: 16 }}>
-                  <RecipeCard {...item} />
-                </View>
-              </TouchableOpacity>
-            )}
-          />
-        ) : (
-          <FlatList
-            data={history}
-            keyExtractor={(item) => item.id.toString()}
-            nestedScrollEnabled
-            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
-            renderItem={({ item }) => (
-              <View style={styles.historyItem}>
-                <Text style={styles.historyTitle}>Recipe #{item.recipeId}</Text>
-                <Text style={styles.historyMeta}>
-                  Cooked at {new Date(item.cookedAt).toLocaleDateString()}
-                </Text>
-                {item.note ? <Text style={styles.historyNote}>{item.note}</Text> : null}
-              </View>
-            )}
-            ListEmptyComponent={
-              <Text style={{ color: "#666", marginTop: 12, textAlign: "center" }}>
-                No history items yet.
-              </Text>
-            }
-          />
-        )}
       </View>
+    </>
+  );
 
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+      {activeTab === "recent" ? (
+        <FlatList
+          data={userRecipe}
+          keyExtractor={(item) => item.recipeId.toString()}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          ListHeaderComponent={ListHeader}
+          ListHeaderComponentStyle={{ paddingBottom: 16 }}
+          renderItem={renderRecentItem}
+          ListEmptyComponent={
+            <Text style={{ color: "#666", marginTop: 12, textAlign: "center" }}>
+              No recipes yet.
+            </Text>
+          }
+        />
+      ) : (
+        <FlatList
+          data={historyRecipes}
+          keyExtractor={(item) => item.recipeId.toString()}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          ListHeaderComponent={ListHeader}
+          ListHeaderComponentStyle={{ paddingBottom: 16 }}
+          renderItem={renderHistoryItem}
+          ListEmptyComponent={
+            <Text style={{ color: "#666", marginTop: 12, textAlign: "center" }}>
+              No history items yet.
+            </Text>
+          }
+        />
+      )}
       <View>
         {/* Bottom navigation bar */}
         {user && <NavigationBar user={user} />}
       </View>
-      </ScrollView>
     </SafeAreaView>
   );
 }

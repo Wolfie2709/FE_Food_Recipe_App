@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Button from "../../../components/ui/button";
+import OverlayMenu from "../../../components/ui/overlay-menu";
 
 export default function IngredientsManagement() {
   const {user} = useUser();
@@ -172,23 +173,29 @@ export default function IngredientsManagement() {
       </TouchableOpacity>
 
       {/* Context menu */}
-      {menuVisibleId === item.ingredientsId && (
-        <View style={styles.contextMenu}>
-          <TouchableOpacity
-            onPress={() =>
-              router.push({
-                pathname: "./EditIngredients",
-                params: { ingredientsId : item.ingredientsId.toString() },
-              })
-            }
-          >
-            <Text style={styles.menuItem}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => DeleteKU(item.ingredientsId)}>
-            <Text style={styles.menuItem}>Delete</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      <OverlayMenu
+        visible={menuVisibleId === item.ingredientsId}
+        onClose={() => setMenuVisibleId(null)}
+        items={
+          menuVisibleId === item.ingredientsId
+            ? [
+                {
+                  label: "Edit",
+                  onPress: () =>
+                    router.push({
+                      pathname: "./EditIngredients",
+                      params: { ingredientsId: item.ingredientsId.toString() },
+                    }),
+                },
+                {
+                  label: "Delete",
+                  onPress: () => DeleteKU(item.ingredientsId),
+                  destructive: true,
+                },
+              ]
+            : []
+        }
+      />
       </View>
 
   );

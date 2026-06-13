@@ -16,6 +16,7 @@ type EditRecipeStepFormProps = {
 export default function EditCookingSteps({ recipeId }: EditRecipeStepFormProps) {
   const { user } = useUser();
   const [recipeSteps, setRecipeSteps] = useState<RecipeStepInfo[]>([]);
+  const [name, setName] = useState("");
   const [currentDescription, setCurrentDescription] = useState("");
   const router = useRouter();
 
@@ -23,9 +24,9 @@ export default function EditCookingSteps({ recipeId }: EditRecipeStepFormProps) 
   useEffect(() => {
     const fetchSteps = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}api/RecipeSteps/recipe-  ${recipeId}`, {
+        const res = await fetch(`${API_BASE_URL}api/RecipeSteps/recipe-${recipeId}`, {
           headers: {
-            "Authorization": user?.token ? `Bearer ${user.token}` : "",
+            Authorization: user?.token ? `Bearer ${user.token}` : "",
           },
         });
         if (!res.ok) return;
@@ -53,15 +54,19 @@ export default function EditCookingSteps({ recipeId }: EditRecipeStepFormProps) 
   };
 
   // Add new step row
- // Add new step row
-const addStep = () => {
-  if (!currentDescription.trim()) return;
-  setRecipeSteps([
-    ...recipeSteps,
-    { recipeStepId: null, name: currentDescription, description: currentDescription },
-  ]);
-  setCurrentDescription("");
-};
+  const addStep = () => {
+    if (!currentDescription.trim()) return;
+    setRecipeSteps([
+      ...recipeSteps,
+      {
+        recipeStepId: null,
+        name: name.trim() || currentDescription,
+        description: currentDescription,
+      },
+    ]);
+    setName("");
+    setCurrentDescription("");
+  };
 
   // Save steps (PUT for existing, POST for new)
   const saveSteps = async () => {
@@ -108,11 +113,20 @@ const addStep = () => {
       <Text style={styles.header}>Edit Cooking Steps</Text>
       <Text style={styles.sectionTitle}>Steps</Text>
 
-      {/* Input for new step */}
+      <Field
+        placeholder="Instruction Name"
+        value={name}
+        keyboardType="default"
+        onChangeText={setName}
+        maxLength={100}
+      />
+
       <Field
         placeholder="Instruction description"
         value={currentDescription}
+        keyboardType="default"
         onChangeText={setCurrentDescription}
+        maxLength={100}
       />
       <Button title="Add new step" onPress={addStep} />
 

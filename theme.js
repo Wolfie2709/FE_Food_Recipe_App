@@ -394,43 +394,7 @@ export const ManagementStyles = StyleSheet.create({
     paddingLeft: spacing.md,
     paddingRight: spacing.sm,
   },
-  contextMenu: {
-    position: "absolute",
-    right: 0,
-    top: 30,
-    backgroundColor: "#fff",
-    borderRadius: 4,
-    elevation: 4, // shadow on Android
-    padding: 8,
-  },
-  menuItem: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    fontSize: 14,
-  },
-  overlayMenu: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    elevation: 10, // Android shadow
-    shadowColor: "#000", // iOS shadow
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    zIndex: 999,
-  },
-  menuItem: {
-    fontSize: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    textAlign: "center",
-  },
+  // Reusable overlay menu styling has been moved to components/ui/overlay-menu.tsx
   
 });
 

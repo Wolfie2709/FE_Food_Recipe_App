@@ -298,7 +298,7 @@ export default function AddNewRecipeForm() {
       <Field
         keyboardType="numeric"
         value={serves}
-        onChangeText={setServes}
+        editable={false}
         placeholder="Enter serving size"
       />
 
@@ -344,6 +344,23 @@ export default function AddNewRecipeForm() {
               setRecipeIngredients(updated);
             }}
           />
+
+          {/* Price calculation */}
+          {item.ingredientsId && item.quantity && (
+            <View style={{ marginLeft: 8, justifyContent: "center" }}>
+              <Text style={{ fontSize: 12, fontWeight: "600", color: "#333" }}>
+                {(() => {
+                  const selectedIng = ingredients.find(
+                    (ing) => ing.ingredientsId === item.ingredientsId
+                  );
+                  const quantityNum = parseFloat(item.quantity) || 0;
+                  const price = selectedIng?.price || 0;
+                  const total = quantityNum * price;
+                  return total.toLocaleString();
+                })()}
+              </Text>
+            </View>
+          )}
 
           {/* Delete row button */}
           <TouchableOpacity

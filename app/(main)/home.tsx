@@ -7,7 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Alert, Dimensions, FlatList, Image, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { homeStyles as styles } from "../../theme";
-import { RecipeBox, RecipePagination, UserRecipeHistory, WishlistDto } from "../../types";
+import { CategoryBoxDto, CategoryPagination, RecipeBox, RecipePagination, UserRecipeHistory, WishlistDto } from "../../types";
 
 const screenWidth = Dimensions.get("window").width;
 const spacing = 10;
@@ -61,8 +61,9 @@ export default function Home() {
   const [recipes, setRecipes] = useState<RecipeBox[]>([]);
   const [history, setHistory] = useState<UserRecipeHistory[]>([]);
   const [wishlistRecipes, setWishlistRecipes] = useState<RecipeBox[]>([]);
-  const [categories, setCategories] = useState<{ categoriesId: number; name: string }[]>([]);
+  const [categories, setCategories] = useState<CategoryBoxDto[]>([]);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
+  const [categoryRecipes, setCategoryRecipes] = useState<RecipeBox[]>([]);
   console.log("Home sees user:", user);
 
   const loadData = async (pageToLoad: number) => {
@@ -163,6 +164,27 @@ export default function Home() {
     loadWishlist();
   }, []);
 
+  const loadCategoryRecipes = async (categoryId: number | null) => {
+    if (categoryId === null) {
+      setCategoryRecipes([]);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE_URL}api/Recipes/search?category=${categoryId}`);
+      if (!res.ok) throw new Error("Failed to load category recipes");
+      const data: RecipePagination = await res.json();
+      setCategoryRecipes(Array.isArray(data.recipeList) ? data.recipeList : []);
+    } catch (err) {
+      console.error("Error loading category recipes:", err);
+      setCategoryRecipes([]);
+    }
+  };
+
+  useEffect(() => {
+    loadCategoryRecipes(activeCategory);
+  }, [activeCategory]);
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -170,8 +192,8 @@ export default function Home() {
           headers: { Authorization: `Bearer ${user?.token}` },
         });
         if (!res.ok) throw new Error("Failed to load categories");
-        const data = await res.json();
-        setCategories(Array.isArray(data) ? data : [data]);
+        const data: CategoryPagination = await res.json();
+        setCategories(Array.isArray(data.categoryList) ? data.categoryList : []);
       } catch (err) {
         console.error("Error loading categories:", err);
       }
@@ -179,11 +201,7 @@ export default function Home() {
     fetchCategories();
   }, []);
 
-  const filteredRecipes = activeCategory
-    ? recipes.filter((r) =>
-      r.categories?.some((c) => c.categoriesId === activeCategory)
-    )
-    : recipes;
+  const filteredRecipes = activeCategory ? categoryRecipes : recipes;
 
 
   if (isLoading) return <Text>Loading history...</Text>;
@@ -370,13 +388,13 @@ export default function Home() {
           <View style={styles.categoryRow}>
             {categories.map((cat) => (
               <TouchableOpacity
-                key={cat.categoriesId}
-                onPress={() => setActiveCategory(cat.categoriesId)}
+                key={cat.categoryId}
+                onPress={() => setActiveCategory(cat.categoryId)}
               >
                 <Text
                   style={[
                     styles.category,
-                    activeCategory === cat.categoriesId && styles.categoryActive,
+                    activeCategory === cat.categoryId && styles.categoryActive,
                   ]}
                 >
                   {cat.name}
@@ -385,25 +403,25 @@ export default function Home() {
             ))}
           </View>
           <FlatList
-  data={filteredRecipes}
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  keyExtractor={(item) => `filtered-${item.recipeId}`}
-  renderItem={({ item }) => (
-    <TouchableOpacity
-      onPress={() =>
-        router.push({
-          pathname: "./Recipe/[recipeId]/RecipeDetail",
-          params: { recipeId: item.recipeId.toString() },
-        })
-      }
-    >
-      <View style={{ width: itemWidth }}>
-        <RecipeCard {...item} />
-      </View>
-    </TouchableOpacity>
-  )}
-/>
+            data={filteredRecipes}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => `filtered-${item.recipeId}`}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: "./Recipe/[recipeId]/RecipeDetail",
+                    params: { recipeId: item.recipeId.toString() },
+                  })
+                }
+              >
+                <View style={{ width: itemWidth }}>
+                  <RecipeCard {...item} />
+                </View>
+              </TouchableOpacity>
+            )}
+          />
 
         </View>
 
