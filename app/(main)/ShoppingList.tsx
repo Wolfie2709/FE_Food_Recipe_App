@@ -1,6 +1,5 @@
 import { useUser } from "@/components/userContext";
 import { API_BASE_URL } from "@/utils/apiConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import { Alert, Image, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -12,16 +11,12 @@ export default function ShoppingCart() {
 
   const loadShoppingList = async () => {
     try {
-      const stored = await AsyncStorage.getItem("shoppingList");
-      const recipeIds = stored ? JSON.parse(stored) : [];
-
       const response = await fetch(`${API_BASE_URL}api/ShoppingLists`, {
-        method: "POST",
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: user?.token ? `Bearer ${user.token}` : "",
         },
-        body: JSON.stringify(recipeIds),
       });
 
       if (!response.ok) throw new Error(`HTTP ${response.status}`);

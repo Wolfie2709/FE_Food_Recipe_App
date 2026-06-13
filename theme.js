@@ -990,6 +990,53 @@ export const profilePageStyles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  tabContainer: { width: "100%", paddingHorizontal: 16, marginTop: 16 },
+  tabRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+    marginHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabButtonActive: {
+    backgroundColor: "#FF6B00",
+  },
+  tabButtonText: {
+    color: "#575757",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  tabButtonTextActive: {
+    color: "#FFF",
+  },
+  historyItem: {
+    backgroundColor: "#FAFAFA",
+    borderRadius: 14,
+    padding: 16,
+    marginTop: 12,
+  },
+  historyTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#303030",
+    marginBottom: 4,
+  },
+  historyMeta: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginBottom: 8,
+  },
+  historyNote: {
+    fontSize: 14,
+    color: "#4B5563",
+  },
 });
 
 export const RecipeStepListStyles = StyleSheet.create({

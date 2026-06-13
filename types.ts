@@ -276,3 +276,10 @@ export type UserRecipeHistory = {
   ratingGiven?: number | null;
   note?: string | null;
 };
+
+export type UserRecipe = {
+  id: number;
+  userId: number;
+  recipeId: number;
+  createdAt: string;
+}

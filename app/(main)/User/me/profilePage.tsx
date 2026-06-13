@@ -2,12 +2,12 @@
 import Button from "@/components/ui/button";
 import NavigationBar from "@/components/ui/figma_navbar";
 import { useUser } from "@/components/userContext";
-import { colors, fonts, spacing, profilePageStyles as styles } from "@/theme";
+import { profilePageStyles as styles } from "@/theme";
 import { RecipeBox, User, UserRecipeHistory } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RecipeCard } from "../../Search";
 
@@ -15,10 +15,11 @@ export default function ProfilePage() {
   // const { accessToken } = useAuthStore();
   const userObject = useUser();
   const [user, setUser] = useState<User | null>(null);
+  const [activeTab, setActiveTab] = useState<"recent" | "history">("recent");
   const accessToken = userObject.user?.token;
-  const [recipes, setRecipes] = useState<RecipeBox[]>([]);
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState<UserRecipeHistory[]>([]);
+  const [userRecipe, setUserRecipe] = useState<RecipeBox[]>([]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -42,33 +43,41 @@ export default function ProfilePage() {
 
   const loadHistory = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}api/UserRecipeHistory`,
-        {
-          headers: {
-            Authorization: `Bearer ${userObject.user?.token}`,
-          },
-        });
+      const response = await fetch(`${API_BASE_URL}api/UserRecipeHistory`, {
+        headers: {
+          Authorization: `Bearer ${userObject.user?.token}`,
+        },
+      });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const res: UserRecipeHistory[] = await response.json();
       setHistory(res);
-
-      // Fetch recipe details for each recipeId
-      const recipePromises = res.map(async (h) => {
-        const r = await fetch(`${API_BASE_URL}api/Recipes/recipe/detail/${h.recipeId}`);
-        return await r.json();
-      });
-
-      const recipeResults = await Promise.all(recipePromises);
-      setRecipes(recipeResults);
     } catch (err) {
       console.error("Error loading history:", err);
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const loadCreatedRecipes = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}api/Recipes/user?page=1&pageSize=20`, {
+        headers: {
+          Authorization: `Bearer ${userObject.user?.token}`,
+        },
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const userRecipes: RecipeBox[] = await response.json();
+      setUserRecipe(userRecipes);
+    } catch (err) {
+      console.error("Error loading user recipes:", err);
     }
   };
 
   useEffect(() => {
-    loadHistory();
+    const loadAllData = async () => {
+      await Promise.all([loadHistory(), loadCreatedRecipes()]);
+      setLoading(false);
+    };
+
+    loadAllData();
   }, []);
 
   if (!user) {
@@ -83,7 +92,8 @@ export default function ProfilePage() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <View style={styles.header}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={styles.header}>
         <View>
           <Image
             source={require("../../../../assets/images/SettingsIcon.png")}
@@ -164,32 +174,77 @@ export default function ProfilePage() {
 
         </View>
       </View>
-      <View>
-        <Text style={{ fontSize: 30, fontFamily: fonts.semiBold, color: colors.textDark, marginBottom: spacing.sm, textAlign: "center" }}>RECENT RECIPES</Text>
-        <FlatList
-          data={recipes}
-          keyExtractor={(item) => item.recipeId.toString()}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() =>
-                router.push({
-                  pathname: "./[recipeId]/RecipeDetail",
-                  params: { recipeId: item.recipeId.toString() },
-                })
-              }
-            >
-              <View style={{ marginTop: 16, marginBottom: 16 }}>
-                <RecipeCard {...item} />
+
+      <View style={styles.tabContainer}>
+        <View style={styles.tabRow}>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === "recent" && styles.tabButtonActive]}
+            onPress={() => setActiveTab("recent")}
+          >
+            <Text style={[styles.tabButtonText, activeTab === "recent" && styles.tabButtonTextActive]}>
+              Recent Recipes
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabButton, activeTab === "history" && styles.tabButtonActive]}
+            onPress={() => setActiveTab("history")}
+          >
+            <Text style={[styles.tabButtonText, activeTab === "history" && styles.tabButtonTextActive]}>
+              Recipe History
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {activeTab === "recent" ? (
+          <FlatList
+            data={userRecipe}
+            keyExtractor={(item) => item.recipeId.toString()}
+            nestedScrollEnabled
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: "./[recipeId]/RecipeDetail",
+                    params: { recipeId: item.recipeId.toString() },
+                  })
+                }
+              >
+                <View style={{ marginTop: 16, marginBottom: 16 }}>
+                  <RecipeCard {...item} />
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        ) : (
+          <FlatList
+            data={history}
+            keyExtractor={(item) => item.id.toString()}
+            nestedScrollEnabled
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
+            renderItem={({ item }) => (
+              <View style={styles.historyItem}>
+                <Text style={styles.historyTitle}>Recipe #{item.recipeId}</Text>
+                <Text style={styles.historyMeta}>
+                  Cooked at {new Date(item.cookedAt).toLocaleDateString()}
+                </Text>
+                {item.note ? <Text style={styles.historyNote}>{item.note}</Text> : null}
               </View>
-            </TouchableOpacity>
-          )}
-        />
+            )}
+            ListEmptyComponent={
+              <Text style={{ color: "#666", marginTop: 12, textAlign: "center" }}>
+                No history items yet.
+              </Text>
+            }
+          />
+        )}
       </View>
+
       <View>
         {/* Bottom navigation bar */}
         {user && <NavigationBar user={user} />}
       </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

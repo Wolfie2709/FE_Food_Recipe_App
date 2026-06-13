@@ -7,7 +7,6 @@ import {
   Review
 } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -19,6 +18,7 @@ export default function RecipeDetail() {
   const [recipe, setRecipe] = useState<RecipeDetailCompleteDto | null>(null);
   const [notes, setNotes] = useState<{ content: string }[]>([]);
   const [review, setReview] = useState<Review[]>([]);
+  const [selectedServings, setSelectedServings] = useState<number>(1);
 
 
   type UserPlaceholder = { pictureAvatarDirectory: string, Name?: string }
@@ -32,6 +32,7 @@ export default function RecipeDetail() {
       const res = await fetch(`${API_BASE_URL}api/Recipes/recipe/detail/${recipeId}`);
       const data = await res.json();
       setRecipe(data);
+      setSelectedServings(data.servingSize ?? 1);
     };
     const fetchNotes = async () => {
       try {
@@ -76,6 +77,25 @@ export default function RecipeDetail() {
 
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
 
+  const formatIngredientQuantity = (quantity?: number, measurementUnit?: string) => {
+    if (quantity == null) return "";
+
+    const baseServings = recipe?.servingSize ?? 1;
+    const scaledQuantity = quantity * (selectedServings / (baseServings || 1));
+    const displayQuantity = Number.isInteger(scaledQuantity)
+      ? scaledQuantity
+      : parseFloat(scaledQuantity.toFixed(2));
+
+    return `${displayQuantity} ${measurementUnit || ""}`.trim();
+  };
+
+  const handleChangeServings = (newValue: number) => {
+    setSelectedServings(Math.max(1, newValue));
+  };
+
+  const incrementServings = () => handleChangeServings(selectedServings + 1);
+  const decrementServings = () => handleChangeServings(selectedServings - 1);
+
   if (!recipe) return <Text>Loading...</Text>;
   console.log("recipe detail: ", recipe);
 
@@ -110,19 +130,24 @@ export default function RecipeDetail() {
 
   const addToShoppingList = async (recipeId: number) => {
     try {
-      const stored = await AsyncStorage.getItem("shoppingList");
-      const list = stored ? JSON.parse(stored) : [];
+      const res = await fetch(`${API_BASE_URL}api/ShoppingLists/${recipeId}?serving=${selectedServings}`, {
+        method: "POST",
+        headers: {
+          Authorization: user?.token ? `Bearer ${user.token}` : "",
+        },
+      });
 
-      // Avoid duplicates
-      if (!list.includes(recipeId)) {
-        list.push(recipeId);
-        await AsyncStorage.setItem("shoppingList", JSON.stringify(list));
-        Alert.alert("Success", "Recipe added to shopping list!");
-      } else {
-        Alert.alert("Info", "Recipe already in shopping list.");
+      const text = await res.text();
+
+      if (!res.ok) {
+        Alert.alert("Error", `Failed to add to shopping list: ${text}`);
+        return;
       }
+
+      Alert.alert("Success", "Added to shopping list!");
     } catch (err) {
-      console.error("Error saving shopping list:", err);
+      console.error("Error adding to shopping list:", err);
+      Alert.alert("Error", "Could not connect to server");
     }
   };
 
@@ -224,11 +249,7 @@ export default function RecipeDetail() {
         <View style={styles.InfoBar}>
           <View style={[styles.InfoCard, { marginRight: 16 }]}>
             <Text style={styles.InfoLabel}>Serves </Text>
-            <Text style={styles.InfoDetail}>{recipe.servingSize}</Text>
-          </View>
-          <View style={[styles.InfoCard, { marginRight: 16 }]}>
-            <Text style={styles.InfoLabel}>Cook Time </Text>
-            <Text style={styles.InfoDetail}>{recipe.cookingTime} mins</Text>
+            <Text style={styles.InfoDetail}>{selectedServings}</Text>
           </View>
           <View style={styles.InfoCard}>
             <Text style={styles.InfoLabel}>Category </Text>
@@ -238,6 +259,40 @@ export default function RecipeDetail() {
                 : "Uncategorized"}
             </Text>
           </View>
+        </View>
+
+        <View style={{ marginTop: 16, flexDirection: "row", alignItems: "center" }}>
+          <Text style={{ fontSize: 16, fontWeight: "600", marginRight: 16 }}>Adjust Servings</Text>
+          <TouchableOpacity
+            onPress={decrementServings}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: "#f1f1f1",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "700" }}>-</Text>
+          </TouchableOpacity>
+          <Text style={{ marginHorizontal: 12, fontSize: 16, fontWeight: "600" }}>{selectedServings}</Text>
+          <TouchableOpacity
+            onPress={incrementServings}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: "#f1f1f1",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "700" }}>+</Text>
+          </TouchableOpacity>
+          <Text style={{ marginLeft: 12, color: "#666" }}>
+            Original: {recipe.servingSize ?? 1}
+          </Text>
         </View>
 
         <View style={{ marginTop: 24 }}>
@@ -262,7 +317,9 @@ export default function RecipeDetail() {
                 : require("assets/images/figma_images/Image1.png")} style={styles.CardListItemImage} />
               <Text style={styles.CardListItemName}>{ing.name}</Text>
             </View>
-            <Text style={{ fontSize: 16, fontWeight: "600", color: "#3c3c3c" }}>{ing.quantity} {ing.measurementUnit || "g"}</Text>
+            <Text style={{ fontSize: 16, fontWeight: "600", color: "#3c3c3c" }}>
+              {formatIngredientQuantity(ing.quantity, ing.measurementUnit)}
+            </Text>
           </View>
         ))}
         {/* UTENSIL LIST */}
