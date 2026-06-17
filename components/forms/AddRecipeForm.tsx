@@ -6,6 +6,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
   ScrollView,
   Text,
@@ -153,6 +154,51 @@ export default function AddNewRecipeForm() {
     setRecipeKU([...recipeKU, { kitchenUtensilId: null }]);
   };
 
+  const buildRecipePayload = (): CreateRecipeRequestDto | null => {
+    const selectedIngredients = recipeIngredients
+      .filter((rI) => rI.ingredientsId !== null)
+      .map((rI) => ({
+        ingredientsId: rI.ingredientsId!,
+        quantity: rI.quantity.trim(),
+      }));
+
+    const duplicateIngredients = selectedIngredients
+      .map((item) => item.ingredientsId)
+      .filter((id, idx, arr) => arr.indexOf(id) !== idx);
+
+    if (duplicateIngredients.length > 0) {
+      Alert.alert(
+        "Duplicate ingredient",
+        "Please remove or merge duplicate ingredients before saving."
+      );
+      return null;
+    }
+
+    if (selectedIngredients.some((item) => item.quantity === "")) {
+      Alert.alert(
+        "Missing quantity",
+        "Please enter a quantity for every selected ingredient."
+      );
+      return null;
+    }
+
+    const payload: CreateRecipeRequestDto = {
+      name,
+      description: description || null,
+      servingSize: parseInt(serves, 10),
+      cookingTime: parseInt(cookTime, 10),
+      ingredients: selectedIngredients,
+      categories: recipeCategories
+        .filter((rC) => rC.categoriesId !== null)
+        .map((rC) => ({ categoriesId: rC.categoriesId! })),
+      kitchenUtensils: recipeKU
+        .filter((rKU) => rKU.kitchenUtensilId !== null)
+        .map((rKU) => ({ kitchenUtensilId: rKU.kitchenUtensilId! })),
+    };
+
+    return payload;
+  };
+
   // 🔹 Pick image and upload immediately
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -201,28 +247,8 @@ export default function AddNewRecipeForm() {
   
   // 🔹 Save recipe and go to cooking steps
   const goToCookingSteps = async () => {
-    const payload: CreateRecipeRequestDto = {
-      name,
-      description: description || null,
-      servingSize: parseInt(serves, 10),
-      cookingTime: parseInt(cookTime, 10),
-      ingredients: recipeIngredients
-        .filter((rI) => rI.ingredientsId !== null)
-        .map((rI) => ({
-          ingredientsId: rI.ingredientsId!,
-          quantity: rI.quantity,
-        })),
-      categories: recipeCategories
-        .filter((rC) => rC.categoriesId !== null)
-        .map((rC) => ({
-          categoriesId: rC.categoriesId!,
-        })),
-      kitchenUtensils: recipeKU
-        .filter((rKU) => rKU.kitchenUtensilId !== null)
-        .map((rKU) => ({
-          kitchenUtensilId: rKU.kitchenUtensilId!,
-        })),
-    };
+    const payload = buildRecipePayload();
+    if (!payload) return;
 
     try {
       if (!user?.token) {
@@ -255,24 +281,15 @@ export default function AddNewRecipeForm() {
 
       const body = payload
         ? JSON.stringify(payload)
-        : JSON.stringify({
-            name,
-            description: description || null,
-            servingSize: parseInt(serves, 10),
-            cookingTime: parseInt(cookTime, 10),
-            ingredients: recipeIngredients
-              .filter((rI) => rI.ingredientsId !== null)
-              .map((rI) => ({
-                ingredientsId: rI.ingredientsId!,
-                quantity: rI.quantity,
-              })),
-            categories: recipeCategories
-              .filter((rC) => rC.categoriesId !== null)
-              .map((rC) => ({ categoriesId: rC.categoriesId! })),
-            kitchenUtensils: recipeKU
-              .filter((rKU) => rKU.kitchenUtensilId !== null)
-              .map((rKU) => ({ kitchenUtensilId: rKU.kitchenUtensilId! })),
-          });
+        : (() => {
+            const generatedPayload = buildRecipePayload();
+            if (!generatedPayload) return null;
+            return JSON.stringify(generatedPayload);
+          })();
+
+      if (!body) {
+        return false;
+      }
 
       const response = await fetch(
         `${API_BASE_URL}api/Recipes/update/complete-recipe-info/${recipeId}`,

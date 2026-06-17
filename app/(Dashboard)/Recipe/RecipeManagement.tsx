@@ -14,7 +14,7 @@ export default function RecipeManagement() {
   const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
   const router = useRouter();
 
-  const loadRecipes = async () => {
+  const loadRecipes = async (): Promise<Recipe[]> => {
     try {
       const res = await fetch(
         `${API_BASE_URL}api/Recipes/home?page=1&pageSize=50`,
@@ -26,12 +26,14 @@ export default function RecipeManagement() {
       );
       if (!res.ok) {
         console.error("Failed to load recipes:", res.status, res.statusText);
-        return;
+        return [];
       }
       const data = await res.json();
       setRecipes(data.recipeList);
+      return data.recipeList || [];
     } catch (error) {
       console.error("Error loading recipes:", error);
+      return [];
     }
   };
 
@@ -69,10 +71,10 @@ export default function RecipeManagement() {
 
       if (raw.includes("success")) {
         console.log("Recipe created successfully");
-        await loadRecipes();
+        const updated = await loadRecipes();
 
-        if (recipes.length > 0) {
-          const latest = recipes.reduce((max, r) => r.recipeId > max.recipeId ? r : max, recipes[0]);
+        if (updated && updated.length > 0) {
+          const latest = updated.reduce((max, r) => (r.recipeId > max.recipeId ? r : max), updated[0]);
           router.push({
             pathname: "./add-recipe/AddNewRecipe",
             params: { recipeId: latest.recipeId.toString() },

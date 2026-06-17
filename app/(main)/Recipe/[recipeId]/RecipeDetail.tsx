@@ -272,10 +272,6 @@ export default function RecipeDetail() {
                 : "Uncategorized"}
             </Text>
           </View>
-          <View style={styles.InfoCard}>
-            <Text style={styles.InfoLabel}>Total Cost </Text>
-            <Text style={styles.InfoDetail}>{totalCost.toLocaleString()}</Text>
-          </View>
         </View>
 
         <View style={{ marginTop: 16, flexDirection: "row", alignItems: "center" }}>
@@ -308,7 +304,7 @@ export default function RecipeDetail() {
             <Text style={{ fontSize: 18, fontWeight: "700" }}>+</Text>
           </TouchableOpacity>
           <Text style={{ marginLeft: 12, color: "#666" }}>
-            Original: {recipe.servingSize ?? 1}
+            Cost: {totalCost.toLocaleString()}
           </Text>
         </View>
 

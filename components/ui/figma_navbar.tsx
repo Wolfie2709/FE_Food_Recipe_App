@@ -12,20 +12,21 @@ const HomeIcon = ({ size = 40, color = "#E23E3E" }) => (
   </Svg>
 );
 
-const ShieldIcon = ({ size = 24, color = "#F9D8D8" }) => (
-  <Svg width={size} height={size} viewBox="0 0 20 20" fill="none">
+const PlusIcon = ({ size = 28, color = "#E23E3E" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
     <Path
-      fillRule="evenodd"
-      clipRule="evenodd"
-      d="M0 11.713C0 6.082 0.614 6.475 3.919 3.41C5.365 2.246 7.615 0 9.558 0C11.5 0 13.795 2.235 15.254 3.41C18.559 6.475 19.172 6.082 19.172 11.713C19.172 20 17.213 20 9.586 20C1.959 20 0 20 0 11.713Z"
+      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"
       fill={color}
     />
   </Svg>
 );
 
-const CircleIcon = ({ size = 48, color = "#E23E3E" }) => (
-  <Svg width={size} height={size} viewBox="0 0 48 48" fill="none">
-    <Path d="M0 24C0 10.745 10.745 0 24 0s24 10.745 24 24-10.745 24-24 24S0 37.255 0 24Z" fill={color} />
+const ShoppingCartIcon = ({ size = 28, color = "#E23E3E" }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"
+      fill={color}
+    />
   </Svg>
 );
 
@@ -50,10 +51,10 @@ export default function NavigationBar({ user }: { user?: Partial<User> }) {
           <HomeIcon />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push("/(Dashboard)/Recipe/add-recipe/AddNewRecipe")}>
-          <ShieldIcon />
+          <PlusIcon />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push("/ShoppingList")}>
-          <CircleIcon />
+          <ShoppingCartIcon />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}

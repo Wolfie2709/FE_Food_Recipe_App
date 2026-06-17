@@ -70,7 +70,7 @@ export default function AddCookingSteps({ recipeId }: Props) {
           console.error("Failed to save step:", res.status, rawError);
         }
         router.push({
-          pathname: "../Recipe/RecipeManagement",
+          pathname: "../RecipeManagement",
           params: { id: recipeId.toString() },
         });
       }
