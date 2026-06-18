@@ -28,7 +28,7 @@ function RecipeCard({ name, authorName, rating, imageDirectory, avatar }: Recipe
   return (
     <View style={styles.recipeCard}>
       <Image
-        source={imageDirectory ? { uri: `${URL}${imageDirectory}` } : undefined}
+        source={imageDirectory ? { uri: `${URL}${imageDirectory}` } : require("assets/images/figma_images/Image1.png")}
         style={styles.recipeImage}
       />
       <Text style={styles.recipeTitle}>{name}</Text>
@@ -380,25 +380,25 @@ export default function Home() {
             ))}
           </View>
           <FlatList
-  data={filteredRecipes}
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  keyExtractor={(item) => `filtered-${item.recipeId}`}
-  renderItem={({ item }) => (
-    <TouchableOpacity
-      onPress={() =>
-        router.push({
-          pathname: "./Recipe/[recipeId]/RecipeDetail",
-          params: { recipeId: item.recipeId.toString() },
-        })
-      }
-    >
-      <View style={{ width: itemWidth }}>
-        <RecipeCard {...item} />
-      </View>
-    </TouchableOpacity>
-  )}
-/>
+            data={filteredRecipes}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => `filtered-${item.recipeId}`}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: "./Recipe/[recipeId]/RecipeDetail",
+                    params: { recipeId: item.recipeId.toString() },
+                  })
+                }
+              >
+                <View style={{ width: itemWidth }}>
+                  <RecipeCard {...item} />
+                </View>
+              </TouchableOpacity>
+            )}
+          />
 
         </View>
 
