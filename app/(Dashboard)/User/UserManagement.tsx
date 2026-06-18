@@ -1,3 +1,4 @@
+import OverlayMenu from "@/components/ui/overlay-menu";
 import { useUser } from "@/components/userContext";
 import { ManagementStyles as styles } from "@/theme";
 import type { User } from "@/types";
@@ -8,7 +9,7 @@ import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, Vie
 import Button from "../../../components/ui/button";
 
 
-export default function IngredientsManagement() {
+export default function UserManagement() {
   const {user} = useUser();
   const [userInfo, setUserInfo] = useState<User[]>([]);
   const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
@@ -100,23 +101,29 @@ export default function IngredientsManagement() {
     </TouchableOpacity>
 
     {/* Context menu */}
-    {menuVisibleId === item.id && (
-      <View style={styles.contextMenu}>
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: "./EditIngredients",
-              params: { ingredientsId: item.id.toString() },
-            })
-          }
-        >
-          <Text style={styles.menuItem}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => DeleteUsers(item.id)}>
-          <Text style={styles.menuItem}>Hard Delete</Text>
-        </TouchableOpacity>
-      </View>
-    )}
+      <OverlayMenu
+        visible={menuVisibleId === item.id}
+        onClose={() => setMenuVisibleId(null)}
+        items={
+          menuVisibleId === item.id
+            ? [
+                {
+                  label: "Edit",
+                  onPress: () =>
+                    router.push({
+                      pathname: "./EditUsers",
+                      params: { usersId: item.id.toString() },
+                    }),
+                },
+                {
+                  label: "Hard Delete",
+                  onPress: () => DeleteUsers(item.id),
+                  destructive: true,
+                },
+              ]
+            : []
+        }
+      />
     </View>
 );
 

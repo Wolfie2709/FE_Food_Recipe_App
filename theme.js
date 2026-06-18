@@ -394,43 +394,7 @@ export const ManagementStyles = StyleSheet.create({
     paddingLeft: spacing.md,
     paddingRight: spacing.sm,
   },
-  contextMenu: {
-    position: "absolute",
-    right: 0,
-    top: 30,
-    backgroundColor: "#fff",
-    borderRadius: 4,
-    elevation: 4, // shadow on Android
-    padding: 8,
-  },
-  menuItem: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    fontSize: 14,
-  },
-  overlayMenu: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    elevation: 10, // Android shadow
-    shadowColor: "#000", // iOS shadow
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    zIndex: 999,
-  },
-  menuItem: {
-    fontSize: 16,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-    textAlign: "center",
-  },
+  // Reusable overlay menu styling has been moved to components/ui/overlay-menu.tsx
   
 });
 
@@ -989,6 +953,53 @@ export const profilePageStyles = StyleSheet.create({
     borderColor: "#DDD",
     justifyContent: "center",
     alignItems: "center",
+  },
+  tabContainer: { width: "100%", paddingHorizontal: 16, marginTop: 16 },
+  tabRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: "#F3F4F6",
+    marginHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabButtonActive: {
+    backgroundColor: "#FF6B00",
+  },
+  tabButtonText: {
+    color: "#575757",
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  tabButtonTextActive: {
+    color: "#FFF",
+  },
+  historyItem: {
+    backgroundColor: "#FAFAFA",
+    borderRadius: 14,
+    padding: 16,
+    marginTop: 12,
+  },
+  historyTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#303030",
+    marginBottom: 4,
+  },
+  historyMeta: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginBottom: 8,
+  },
+  historyNote: {
+    fontSize: 14,
+    color: "#4B5563",
   },
 });
 

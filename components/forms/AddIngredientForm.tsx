@@ -6,11 +6,12 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
+    Image,
+    Platform,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Button from "../ui/button";
 import Field from "../ui/figma_input_fields";
@@ -67,11 +68,20 @@ export default function AddIngredientForm() {
   
       try {
         const formData = new FormData();
-        formData.append("file", {
-          uri, // keep full URI
-          name: "ingredient.jpg",
-          type: "image/jpeg",
-        } as any);
+        if (Platform.OS === "web") {
+          const imageResponse = await fetch(uri);
+          const blob = await imageResponse.blob();
+          const file = new File([blob], `ingredient-${ingredientsId || "temp"}-${Date.now()}.jpg`, {
+            type: blob.type || "image/jpeg",
+          });
+          formData.append("file", file);
+        } else {
+          formData.append("file", {
+            uri, // keep full URI
+            name: `ingredient-${ingredientsId || "temp"}-${Date.now()}.jpg`,
+            type: "image/jpeg",
+          } as any);
+        }
   
         const response = await fetch(
           `${API_BASE_URL}api/Ingredients/update/image/ingredient/${ingredientsId}`,

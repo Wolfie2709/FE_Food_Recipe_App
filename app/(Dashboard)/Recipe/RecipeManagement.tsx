@@ -6,14 +6,16 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Button from "../../../components/ui/button";
+import OverlayMenu from "../../../components/ui/overlay-menu";
 
 export default function RecipeManagement() {
   const { user } = useUser();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
   const router = useRouter();
+  const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
 
-  const loadRecipes = async () => {
+  const loadRecipes = async (): Promise<Recipe[]> => {
     try {
       const res = await fetch(
         `${API_BASE_URL}api/Recipes/home?page=1&pageSize=50`,
@@ -25,12 +27,14 @@ export default function RecipeManagement() {
       );
       if (!res.ok) {
         console.error("Failed to load recipes:", res.status, res.statusText);
-        return;
+        return [];
       }
       const data = await res.json();
       setRecipes(data.recipeList);
+      return data.recipeList || [];
     } catch (error) {
       console.error("Error loading recipes:", error);
+      return [];
     }
   };
 
@@ -68,10 +72,10 @@ export default function RecipeManagement() {
 
       if (raw.includes("success")) {
         console.log("Recipe created successfully");
-        await loadRecipes();
+        const updated = await loadRecipes();
 
-        if (recipes.length > 0) {
-          const latest = recipes.reduce((max, r) => r.recipeId > max.recipeId ? r : max, recipes[0]);
+        if (updated && updated.length > 0) {
+          const latest = updated.reduce((max, r) => (r.recipeId > max.recipeId ? r : max), updated[0]);
           router.push({
             pathname: "./add-recipe/AddNewRecipe",
             params: { recipeId: latest.recipeId.toString() },
@@ -125,15 +129,33 @@ export default function RecipeManagement() {
 
       <View style={styles.tableCellProduct}>
         <View style={styles.ProductCell}>
+          {(() => {
+            const rawImage = Array.isArray(item.pictureDirectory)
+              ? item.pictureDirectory[0]
+              : item.pictureDirectory || item.picture_directory || item.imageDirectory || item.imageUrl;
+            const normalizedImage = rawImage && !/\.[a-zA-Z0-9]+(?:$|[?#])/.test(rawImage)
+              ? `${rawImage}.jpg`
+              : rawImage;
+            const imageUri = !normalizedImage
+              ? null
+              : normalizedImage.startsWith("http")
+                ? normalizedImage
+                : normalizedImage.includes("/")
+                  ? `${URL}${normalizedImage.startsWith("/") ? normalizedImage : `/${normalizedImage}`}`
+                  : `${URL}/Pictures/Recipes/${item.recipeId}/${normalizedImage}`;
+
+            return (
           <Image
             source={
-              item.imageDirectory
-                ? { uri: `${URL}${item.imageDirectory}` }
+              imageUri
+                ? { uri: imageUri }
                 : require("assets/images/icon.png")
             }
             style={styles.ImageContent}
             resizeMode="cover"
           />
+            );
+          })()}
           <View style={styles.ProductInformation}>
             <Text style={styles.tableCellText}>{item.name || "Untitled"}</Text>
           </View>
@@ -151,8 +173,6 @@ export default function RecipeManagement() {
       </TouchableOpacity>
     </View>
   );
-
-  const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
 
   return (
     <View style={styles.container}>
@@ -195,49 +215,42 @@ export default function RecipeManagement() {
       </View>
 
       {/* Overlay menu */}
-      {menuVisibleId && (
-        <View style={styles.overlayMenu}>
-          <TouchableOpacity
-            onPress={() => {
-              router.push({
-                pathname: "./edit-recipe/EditRecipe",
-                params: { recipeId: menuVisibleId.toString() },
-              });
-              setMenuVisibleId(null);
-            }}
-          >
-            <Text style={styles.menuItem}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              router.push({
-                pathname: "./edit-recipe/EditRecipeStep",
-                params: { recipeId: menuVisibleId.toString() },
-              });
-              setMenuVisibleId(null);
-            }}
-          >
-            <Text style={styles.menuItem}>Edit Recipe Step</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              softDeleteRecipe(menuVisibleId);
-              setMenuVisibleId(null);
-            }}
-          >
-            <Text style={styles.menuItem}>Soft Delete</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              hardDeleteRecipe(menuVisibleId);
-              setMenuVisibleId(null);
-            }}
-          >
-            <Text style={styles.menuItem}>Hard Delete</Text>
-          </TouchableOpacity>
-          <Button title="Close" onPress={() => setMenuVisibleId(null)} />
-        </View>
-      )}
+      <OverlayMenu
+        visible={!!menuVisibleId}
+        onClose={() => setMenuVisibleId(null)}
+        items={
+          menuVisibleId
+            ? [
+                {
+                  label: "Edit",
+                  onPress: () =>
+                    router.push({
+                      pathname: "./edit-recipe/EditRecipe",
+                      params: { recipeId: menuVisibleId.toString() },
+                    }),
+                },
+                {
+                  label: "Edit Recipe Step",
+                  onPress: () =>
+                    router.push({
+                      pathname: "./edit-recipe/EditRecipeStep",
+                      params: { recipeId: menuVisibleId.toString() },
+                    }),
+                },
+                {
+                  label: "Soft Delete",
+                  onPress: () => softDeleteRecipe(menuVisibleId),
+                  destructive: true,
+                },
+                {
+                  label: "Hard Delete",
+                  onPress: () => hardDeleteRecipe(menuVisibleId),
+                  destructive: true,
+                },
+              ]
+            : []
+        }
+      />
     </View>
   );
 }

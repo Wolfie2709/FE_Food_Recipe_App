@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList, Image, ListRenderItem, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Button from "../../../components/ui/button";
+import OverlayMenu from "../../../components/ui/overlay-menu";
 
 export default function KitchenUtensilsManagement() {
   const {user} = useUser();
@@ -172,23 +173,29 @@ export default function KitchenUtensilsManagement() {
       </TouchableOpacity>
 
       {/* Context menu */}
-      {menuVisibleId === item.kitchenUtensilId && (
-        <View style={styles.contextMenu}>
-          <TouchableOpacity
-            onPress={() =>
-              router.push({
-                pathname: "./EditKitchenUtensils",
-                params: { kitchenUtensilId: item.kitchenUtensilId.toString() },
-              })
-            }
-          >
-            <Text style={styles.menuItem}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => DeleteKU(item.kitchenUtensilId)}>
-            <Text style={styles.menuItem}>Delete</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      <OverlayMenu
+        visible={menuVisibleId === item.kitchenUtensilId}
+        onClose={() => setMenuVisibleId(null)}
+        items={
+          menuVisibleId === item.kitchenUtensilId
+            ? [
+                {
+                  label: "Edit",
+                  onPress: () =>
+                    router.push({
+                      pathname: "./EditKitchenUtensils",
+                      params: { kitchenUtensilId: item.kitchenUtensilId.toString() },
+                    }),
+                },
+                {
+                  label: "Delete",
+                  onPress: () => DeleteKU(item.kitchenUtensilId),
+                  destructive: true,
+                },
+              ]
+            : []
+        }
+      />
       </View>
 
   );

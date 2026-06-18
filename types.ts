@@ -50,7 +50,10 @@ export type RecipeBox = {
   name: string;
   addedBy: number;
   rating: number;
-  imageDirectory: string;
+  imageDirectory?: string | null;
+  imageUrl?: string | null;
+  pictureDirectory?: string | Array<string> | null;
+  picture_directory?: string | null;
   authorName: string;
   avatar?: string | null;
   categories?: Array<RecipeDetailCategoryIdDto>;
@@ -92,6 +95,7 @@ export type Ingredient = {
   categoryId: number;
   categoryName: string;
   pictureDirectory: string;
+  price?: number;
 };
 export type RecipeBoxDTO = {
   id: number;
@@ -110,7 +114,10 @@ export type Recipe = {
   categories: Category[];
   ingredients: Ingredient[];
   kitchenUtensils: KitchenUtensil[];
-  imageDirectory: string;
+  imageDirectory?: string | null;
+  imageUrl?: string | null;
+  pictureDirectory?: string | Array<string> | null;
+  picture_directory?: string | null;
 };
 export type KitchenUtensil = {
   kitchenUtensilId: number;
@@ -167,6 +174,7 @@ export type RecipeStepInfo = {
   name: string;
   description: string;
   imageUrl?: string;
+  pictureDirectory?: string;
 };
 
 export type RecipeCategoryInfoDto = {
@@ -184,6 +192,7 @@ export type RecipeDetailIngredientListDto = {
   measurementUnit?: string;
   quantity?: number;
   pictureDirectory?: string;
+  price?: number;
 };
 
 export type RecipeDetailCategoryIdDto ={
@@ -205,6 +214,8 @@ export type RecipeDetailStepListDto = {
   name?: string;
   description?: string;
   imageUrl?: string;
+  pictureDirectory?: string;
+  picture_directory?: string;
   recipeId: number;
 };
 
@@ -276,3 +287,10 @@ export type UserRecipeHistory = {
   ratingGiven?: number | null;
   note?: string | null;
 };
+
+export type UserRecipe = {
+  id: number;
+  userId: number;
+  recipeId: number;
+  createdAt: string;
+}

@@ -153,17 +153,6 @@ export default function AdminDashboard() {
 
       </View>
 
-      {/* Bottom sections */}
-      <View style={styles.sectionRow}>
-        {["Time", "Recipes", "Ingredients", "Charts", "Users", "Reviews"].map(
-          (section) => (
-            <View key={section} style={styles.statCard}>
-              <Text style={styles.statTitle}>{section}</Text>
-            </View>
-          )
-        )}
-      </View>
-
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Statistics Chart</Text>
         <BarChart

@@ -1,12 +1,12 @@
 import { RecipeFormStyles as styles } from "@/theme";
 import {
-  Category,
-  CreateRecipeRequestDto,
-  Ingredient,
-  KitchenUtensil,
-  RecipeCategoryInfoDto,
-  RecipeIngredient,
-  RecipeKitchenUtensilsInfoDto,
+    Category,
+    CreateRecipeRequestDto,
+    Ingredient,
+    KitchenUtensil,
+    RecipeCategoryInfoDto,
+    RecipeIngredient,
+    RecipeKitchenUtensilsInfoDto,
 } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { Picker } from "@react-native-picker/picker";
@@ -14,12 +14,13 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Image,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Image,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import Button from "../ui/button";
 import { MinusIcon } from "../ui/figma_Icons";
@@ -104,7 +105,11 @@ export default function EditRecipeForm() {
         );
         
         setRecipeKU(data.kitchenUtensils || []);
-        setRecipeImage(data.imageUrl || null);
+        setRecipeImage(
+          data.imageUrl ||
+          (Array.isArray(data.pictureDirectory) ? data.pictureDirectory[0] : data.pictureDirectory) ||
+          null
+        );
       } catch (err) {
         console.error("Error fetching recipe details:", err);
       }
@@ -124,11 +129,21 @@ export default function EditRecipeForm() {
       setRecipeImage(uri);
       try {
         const formData = new FormData();
-        formData.append("file", {
-          uri,
-          name: "recipe.jpg",
-          type: "image/jpeg",
-        } as any);
+        if (Platform.OS === "web") {
+          const imageResponse = await fetch(uri);
+          const blob = await imageResponse.blob();
+          const filename = `recipe-${recipeId || "temp"}-${Date.now()}.jpg`;
+          const file = new File([blob], filename, {
+            type: blob.type || "image/jpeg",
+          });
+          formData.append("file", file);
+        } else {
+          formData.append("file", {
+            uri,
+            name: "recipe.jpg",
+            type: "image/jpeg",
+          } as any);
+        }
 
         const response = await fetch(
           `${API_BASE_URL}api/Pictures/add-picture-for-recipe-${recipeId}`,
