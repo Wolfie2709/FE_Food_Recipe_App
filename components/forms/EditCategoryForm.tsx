@@ -3,7 +3,7 @@ import { API_BASE_URL } from "@/utils/apiConfig";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Image, Platform, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Button from "../ui/button";
 import Field from "../ui/figma_input_fields";
 import { useUser } from "../userContext";
@@ -77,11 +77,20 @@ const [ingredientCategory, setIngredientCategory] = useState(false);
       // Update category image if changed
       if (pictureDirectory) {
         const formData = new FormData();
-        formData.append("file", {
-          uri: pictureDirectory,
-          type: "image/jpeg",
-          name: "category.jpg",
-        } as any);
+        if (Platform.OS === "web") {
+          const imageResponse = await fetch(pictureDirectory);
+          const blob = await imageResponse.blob();
+          const file = new File([blob], `category-${categoryId || "temp"}-${Date.now()}.jpg`, {
+            type: blob.type || "image/jpeg",
+          });
+          formData.append("file", file);
+        } else {
+          formData.append("file", {
+            uri: pictureDirectory,
+            type: "image/jpeg",
+            name: `category-${categoryId || "temp"}-${Date.now()}.jpg`,
+          } as any);
+        }
 
         const imageResponse = await fetch(
           `${API_BASE_URL}api/Categories/update/image/category/${categoryId}`,

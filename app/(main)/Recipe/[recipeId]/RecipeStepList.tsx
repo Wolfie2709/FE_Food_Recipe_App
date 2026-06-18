@@ -30,7 +30,14 @@ export default function RecipeStepList() {
         }
   
         const text = await res.text();
-        const data = text ? JSON.parse(text) : [];
+        let data: RecipeDetailStepListDto[] = [];
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (parseError) {
+            console.error("Failed to parse step list response:", parseError, text);
+          }
+        }
         console.log("Fetched steps:", data);
         setSteps(data);
       } catch (err) {
@@ -81,9 +88,15 @@ export default function RecipeStepList() {
             }
           >
             {/* Circle thumbnail */}
-            {step.imageUrl ? (
+            {step.imageUrl || step.pictureDirectory || step.picture_directory ? (
               <Image
-                source={{ uri: `${URL}${step.imageUrl}` }}
+                source={{
+                  uri: (() => {
+                    const rawImage = step.imageUrl || step.pictureDirectory || step.picture_directory;
+                    if (!rawImage) return "";
+                    return rawImage.startsWith("http") ? rawImage : `${URL}${rawImage}`;
+                  })(),
+                }}
                 style={styles.thumbnail}
               />
             ) : (

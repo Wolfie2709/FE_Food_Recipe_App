@@ -42,15 +42,14 @@ export default function ShoppingCart() {
   };
 
   const calculateIngredientCost = (ing: any) => {
-    const quantity = parseIngredientQuantity(ing.quantity);
-    return quantity * (ing.price || 0);
+    if (ing == null) return 0;
+    const parsed = parseFloat(String(ing.price ?? 0).replace(/[^0-9.\-]/g, ""));
+    return Number.isNaN(parsed) ? 0 : parsed;
   };
 
   const calculateRecipeCost = (ingredients: any[]) => {
     if (!ingredients || ingredients.length === 0) return 0;
-    return ingredients.reduce((total, ing) => {
-      return total + calculateIngredientCost(ing);
-    }, 0);
+    return ingredients.reduce((total, ing) => total + calculateIngredientCost(ing), 0);
   };
 
   const calculateTotalShoppingCost = () => {

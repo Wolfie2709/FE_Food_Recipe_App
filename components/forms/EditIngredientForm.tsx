@@ -6,11 +6,12 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    Platform,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "../ui/button";
@@ -114,6 +115,45 @@ export default function EditIngredientForm() {
         const rawError = await response.text();
         console.error("Ingredient update failed:", response.status, rawError);
         return;
+      }
+
+      const isLocalImage =
+        pictureDirectory &&
+        !pictureDirectory.startsWith("http") &&
+        !pictureDirectory.startsWith("/Pictures");
+
+      if (isLocalImage) {
+        const formData = new FormData();
+        if (Platform.OS === "web") {
+          const imageResponse = await fetch(pictureDirectory);
+          const blob = await imageResponse.blob();
+          const file = new File([blob], `ingredient-${ingredientsId || "temp"}-${Date.now()}.jpg`, {
+            type: blob.type || "image/jpeg",
+          });
+          formData.append("file", file);
+        } else {
+          formData.append("file", {
+            uri: pictureDirectory,
+            name: `ingredient-${ingredientsId || "temp"}-${Date.now()}.jpg`,
+            type: "image/jpeg",
+          } as any);
+        }
+
+        const imageResponse = await fetch(
+          `${API_BASE_URL}api/Ingredients/update/image/ingredient/${ingredientsId}`,
+          {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: formData,
+          }
+        );
+
+        if (!imageResponse.ok) {
+          const rawError = await imageResponse.text();
+          console.error("Ingredient image update failed:", imageResponse.status, rawError);
+        }
       }
 
       router.push("./IngredientsManagement");

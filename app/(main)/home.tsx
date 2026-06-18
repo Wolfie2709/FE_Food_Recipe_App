@@ -23,12 +23,25 @@ function CreatorCard({ name, image }: Creator) {
   );
 }
 
-function RecipeCard({ name, authorName, rating, imageDirectory, avatar }: RecipeBox) {
-  let URL = API_BASE_URL.slice(0, -1);
+function RecipeCard({ recipeId, name, authorName, rating, imageDirectory, imageUrl, pictureDirectory, picture_directory, avatar }: RecipeBox) {
+  const URL = API_BASE_URL.slice(0, -1);
+  const rawImage = Array.isArray(pictureDirectory)
+    ? pictureDirectory[0]
+    : pictureDirectory || picture_directory || imageDirectory || imageUrl || null;
+  const normalizedImage = rawImage && !/\.[a-zA-Z0-9]+(?:$|[?#])/.test(rawImage)
+    ? `${rawImage}.jpg`
+    : rawImage;
+  const imageUri = !normalizedImage
+    ? null
+    : normalizedImage.startsWith("http")
+      ? normalizedImage
+      : normalizedImage.includes("/")
+        ? `${URL}${normalizedImage.startsWith("/") ? normalizedImage : `/${normalizedImage}`}`
+        : `${URL}/Pictures/Recipes/${recipeId}/${normalizedImage}`;
   return (
     <View style={styles.recipeCard}>
       <Image
-        source={imageDirectory ? { uri: `${URL}${imageDirectory}` } : undefined}
+        source={imageUri ? { uri: imageUri } : undefined}
         style={styles.recipeImage}
       />
       <Text style={styles.recipeTitle}>{name}</Text>

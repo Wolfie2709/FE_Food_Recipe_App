@@ -6,11 +6,12 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View
+    Image,
+    Platform,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import Button from "../ui/button";
 import Field from "../ui/figma_input_fields";
@@ -94,6 +95,54 @@ export default function AddKitchenUtensilForm() {
         const rawError = await response.text();
         console.error("Utensil update failed:", response.status, rawError);
         return;
+      }
+
+      const isLocalImage =
+        pictureDirectory &&
+        !pictureDirectory.startsWith("http") &&
+        !pictureDirectory.startsWith("/Pictures");
+
+      if (isLocalImage) {
+        const formData = new FormData();
+        if (Platform.OS === "web") {
+          const imageResponse = await fetch(pictureDirectory);
+          const blob = await imageResponse.blob();
+          const file = new File([blob], `utensil-${kitchenUtensilId || "temp"}-${Date.now()}.jpg`, {
+            type: blob.type || "image/jpeg",
+          });
+          formData.append("file", file);
+        } else {
+          formData.append("file", {
+            uri: pictureDirectory,
+            name: `utensil-${kitchenUtensilId || "temp"}-${Date.now()}.jpg`,
+            type: "image/jpeg",
+          } as any);
+        }
+
+        const uploadCandidates = [
+          `${API_BASE_URL}api/KitchenUtensils/update/image/kitchen-utensil/${kitchenUtensilId}`,
+          `${API_BASE_URL}api/KitchenUtensils/update/image/utensil/${kitchenUtensilId}`,
+        ];
+
+        let uploaded = false;
+        for (const uploadUrl of uploadCandidates) {
+          const imageResponse = await fetch(uploadUrl, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+            body: formData,
+          });
+
+          if (imageResponse.ok) {
+            uploaded = true;
+            break;
+          }
+        }
+
+        if (!uploaded) {
+          console.error("Utensil image upload failed for all known endpoints");
+        }
       }
 
       router.push("./KitchenUtensilManagement");

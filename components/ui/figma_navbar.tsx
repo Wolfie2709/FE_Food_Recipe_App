@@ -1,7 +1,8 @@
 import { nBarStyles as styles } from "@/theme";
-import { User } from "@/types";
+import { Recipe, User } from "@/types";
+import { API_BASE_URL } from "@/utils/apiConfig";
 import { useRouter } from "expo-router"; // or useNavigation from react-navigation
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
 
@@ -42,6 +43,78 @@ const ProfileIcon = ({ size = 28, color = "#303030" }) => (
 
 export default function NavigationBar({ user }: { user?: Partial<User> }) {
   const router = useRouter();
+  
+    const [recipes, setRecipes] = useState<Recipe[]>([]);
+      const loadRecipes = async (): Promise<Recipe[]> => {
+        try {
+          const res = await fetch(
+            `${API_BASE_URL}api/Recipes/home?page=1&pageSize=50`,
+            {
+              headers: {
+                "Authorization": user?.token ? `Bearer ${user.token}` : "",
+              },
+            }
+          );
+          if (!res.ok) {
+            console.error("Failed to load recipes:", res.status, res.statusText);
+            return [];
+          }
+          const data = await res.json();
+          setRecipes(data.recipeList);
+          return data.recipeList || [];
+        } catch (error) {
+          console.error("Error loading recipes:", error);
+          return [];
+        }
+      };
+    
+      useEffect(() => {
+        loadRecipes();
+      }, []);
+ const createRecipe = async () => {
+    try {
+      if (!user?.token) {
+        console.error("No token available");
+        return;
+      }
+
+      const res = await fetch(`${API_BASE_URL}api/Recipes/create-recipe`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${user.token}`,
+        },
+        body: JSON.stringify({
+          name: "Untitled Recipe",
+          description: null,
+          cookingTime: 0,
+          servingSize: 0,
+        }),
+      });
+
+      const raw = await res.text();
+
+      if (!res.ok) {
+        console.error("Failed to create recipe:", res.status, res.statusText, raw);
+        return;
+      }
+
+      if (raw.includes("success")) {
+        console.log("Recipe created successfully");
+        const updated = await loadRecipes();
+
+        if (updated && updated.length > 0) {
+          const latest = updated.reduce((max, r) => (r.recipeId > max.recipeId ? r : max), updated[0]);
+          router.push({
+            pathname: "../(Dashboard)/Recipe/add-recipe/AddNewRecipe",
+            params: { recipeId: latest.recipeId.toString() },
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error creating recipe:", error);
+    }
+  };
 
 
   return (
@@ -50,7 +123,7 @@ export default function NavigationBar({ user }: { user?: Partial<User> }) {
         <TouchableOpacity style={styles.navItem} onPress={() => router.push("/home")}>
           <HomeIcon />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push("/(Dashboard)/Recipe/add-recipe/AddNewRecipe")}>
+        <TouchableOpacity style={styles.navItem} onPress={createRecipe}>
           <PlusIcon />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push("/ShoppingList")}>

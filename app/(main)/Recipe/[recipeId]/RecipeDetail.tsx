@@ -3,8 +3,8 @@ import { ReviewCard } from "@/components/ui/reviewcard";
 import { useUser } from "@/components/userContext";
 import { RecipeDetailStyles as styles } from "@/theme";
 import {
-  RecipeDetailCompleteDto,
-  Review
+    RecipeDetailCompleteDto,
+    Review
 } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { router, useLocalSearchParams } from "expo-router";
@@ -112,7 +112,9 @@ export default function RecipeDetail() {
   if (!recipe) return <Text>Loading...</Text>;
   console.log("recipe detail: ", recipe);
 
-  const imageUri = recipe.pictureDirectory?.[0];
+  const imageUri = Array.isArray(recipe.pictureDirectory)
+    ? recipe.pictureDirectory[0]
+    : recipe.pictureDirectory || (recipe as any).imageDirectory || null;
 
   const saveToWishlist = async () => {
     try {
@@ -214,7 +216,7 @@ export default function RecipeDetail() {
         <View style={styles.RecipeVisualBlock}>
           <Text style={styles.RecipeName}>{recipe.name}</Text>
           <Image source={imageUri ?
-            { uri: `${URL}${imageUri}` }
+            { uri: imageUri.startsWith("http") ? imageUri : `${URL}${imageUri}` }
             : require("assets/images/figma_images/Image1.png")}
             style={styles.RecipePicture} />
           <View style={{ flexDirection: "row", alignItems: "baseline" }}>

@@ -5,7 +5,7 @@ import { API_BASE_URL } from "@/utils/apiConfig";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, Text, View } from "react-native";
+import { FlatList, Image, Platform, Text, View } from "react-native";
 import Button from "../ui/button";
 import Field from "../ui/figma_input_fields";
 
@@ -49,7 +49,56 @@ export default function EditCookingSteps({ recipeId }: EditRecipeStepFormProps) 
     if (!result.canceled) {
       const updated = [...recipeSteps];
       updated[index].imageUrl = result.assets[0].uri;
+      updated[index].pictureDirectory = result.assets[0].uri;
       setRecipeSteps(updated);
+    }
+  };
+
+  const extractStepIdFromResponse = async (res: Response) => {
+    const responseText = await res.text().catch(() => "");
+    if (!responseText) return null;
+
+    try {
+      const parsed = JSON.parse(responseText);
+      return parsed?.recipeStepId || parsed?.id || null;
+    } catch {
+      const digits = responseText.match(/(\d+)/);
+      if (!digits) return null;
+      const id = Number(digits[0]);
+      return Number.isNaN(id) ? null : id;
+    }
+  };
+
+  const uploadStepImage = async (stepId: number, imageUri: string) => {
+    const formData = new FormData();
+    if (Platform.OS === "web") {
+      const imageResponse = await fetch(imageUri);
+      const blob = await imageResponse.blob();
+      const file = new File([blob], `recipe-step-${stepId}-${Date.now()}.jpg`, {
+        type: blob.type || "image/jpeg",
+      });
+      formData.append("file", file);
+    } else {
+      formData.append("file", {
+        uri: imageUri,
+        name: `recipe-step-${stepId}-${Date.now()}.jpg`,
+        type: "image/jpeg",
+      } as any);
+    }
+
+    const imageResponse = await fetch(
+      `${API_BASE_URL}api/RecipeSteps/update/image/recipe-step/${stepId}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: user?.token ? `Bearer ${user.token}` : "",
+        },
+        body: formData,
+      }
+    );
+
+    if (!imageResponse.ok) {
+      console.error("Failed to upload step image:", await imageResponse.text());
     }
   };
 
@@ -75,7 +124,6 @@ export default function EditCookingSteps({ recipeId }: EditRecipeStepFormProps) 
         const payload = {
           name: step.name,
           description: step.description,
-          imageUrl: step.imageUrl || null,
         };
   
         const isExisting = step.recipeStepId && step.recipeStepId > 0; // only positive IDs are valid
@@ -96,6 +144,22 @@ export default function EditCookingSteps({ recipeId }: EditRecipeStepFormProps) 
   
         if (!res.ok) {
           console.error("Failed to save step:", await res.text());
+          continue;
+        }
+
+        const isLocalImage =
+          (step.pictureDirectory || step.imageUrl) &&
+          !(step.pictureDirectory || step.imageUrl || "").startsWith("http") &&
+          !(step.pictureDirectory || step.imageUrl || "").startsWith("/Pictures");
+
+        if (isLocalImage) {
+          const targetStepId = isExisting
+            ? Number(step.recipeStepId)
+            : await extractStepIdFromResponse(res);
+
+          if (targetStepId) {
+            await uploadStepImage(targetStepId, (step.pictureDirectory || step.imageUrl)!);
+          }
         }
       }
   

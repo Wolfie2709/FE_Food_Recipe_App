@@ -1,13 +1,14 @@
 // import { useAuthStore } from "@/components/Store/authStore";
 import Button from "@/components/ui/button";
 import NavigationBar from "@/components/ui/figma_navbar";
+import OverlayMenu from "@/components/ui/overlay-menu";
 import { useUser } from "@/components/userContext";
 import { profilePageStyles as styles } from "@/theme";
 import { RecipeBox, User, UserRecipeHistory } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import { Alert, FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RecipeCard } from "../../Search";
 
@@ -20,6 +21,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [historyRecipes, setHistoryRecipes] = useState<Array<RecipeBox & { cookedAt: string; note?: string | null }>>([]);
   const [userRecipe, setUserRecipe] = useState<RecipeBox[]>([]);
+  const [menuVisibleRecipeId, setMenuVisibleRecipeId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -103,19 +105,56 @@ export default function ProfilePage() {
 
   type HistoryRecipe = RecipeBox & { cookedAt: string; note?: string | null };
 
-  const renderRecentItem = ({ item }: { item: RecipeBox }) => (
-    <TouchableOpacity
-      onPress={() =>
-        router.push({
-          pathname: "./[recipeId]/RecipeDetail",
-          params: { recipeId: item.recipeId.toString() },
-        })
+  const handleEditRecipe = (recipeId: number) => {
+    router.push({
+      pathname: "/(Dashboard)/Recipe/edit-recipe/EditRecipe",
+      params: { recipeId: recipeId.toString() },
+    });
+  };
+
+  const handleDeleteRecipe = async (recipeId: number) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}api/Recipes/${recipeId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${userObject.user?.token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const rawError = await res.text();
+        console.error("Recipe delete failed:", res.status, rawError);
+        Alert.alert("Delete failed", "Could not delete this recipe.");
+        return;
       }
-    >
-      <View style={{ marginTop: 16, marginBottom: 16 }}>
+
+      setUserRecipe((prev) => prev.filter((item) => item.recipeId !== recipeId));
+      setMenuVisibleRecipeId(null);
+    } catch (error) {
+      console.error("Error deleting recipe:", error);
+      Alert.alert("Delete failed", "Could not delete this recipe.");
+    }
+  };
+
+  const renderRecentItem = ({ item }: { item: RecipeBox }) => (
+    <View style={{ marginTop: 16, marginBottom: 16, position: "relative" }}>
+      <TouchableOpacity
+        onPress={() =>
+          router.push({
+            pathname: "./[recipeId]/RecipeDetail",
+            params: { recipeId: item.recipeId.toString() },
+          })
+        }
+      >
         <RecipeCard {...item} />
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{ position: "absolute", right: 12, top: 12, padding: 8, zIndex: 2 }}
+        onPress={() => setMenuVisibleRecipeId(item.recipeId)}
+      >
+        <Image source={require("assets/images/Union.png")} />
+      </TouchableOpacity>
+    </View>
   );
 
   const renderHistoryItem = ({ item }: { item: HistoryRecipe }) => (
@@ -280,6 +319,25 @@ export default function ProfilePage() {
         {/* Bottom navigation bar */}
         {user && <NavigationBar user={user} />}
       </View>
+      <OverlayMenu
+        visible={menuVisibleRecipeId !== null}
+        onClose={() => setMenuVisibleRecipeId(null)}
+        items={
+          menuVisibleRecipeId
+            ? [
+                {
+                  label: "Edit",
+                  onPress: () => handleEditRecipe(menuVisibleRecipeId),
+                },
+                {
+                  label: "Delete",
+                  onPress: () => handleDeleteRecipe(menuVisibleRecipeId),
+                  destructive: true,
+                },
+              ]
+            : []
+        }
+      />
     </SafeAreaView>
   );
 }

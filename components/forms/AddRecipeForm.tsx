@@ -213,12 +213,15 @@ export default function AddNewRecipeForm() {
       console.log("Picked recipe image URI:", uri);
   
       try {
+        const imageResponse = await fetch(uri);
+        const blob = await imageResponse.blob();
+        const filename = `recipe-${recipeId || "temp"}-${Date.now()}.jpg`;
+        const file = new File([blob], filename, {
+          type: blob.type || "image/jpeg",
+        });
+
         const formData = new FormData();
-        formData.append("file", {
-          uri,
-          name: "recipe.jpg",
-          type: "image/jpeg",
-        } as any);
+        formData.append("file", file);
   
         const response = await fetch(
           `${API_BASE_URL}api/Pictures/add-picture-for-recipe-${recipeId}`,

@@ -13,6 +13,7 @@ export default function RecipeManagement() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
   const router = useRouter();
+  const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
 
   const loadRecipes = async (): Promise<Recipe[]> => {
     try {
@@ -128,15 +129,33 @@ export default function RecipeManagement() {
 
       <View style={styles.tableCellProduct}>
         <View style={styles.ProductCell}>
+          {(() => {
+            const rawImage = Array.isArray(item.pictureDirectory)
+              ? item.pictureDirectory[0]
+              : item.pictureDirectory || item.picture_directory || item.imageDirectory || item.imageUrl;
+            const normalizedImage = rawImage && !/\.[a-zA-Z0-9]+(?:$|[?#])/.test(rawImage)
+              ? `${rawImage}.jpg`
+              : rawImage;
+            const imageUri = !normalizedImage
+              ? null
+              : normalizedImage.startsWith("http")
+                ? normalizedImage
+                : normalizedImage.includes("/")
+                  ? `${URL}${normalizedImage.startsWith("/") ? normalizedImage : `/${normalizedImage}`}`
+                  : `${URL}/Pictures/Recipes/${item.recipeId}/${normalizedImage}`;
+
+            return (
           <Image
             source={
-              item.imageDirectory
-                ? { uri: `${URL}${item.imageDirectory}` }
+              imageUri
+                ? { uri: imageUri }
                 : require("assets/images/icon.png")
             }
             style={styles.ImageContent}
             resizeMode="cover"
           />
+            );
+          })()}
           <View style={styles.ProductInformation}>
             <Text style={styles.tableCellText}>{item.name || "Untitled"}</Text>
           </View>
@@ -154,8 +173,6 @@ export default function RecipeManagement() {
       </TouchableOpacity>
     </View>
   );
-
-  const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
 
   return (
     <View style={styles.container}>

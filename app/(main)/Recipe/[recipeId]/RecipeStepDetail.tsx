@@ -74,9 +74,15 @@ export default function RecipeStepDetail() {
         <Text style={styles.stepNumber}>Step {step.stepId}</Text>
 
         {/* Step image */}
-        {step.pictureDirectory && (
+        {(step.pictureDirectory || step.picture_directory) && (
           <Image
-            source={{ uri: `${URL}${step.pictureDirectory}` }}
+            source={{
+              uri: (() => {
+                const rawImage = step.pictureDirectory || step.picture_directory;
+                if (!rawImage) return "";
+                return rawImage.startsWith("http") ? rawImage : `${URL}${rawImage}`;
+              })(),
+            }}
             style={styles.stepImage}
           />
         )}
