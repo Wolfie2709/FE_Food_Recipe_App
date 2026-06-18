@@ -41,7 +41,7 @@ function RecipeCard({ recipeId, name, authorName, rating, imageDirectory, imageU
   return (
     <View style={styles.recipeCard}>
       <Image
-        source={imageUri ? { uri: imageUri } : undefined}
+        source={imageUri ? { uri: imageUri } : require("assets/images/icon.png")}
         style={styles.recipeImage}
       />
       <Text style={styles.recipeTitle}>{name}</Text>

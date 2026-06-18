@@ -7,5 +7,5 @@ export const API_CONFIG = {
 };
 
 
-export const API_BASE_URL = API_CONFIG.web.trim();
+export const API_BASE_URL = API_CONFIG.local_emulator;
 
