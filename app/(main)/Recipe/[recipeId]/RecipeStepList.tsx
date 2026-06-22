@@ -38,6 +38,11 @@ export default function RecipeStepList() {
             console.error("Failed to parse step list response:", parseError, text);
           }
         }
+        data.sort((a, b) => {
+          const aId = Number(a.recipeStepId || 0);
+          const bId = Number(b.recipeStepId || 0);
+          return aId - bId;
+        });
         console.log("Fetched steps:", data);
         setSteps(data);
       } catch (err) {

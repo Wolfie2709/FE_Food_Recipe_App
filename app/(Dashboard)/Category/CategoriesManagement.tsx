@@ -38,8 +38,15 @@ export default function CategoryManagement() {
     fetchCategories();
   }, []);
 
-  const searchCategory = async (name: string) => {
+  const searchCategory = async () => {
     try {
+      const name = searchText.trim();
+
+      if (!name) {
+        await fetchCategories();
+        return;
+      }
+
       const res = await fetch(
         `${API_BASE_URL}api/Categories/category/pagination?categoryName=${encodeURIComponent(name)}&page=1&pageSize=10&type=all`,
         {
@@ -55,7 +62,7 @@ export default function CategoryManagement() {
       }
   
       const data = await res.json();
-      setCategories(data.categoryList);
+      setCategories(data.categoryList || []);
     } catch (error) {
       console.error("Error searching ingredients:", error);
     }
@@ -174,31 +181,6 @@ export default function CategoryManagement() {
     >
       <Image source={require("assets/images/Union.png")} />
     </TouchableOpacity>
-
-    {/* Context menu */}
-      <OverlayMenu
-        visible={menuVisibleId === item.categoryId}
-        onClose={() => setMenuVisibleId(null)}
-        items={
-          menuVisibleId === item.categoryId
-            ? [
-                {
-                  label: "Edit",
-                  onPress: () =>
-                    router.push({
-                      pathname: "./EditCategories",
-                      params: { categoryId: item.categoryId.toString() },
-                    }),
-                },
-                {
-                  label: "Delete",
-                  onPress: () => softDeleteCategory(item.categoryId),
-                  destructive: true,
-                },
-              ]
-            : []
-        }
-      />
     </View>
 
 );
@@ -213,22 +195,17 @@ return (
      <View style={styles.searchBar}>
   <TextInput
     style={styles.searchText}
-    placeholder="Search ingredients..."
+      placeholder="Search categories..."
     value={searchText}
-    onChangeText={(text) => {
-      setSearchText(text);
-      if (text.trim().length > 0) {
-        searchCategory(text);
-      } else {
-        fetchCategories(); // fallback to full list
-      }
-    }}
+      onChangeText={setSearchText}
+      onSubmitEditing={searchCategory}
+      returnKeyType="search"
   />
   <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
 </View>
-    {/* Filter + Add New Recipe buttons */}
+      {/* Search + Add New Category buttons */}
     <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
-      <Button title="Filter" onPress={() => { }} />
+        <Button title="Search" onPress={searchCategory} />
       <Button title="Add New Category" onPress={createCategory} />
     </View>
 
@@ -257,6 +234,31 @@ return (
         renderItem={renderItem}
       />
     </View>
+
+    {/* Overlay menu */}
+    <OverlayMenu
+      visible={!!menuVisibleId}
+      onClose={() => setMenuVisibleId(null)}
+      items={
+        menuVisibleId
+          ? [
+              {
+                label: "Edit",
+                onPress: () =>
+                  router.push({
+                    pathname: "./EditCategories",
+                    params: { categoryId: menuVisibleId.toString() },
+                  }),
+              },
+              {
+                label: "Delete",
+                onPress: () => softDeleteCategory(menuVisibleId),
+                destructive: true,
+              },
+            ]
+          : []
+      }
+    />
   </View>
 );
 }

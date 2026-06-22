@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
+  Platform,
   ScrollView,
   Text,
   TextInput,
@@ -213,15 +214,23 @@ export default function AddNewRecipeForm() {
       console.log("Picked recipe image URI:", uri);
   
       try {
-        const imageResponse = await fetch(uri);
-        const blob = await imageResponse.blob();
-        const filename = `recipe-${recipeId || "temp"}-${Date.now()}.jpg`;
-        const file = new File([blob], filename, {
-          type: blob.type || "image/jpeg",
-        });
-
         const formData = new FormData();
-        formData.append("file", file);
+        const filename = `recipe-${recipeId || "temp"}-${Date.now()}.jpg`;
+
+        if (Platform.OS === "web") {
+          const imageResponse = await fetch(uri);
+          const blob = await imageResponse.blob();
+          const file = new File([blob], filename, {
+            type: blob.type || "image/jpeg",
+          });
+          formData.append("file", file);
+        } else {
+          formData.append("file", {
+            uri,
+            name: filename,
+            type: "image/jpeg",
+          } as any);
+        }
   
         const response = await fetch(
           `${API_BASE_URL}api/Pictures/add-picture-for-recipe-${recipeId}`,
@@ -476,7 +485,7 @@ export default function AddNewRecipeForm() {
                   const price = selectedIng?.price || 0;
                   const total = quantityNum * price;
                   return total.toLocaleString();
-                })()}
+                })()} vnd
               </Text>
             </View>
           )}

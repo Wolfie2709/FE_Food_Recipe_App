@@ -111,28 +111,35 @@ export default function IngredientsManagement() {
     }
   };
 
-  const searchIngredients = async (name: string) => {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}api/Ingredients/ingredient/pagination?ingredientName=${encodeURIComponent(name)}&page=1&pageSize=10`,
-      {
-        headers: {
-          "Authorization": user?.token ? `Bearer ${user.token}` : "",
-        },
+  const searchIngredients = async () => {
+    try {
+      const name = searchText.trim();
+
+      if (!name) {
+        await loadIngredients();
+        return;
       }
-    );
 
-    if (!res.ok) {
-      console.error("Failed to search ingredients:", res.status, await res.text());
-      return;
+      const res = await fetch(
+        `${API_BASE_URL}api/Ingredients/ingredient/pagination?ingredientName=${encodeURIComponent(name)}&page=1&pageSize=10`,
+        {
+          headers: {
+            "Authorization": user?.token ? `Bearer ${user.token}` : "",
+          },
+        }
+      );
+
+      if (!res.ok) {
+        console.error("Failed to search ingredients:", res.status, await res.text());
+        return;
+      }
+
+      const data = await res.json();
+      setIngredient(data.ingredientList || []);
+    } catch (error) {
+      console.error("Error searching ingredients:", error);
     }
-
-    const data = await res.json();
-    setIngredient(data.ingredientList);
-  } catch (error) {
-    console.error("Error searching ingredients:", error);
-  }
-};
+  };
 
   const renderItem: ListRenderItem<Ingredient> = ({ item }) => (
       <View style={styles.tableRow}>
@@ -171,31 +178,6 @@ export default function IngredientsManagement() {
       >
         <Image source={require("assets/images/Union.png")} />
       </TouchableOpacity>
-
-      {/* Context menu */}
-      <OverlayMenu
-        visible={menuVisibleId === item.ingredientsId}
-        onClose={() => setMenuVisibleId(null)}
-        items={
-          menuVisibleId === item.ingredientsId
-            ? [
-                {
-                  label: "Edit",
-                  onPress: () =>
-                    router.push({
-                      pathname: "./EditIngredients",
-                      params: { ingredientsId: item.ingredientsId.toString() },
-                    }),
-                },
-                {
-                  label: "Delete",
-                  onPress: () => DeleteKU(item.ingredientsId),
-                  destructive: true,
-                },
-              ]
-            : []
-        }
-      />
       </View>
 
   );
@@ -212,21 +194,16 @@ export default function IngredientsManagement() {
     style={styles.searchText}
     placeholder="Search ingredients..."
     value={searchText}
-    onChangeText={(text) => {
-      setSearchText(text);
-      if (text.trim().length > 0) {
-        searchIngredients(text);
-      } else {
-        loadIngredients(); // fallback to full list
-      }
-    }}
+    onChangeText={setSearchText}
+    onSubmitEditing={searchIngredients}
+    returnKeyType="search"
   />
   <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
 </View>
 
-      {/* Filter + Add New Recipe buttons */}
+      {/* Search + Add New Ingredient buttons */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
-        <Button title="Filter" onPress={() => { }} />
+        <Button title="Search" onPress={searchIngredients} />
         <Button title="Add New Ingredient" onPress={createIngredient} />
       </View>
 
@@ -255,6 +232,31 @@ export default function IngredientsManagement() {
           renderItem={renderItem}
         />
       </View>
+
+      {/* Overlay menu */}
+      <OverlayMenu
+        visible={!!menuVisibleId}
+        onClose={() => setMenuVisibleId(null)}
+        items={
+          menuVisibleId
+            ? [
+                {
+                  label: "Edit",
+                  onPress: () =>
+                    router.push({
+                      pathname: "./EditIngredients",
+                      params: { ingredientsId: menuVisibleId.toString() },
+                    }),
+                },
+                {
+                  label: "Delete",
+                  onPress: () => DeleteKU(menuVisibleId),
+                  destructive: true,
+                },
+              ]
+            : []
+        }
+      />
     </View>
   );
 }

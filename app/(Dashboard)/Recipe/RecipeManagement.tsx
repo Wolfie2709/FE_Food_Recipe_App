@@ -12,6 +12,7 @@ export default function RecipeManagement() {
   const { user } = useUser();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
+  const [searchText, setSearchText] = useState("");
   const router = useRouter();
   const URL = React.useMemo(() => API_BASE_URL.slice(0, -1), []);
 
@@ -41,6 +42,36 @@ export default function RecipeManagement() {
   useEffect(() => {
     loadRecipes();
   }, []);
+
+  const searchRecipes = async () => {
+    try {
+      const keyword = searchText.trim();
+
+      if (!keyword) {
+        await loadRecipes();
+        return;
+      }
+
+      const res = await fetch(
+        `${API_BASE_URL}api/Recipes/search?recipeName=${encodeURIComponent(keyword)}&page=1&pageSize=999`,
+        {
+          headers: {
+            "Authorization": user?.token ? `Bearer ${user.token}` : "",
+          },
+        }
+      );
+
+      if (!res.ok) {
+        console.error("Failed to search recipes:", res.status, res.statusText);
+        return;
+      }
+
+      const data = await res.json();
+      setRecipes(data.recipeList || []);
+    } catch (error) {
+      console.error("Error searching recipes:", error);
+    }
+  };
 
   const createRecipe = async () => {
     try {
@@ -89,7 +120,7 @@ export default function RecipeManagement() {
 
   const softDeleteRecipe = async (recipeId: number) => {
     try {
-      const res = await fetch(`${API_BASE_URL}api/RecipeSteps/recipe-${recipeId}`, {
+      const res = await fetch(`${API_BASE_URL}api/Recipes/soft/recipe-${recipeId}`, {
         method: "DELETE",
         headers: { "Authorization": user?.token ? `Bearer ${user.token}` : "" },
       });
@@ -106,7 +137,7 @@ export default function RecipeManagement() {
 
   const hardDeleteRecipe = async (recipeId: number) => {
     try {
-      const res = await fetch(`${API_BASE_URL}api/Recipes/${recipeId}`, {
+      const res = await fetch(`${API_BASE_URL}api/Recipes/hard/${recipeId}`, {
         method: "DELETE",
         headers: { "Authorization": user?.token ? `Bearer ${user.token}` : "" },
       });
@@ -181,13 +212,20 @@ export default function RecipeManagement() {
 
       {/* Search bar */}
       <View style={styles.searchBar}>
-        <TextInput style={styles.searchText} placeholder="Search recipes..." />
+        <TextInput
+          style={styles.searchText}
+          placeholder="Search recipes..."
+          value={searchText}
+          onChangeText={setSearchText}
+          onSubmitEditing={searchRecipes}
+          returnKeyType="search"
+        />
         <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
       </View>
 
-      {/* Filter + Add New Recipe buttons */}
+      {/* Search + Add New Recipe buttons */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
-        <Button title="Filter" onPress={() => {}} />
+        <Button title="Filter" onPress={searchRecipes} />
         <Button title="Add New Recipe" onPress={createRecipe} />
       </View>
 
