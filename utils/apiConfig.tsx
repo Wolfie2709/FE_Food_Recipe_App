@@ -7,5 +7,5 @@ export const API_CONFIG = {
 };
 
 
-export const API_BASE_URL = API_CONFIG.local_emulator;
+export const API_BASE_URL = API_CONFIG.local_emulator; // Change this to the appropriate URL based on your testing environment
 

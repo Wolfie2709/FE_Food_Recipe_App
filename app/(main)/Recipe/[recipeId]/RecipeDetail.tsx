@@ -3,8 +3,8 @@ import { ReviewCard } from "@/components/ui/reviewcard";
 import { useUser } from "@/components/userContext";
 import { RecipeDetailStyles as styles } from "@/theme";
 import {
-    RecipeDetailCompleteDto,
-    Review
+  RecipeDetailCompleteDto,
+  Review
 } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import { router, useLocalSearchParams } from "expo-router";
@@ -32,7 +32,11 @@ export default function RecipeDetail() {
       const res = await fetch(`${API_BASE_URL}api/Recipes/recipe/detail/${recipeId}`);
       const data = await res.json();
       setRecipe(data);
-      setSelectedServings(data.servingSize ?? 1);
+      const initialServings = Math.max(
+        1,
+        Number((data as any).servingSize ?? (data as any).serving ?? 1)
+      );
+      setSelectedServings(initialServings);
     };
     const fetchNotes = async () => {
       try {
@@ -98,13 +102,10 @@ export default function RecipeDetail() {
 
   const calculateRecipeCost = () => {
     if (!recipe?.ingredients || recipe.ingredients.length === 0) return 0;
-    const baseServings = recipe.servingSize ?? 1;
-    const scale = selectedServings / (baseServings || 1);
-    return recipe.ingredients.reduce((total, ing) => {
-      const quantity = (ing.quantity || 0) * scale;
-      const ingredientCost = (ing.price || 0) * quantity;
-      return total + ingredientCost;
+    const baseCost = recipe.ingredients.reduce((total, ing) => {
+      return total + (ing.price || 0);
     }, 0);
+    return baseCost * selectedServings;
   };
 
   const totalCost = calculateRecipeCost();
@@ -143,14 +144,18 @@ export default function RecipeDetail() {
     }
   };
 
-  const addToShoppingList = async (recipeId: number) => {
+  const addToShoppingList = async (recipeId: number, serving: number) => {
+    const normalizedServing = Math.max(1, Math.floor(serving || 1));
     try {
-      const res = await fetch(`${API_BASE_URL}api/ShoppingLists/${recipeId}?serving=${selectedServings}`, {
+      const res = await fetch(
+        `${API_BASE_URL}api/ShoppingLists/${recipeId}?serving=${normalizedServing}`,
+        {
         method: "POST",
         headers: {
           Authorization: user?.token ? `Bearer ${user.token}` : "",
         },
-      });
+      }
+      );
 
       const text = await res.text();
 
@@ -159,7 +164,7 @@ export default function RecipeDetail() {
         return;
       }
 
-      Alert.alert("Success", "Added to shopping list!");
+      Alert.alert("Success", `Added to shopping list for serving ${normalizedServing}!`);
     } catch (err) {
       console.error("Error adding to shopping list:", err);
       Alert.alert("Error", "Could not connect to server");
@@ -233,7 +238,10 @@ export default function RecipeDetail() {
             </View>
           </View>
 
-          <Button title="Add to Shopping List" onPress={() => addToShoppingList(recipe.recipeId)} />
+          <Button
+            title="Add to Shopping List"
+            onPress={() => addToShoppingList(recipe.recipeId, selectedServings)}
+          />
 
           <Button
             title="Save to wishlist"
@@ -305,8 +313,10 @@ export default function RecipeDetail() {
           >
             <Text style={{ fontSize: 18, fontWeight: "700" }}>+</Text>
           </TouchableOpacity>
-          <Text style={{ marginLeft: 12, color: "#666" }}>
-            Cost: {totalCost.toLocaleString()}
+        </View>
+        <View>
+                    <Text style={{ color: "#666", fontSize: 24, fontWeight: "600" }}>
+            Cost: {totalCost.toLocaleString()} vnd
           </Text>
         </View>
 

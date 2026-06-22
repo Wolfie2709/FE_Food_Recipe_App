@@ -5,7 +5,7 @@ import { API_BASE_URL } from "@/utils/apiConfig";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, FlatList, Image, Text, View } from "react-native";
+import { Alert, FlatList, Image, Platform, Text, View } from "react-native";
 import Button from "../ui/button";
 import Field from "../ui/figma_input_fields";
 
@@ -51,9 +51,9 @@ export default function AddCookingSteps({ recipeId }: Props) {
   // Add new step row
   const addStep = () => {
     if (!currentDescription.trim()) return;
-    setRecipeSteps([
-      ...recipeSteps,
-      {  recipeStepId: Date.now() * -1, name: name, description: currentDescription },
+    setRecipeSteps((prev) => [
+      ...prev,
+      { recipeStepId: Date.now() * -1, name: name, description: currentDescription },
     ]);
     setName("");
     setCurrentDescription("");
@@ -63,13 +63,21 @@ export default function AddCookingSteps({ recipeId }: Props) {
     if (!imageUri) return;
 
     try {
-      const uri = imageUri;
       const formData = new FormData();
-      formData.append("file", {
-        uri,
-        name: "recipe-step.jpg",
-        type: "image/jpeg",
-      } as any);
+      if (Platform.OS === "web") {
+        const imageResponse = await fetch(imageUri);
+        const blob = await imageResponse.blob();
+        const file = new File([blob], `recipe-step-${stepId}-${Date.now()}.jpg`, {
+          type: blob.type || "image/jpeg",
+        });
+        formData.append("file", file);
+      } else {
+        formData.append("file", {
+          uri: imageUri,
+          name: `recipe-step-${stepId}-${Date.now()}.jpg`,
+          type: "image/jpeg",
+        } as any);
+      }
 
       console.log("Uploading step image to:", `${API_BASE_URL}api/RecipeSteps/update/image/recipe-step/${stepId}`);
 
@@ -155,7 +163,9 @@ export default function AddCookingSteps({ recipeId }: Props) {
     }
 
     try {
-      for (const step of recipeSteps) {
+      const stepsToSave = [...recipeSteps];
+
+      for (const step of stepsToSave) {
         const payload = {
           name: step.name,
           description: step.description,
