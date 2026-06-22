@@ -45,7 +45,6 @@ export default function ReviewRecipe() {
 
       console.log("Note submitted successfully");
       setNote(""); // clear after submit
-      router.push("./RecipeDetail");
     } catch (err) {
       console.error("Error submitting note:", err);
     }
