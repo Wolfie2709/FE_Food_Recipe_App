@@ -14,7 +14,7 @@ type RecipeStep = {
 };
 
 export default function RecipeStepDetail() {
-  const {user} = useUser();
+  const { user } = useUser();
   const { recipeStepId, recipeId } = useLocalSearchParams<{ recipeStepId: string; recipeId: string }>();
   const [step, setStep] = useState<RecipeStep | null>(null);
 
@@ -50,22 +50,22 @@ export default function RecipeStepDetail() {
 
   const URL = API_BASE_URL.slice(0, -1);
 
-    const finishSession = async () => {
-      try {
-        await fetch(`${API_BASE_URL}api/UserCookingSessions/finish`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: user?.token ? `Bearer ${user.token}` : "",
-          },
-          body: JSON.stringify({ RecipeId: Number(recipeId) }),
-        });
-        console.log("Cooking session finished!");
-        router.push("./ReviewRecipe");
-      } catch (error) {
-        console.error("Error finishing session:", error);
-      }
-    };
+  const finishSession = async () => {
+    try {
+      await fetch(`${API_BASE_URL}api/UserCookingSessions/finish`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: user?.token ? `Bearer ${user.token}` : "",
+        },
+        body: JSON.stringify({ RecipeId: Number(recipeId) }),
+      });
+      console.log("Cooking session finished!");
+      router.push("./ReviewRecipe");
+    } catch (error) {
+      console.error("Error finishing session:", error);
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
@@ -74,11 +74,11 @@ export default function RecipeStepDetail() {
         <Text style={styles.stepNumber}>Step {step.stepId}</Text>
 
         {/* Step image */}
-        {(step.pictureDirectory || step.picture_directory) && (
+        {(step.pictureDirectory || step.pictureDirectory) && (
           <Image
             source={{
               uri: (() => {
-                const rawImage = step.pictureDirectory || step.picture_directory;
+                const rawImage = step.pictureDirectory || step.pictureDirectory;
                 if (!rawImage) return "";
                 return rawImage.startsWith("http") ? rawImage : `${URL}${rawImage}`;
               })(),
@@ -118,7 +118,7 @@ export default function RecipeStepDetail() {
         </View>
 
         {/* Finish button */}
-        <TouchableOpacity style={styles.finishButton}  onPress={finishSession}>
+        <TouchableOpacity style={styles.finishButton} onPress={finishSession}>
           <Text style={styles.finishButtonText}>Finish this recipe</Text>
         </TouchableOpacity>
       </ScrollView>

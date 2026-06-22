@@ -25,19 +25,20 @@ function CreatorCard({ name, image }: Creator) {
 
 function RecipeCard({ recipeId, name, authorName, rating, imageDirectory, imageUrl, pictureDirectory, picture_directory, avatar }: RecipeBox) {
   const URL = API_BASE_URL.slice(0, -1);
-  const rawImage = Array.isArray(pictureDirectory)
-    ? pictureDirectory[0]
-    : pictureDirectory || picture_directory || imageDirectory || imageUrl || null;
-  const normalizedImage = rawImage && !/\.[a-zA-Z0-9]+(?:$|[?#])/.test(rawImage)
-    ? `${rawImage}.jpg`
-    : rawImage;
-  const imageUri = !normalizedImage
-    ? null
-    : normalizedImage.startsWith("http")
-      ? normalizedImage
-      : normalizedImage.includes("/")
-        ? `${URL}${normalizedImage.startsWith("/") ? normalizedImage : `/${normalizedImage}`}`
-        : `${URL}/Pictures/Recipes/${recipeId}/${normalizedImage}`;
+  console.log("picture: ", imageDirectory)
+  // const rawImage = Array.isArray(pictureDirectory)
+  //   ? pictureDirectory[0]
+  //   : pictureDirectory || picture_directory || imageDirectory || imageUrl || null;
+  // const normalizedImage = rawImage && !/\.[a-zA-Z0-9]+(?:$|[?#])/.test(rawImage)
+  //   ? `${rawImage}.jpg`
+  //   : rawImage;
+  // const imageUri = !normalizedImage
+  //   ? null
+  //   : normalizedImage.startsWith("http")
+  //     ? normalizedImage
+  //     : normalizedImage.includes("/")
+  //       ? `${URL}${normalizedImage.startsWith("/") ? normalizedImage : `/${normalizedImage}`}`
+  //       : `${URL}/Pictures/Recipes/${recipeId}/${normalizedImage}`;
   return (
     <View style={styles.recipeCard}>
       <Image
@@ -76,7 +77,7 @@ export default function Home() {
   const [categories, setCategories] = useState<CategoryBoxDto[]>([]);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const [categoryRecipes, setCategoryRecipes] = useState<RecipeBox[]>([]);
-  console.log("Home sees user:", user);
+  // console.log("Home sees user:", user);
 
   const loadData = async (pageToLoad: number) => {
     if (isLoading) return;
