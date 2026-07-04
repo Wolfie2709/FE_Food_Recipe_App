@@ -12,7 +12,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import Button from "../ui/button";
 import CategoryDropdown from "../ui/categoryDropdown";
@@ -200,54 +200,72 @@ export default function AddNewRecipeForm() {
   };
 
   // 🔹 Pick image and upload immediately
-  const pickImage = async () => {
+const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      // safe fallback to avoid TS issues across expo-image-picker versions
+      mediaTypes: (ImagePicker as any).MediaTypeOptions?.Images ?? (ImagePicker as any).MediaType?.Images ?? (ImagePicker as any).MediaTypeOptions ?? "Images",
       allowsEditing: true,
       quality: 0.8,
     });
-  
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setRecipeImage(uri); // show preview in UI
-      console.log("Picked recipe image URI:", uri);
-  
-      try {
-        const imageResponse = await fetch(uri);
-        const blob = await imageResponse.blob();
-        const filename = `recipe-${recipeId || "temp"}-${Date.now()}.jpg`;
-        const file = new File([blob], filename, {
-          type: blob.type || "image/jpeg",
-        });
 
-        const formData = new FormData();
-        formData.append("file", file);
-  
-        const response = await fetch(
-          `${API_BASE_URL}api/Pictures/add-picture-for-recipe-${recipeId}`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: user?.token ? `Bearer ${user.token}` : "",
-              // ❌ don’t set Content-Type manually
-            },
-            body: formData,
-          }
-        );
-  
-        if (!response.ok) {
-          const text = await response.text();
-          console.error("Recipe image upload failed:", text);
-        } else {
-          console.log("✅ Recipe image uploaded successfully");
+    if (result.canceled) return;
+
+    const uri = result.assets[0].uri;
+    setRecipeImage(uri); // always show preview locally
+    console.log("Picked recipe image URI:", uri);
+
+    // If there's no recipeId yet (creating new recipe), skip server upload
+    if (!recipeId) {
+      console.warn("No recipeId present — skipping upload until recipe is created");
+      return;
+    }
+
+    try {
+      const filename = uri.split("/").pop() || `recipe-${recipeId}-${Date.now()}.jpg`;
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : "image/jpeg";
+
+      const formData = new FormData();
+      // append object with uri/name/type — works on Expo
+      formData.append("file", { uri, name: filename, type } as any);
+
+      const response = await fetch(
+        `${API_BASE_URL}api/Pictures/add-picture-for-recipe-${recipeId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: user?.token ? `Bearer ${user.token}` : "",
+            // DO NOT set Content-Type here
+          },
+          body: formData,
         }
-      } catch (error) {
-        console.error("Error uploading recipe image:", error);
+      );
+
+      const bodyText = await response.text();
+      console.log("Image upload response status:", response.status);
+      if (!response.ok) {
+        console.error("Recipe image upload failed:", response.status, bodyText);
+        Alert.alert("Upload failed", `Status ${response.status}`);
+        return;
       }
+
+      // parse and set pictureDirectory when backend returns it
+      try {
+        const json = bodyText ? JSON.parse(bodyText) : null;
+        const dir = json?.pictureDirectory ?? json?.path ?? null;
+        if (dir) {
+          setPictureDirectory(dir);
+          console.log("Set pictureDirectory:", dir);
+        }
+      } catch (e) {
+        // response not JSON — ignore
+        console.log("Upload succeeded but response was not JSON");
+      }
+    } catch (error) {
+      console.error("Error uploading recipe image:", error);
+      Alert.alert("Upload error", "Could not upload image. See console for details.");
     }
   };
-  
-  
   // 🔹 Save recipe and go to cooking steps
   const goToCookingSteps = async () => {
     const payload = buildRecipePayload();
