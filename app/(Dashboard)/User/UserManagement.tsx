@@ -13,6 +13,7 @@ export default function UserManagement() {
   const {user} = useUser();
   const [userInfo, setUserInfo] = useState<User[]>([]);
   const [menuVisibleId, setMenuVisibleId] = useState<number | null>(null);
+  const [searchText, setSearchText] = useState("");
   const router = useRouter();
 
   // Load all recipes
@@ -42,6 +43,36 @@ export default function UserManagement() {
   useEffect(() => {
     loadUsers();
   }, []);
+
+  const searchUsers = async () => {
+    try {
+      const keyword = searchText.trim();
+
+      if (!keyword) {
+        await loadUsers();
+        return;
+      }
+
+      const res = await fetch(
+        `${API_BASE_URL}api/Users/users/pagination?username=${encodeURIComponent(keyword)}&page=1&pageSize=10`,
+        {
+          headers: {
+            "Authorization": user?.token ? `Bearer ${user.token}` : "",
+          },
+        }
+      );
+
+      if (!res.ok) {
+        console.error("Failed to search users:", res.status, res.statusText);
+        return;
+      }
+
+      const data = await res.json();
+      setUserInfo(data.userList || []);
+    } catch (error) {
+      console.error("Error searching users:", error);
+    }
+  };
 
   const DeleteUsers = async (id: number) => {
     try {
@@ -99,31 +130,6 @@ export default function UserManagement() {
     >
       <Image source={require("assets/images/Union.png")} />
     </TouchableOpacity>
-
-    {/* Context menu */}
-      <OverlayMenu
-        visible={menuVisibleId === item.id}
-        onClose={() => setMenuVisibleId(null)}
-        items={
-          menuVisibleId === item.id
-            ? [
-                {
-                  label: "Edit",
-                  onPress: () =>
-                    router.push({
-                      pathname: "./EditUsers",
-                      params: { usersId: item.id.toString() },
-                    }),
-                },
-                {
-                  label: "Hard Delete",
-                  onPress: () => DeleteUsers(item.id),
-                  destructive: true,
-                },
-              ]
-            : []
-        }
-      />
     </View>
 );
 
@@ -134,13 +140,20 @@ export default function UserManagement() {
 
       {/* Search bar */}
       <View style={styles.searchBar}>
-        <TextInput style={styles.searchText} placeholder="Search recipes..." />
+        <TextInput
+          style={styles.searchText}
+          placeholder="Search users..."
+          value={searchText}
+          onChangeText={setSearchText}
+          onSubmitEditing={searchUsers}
+          returnKeyType="search"
+        />
         <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
       </View>
 
-      {/* Filter + Add New Recipe buttons */}
+      {/* Search + Add New User buttons */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
-        <Button title="Filter" onPress={() => { }} />
+        <Button title="Search" onPress={searchUsers} />
         <Button title="Add New User" onPress={() => router.push("./AddNewEmployee")} />
       </View>
 
@@ -169,6 +182,31 @@ export default function UserManagement() {
           renderItem={renderItem}
         />
       </View>
+
+      {/* Overlay menu */}
+      <OverlayMenu
+        visible={!!menuVisibleId}
+        onClose={() => setMenuVisibleId(null)}
+        items={
+          menuVisibleId
+            ? [
+                {
+                  label: "Edit",
+                  onPress: () =>
+                    router.push({
+                      pathname: "./EditUsers",
+                      params: { usersId: menuVisibleId.toString() },
+                    }),
+                },
+                {
+                  label: "Hard Delete",
+                  onPress: () => DeleteUsers(menuVisibleId),
+                  destructive: true,
+                },
+              ]
+            : []
+        }
+      />
     </View>
   );
 }

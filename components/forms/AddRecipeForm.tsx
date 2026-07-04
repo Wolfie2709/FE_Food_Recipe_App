@@ -494,7 +494,7 @@ const pickImage = async () => {
                   const price = selectedIng?.price || 0;
                   const total = quantityNum * price;
                   return total.toLocaleString();
-                })()}
+                })()} vnd
               </Text>
             </View>
           )}

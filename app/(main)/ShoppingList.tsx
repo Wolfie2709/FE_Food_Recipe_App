@@ -47,6 +47,25 @@ export default function ShoppingCart() {
     return Number.isNaN(parsed) ? 0 : parsed;
   };
 
+  const parseNumber = (value: any) => {
+    if (value == null) return 0;
+    if (typeof value === "number") return value;
+    const parsed = parseFloat(String(value).replace(/[^0-9.\-]/g, ""));
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
+  const getRecipeServing = (recipe: any) => {
+    return Math.max(1, parseNumber(recipe?.serving ?? recipe?.servingSize ?? 1));
+  };
+
+  const getRecipeCost = (recipe: any) => {
+    const backendTotal = parseNumber(recipe?.totalPrice);
+    if (backendTotal > 0) return backendTotal;
+
+    const baseCost = calculateRecipeCost(recipe?.ingredients || []);
+    return baseCost * getRecipeServing(recipe);
+  };
+
   const calculateRecipeCost = (ingredients: any[]) => {
     if (!ingredients || ingredients.length === 0) return 0;
     return ingredients.reduce((total, ing) => total + calculateIngredientCost(ing), 0);
@@ -55,7 +74,7 @@ export default function ShoppingCart() {
   const calculateTotalShoppingCost = () => {
     if (!shoppingList?.recipes || shoppingList.recipes.length === 0) return 0;
     return shoppingList.recipes.reduce((total: number, recipe: any) => {
-      return total + calculateRecipeCost(recipe.ingredients);
+      return total + getRecipeCost(recipe);
     }, 0);
   };
 
@@ -92,7 +111,10 @@ export default function ShoppingCart() {
         {recipe.name}
       </Text>
       <Text style={{ fontSize: 14, color: "#666", marginTop: 4 }}>
-        Total Cost: {calculateRecipeCost(recipe.ingredients).toLocaleString()}
+        Servings: {getRecipeServing(recipe)}
+      </Text>
+      <Text style={{ fontSize: 14, color: "#666", marginTop: 2 }}>
+        Total Cost: {getRecipeCost(recipe).toLocaleString()}
       </Text>
     </View>
 
