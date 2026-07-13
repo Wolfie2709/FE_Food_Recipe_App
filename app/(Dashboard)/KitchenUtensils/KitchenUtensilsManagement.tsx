@@ -121,6 +121,10 @@ export default function KitchenUtensilsManagement() {
       console.error("Error searching utensils:", error);
     }
   };
+
+  const sortKitchenUtensilsByIdAsc = () => {
+    setKU((prev) => [...prev].sort((a, b) => a.kitchenUtensilId - b.kitchenUtensilId));
+  };
   
 
   const DeleteKU = async (kitchenUtensilId: number) => {
@@ -198,11 +202,13 @@ export default function KitchenUtensilsManagement() {
     onSubmitEditing={searchKitchenUtensils}
     returnKeyType="search"
   />
-  <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+  <TouchableOpacity onPress={searchKitchenUtensils} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+    <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+  </TouchableOpacity>
 </View>
       {/* Search + Add New Kitchen Utensil buttons */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
-        <Button title="Filter" onPress={searchKitchenUtensils} />
+        <Button title="Filter" onPress={sortKitchenUtensilsByIdAsc} />
         <Button title="Add New Utensil" onPress={createKitchenUtensil} />
       </View>
 

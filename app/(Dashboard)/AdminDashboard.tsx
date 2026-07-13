@@ -52,7 +52,11 @@ export default function AdminDashboard() {
             headers: {
               "Authorization": user?.token ? `Bearer ${user.token}` : "",
             },}),
-          fetch(`${API_BASE_URL}api/Reviews/all`)
+          fetch(`${API_BASE_URL}api/Reviews/all`, {
+            headers: {
+              "Authorization": user?.token ? `Bearer ${user.token}` : "",
+            },
+          }),
         ]);
         const [recipes, ingredients, allUsers, reviews] = await Promise.all([
           safeJson(resRecipe),
@@ -78,11 +82,15 @@ export default function AdminDashboard() {
   console.log("Reviews response:", reviewCount);
   console.log("Time of log:", new Date().toLocaleString());
 
+  const chartValues = [recipeCount, ingredientsCount, userCount, reviewCount];
+  const roundedYAxisMax = Math.max(10, Math.ceil(Math.max(...chartValues) / 10) * 10);
+  const yAxisSegments = roundedYAxisMax / 10;
+
   const chartData = {
     labels: ["Recipes", "Ingredients", "Users", "Reviews"],
     datasets: [
       {
-        data: [recipeCount, ingredientsCount, userCount, reviewCount],
+        data: chartValues,
       },
     ],
   };
@@ -160,7 +168,9 @@ export default function AdminDashboard() {
           width={screenWidth - 32}
           height={220}
           yAxisLabel=""
-          yAxisSuffix=" count"
+          yAxisSuffix=" "
+          fromZero
+          segments={yAxisSegments}
           chartConfig={{
             backgroundColor: "#fff",
             backgroundGradientFrom: "#fff",

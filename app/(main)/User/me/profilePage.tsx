@@ -6,8 +6,9 @@ import { useUser } from "@/components/userContext";
 import { profilePageStyles as styles } from "@/theme";
 import { RecipeBox, User, UserRecipeHistory } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
+import { useFocusEffect } from "@react-navigation/native";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Alert, FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { RecipeCard } from "../../Search";
@@ -22,26 +23,49 @@ export default function ProfilePage() {
   const [historyRecipes, setHistoryRecipes] = useState<Array<RecipeBox & { cookedAt: string; note?: string | null }>>([]);
   const [userRecipe, setUserRecipe] = useState<RecipeBox[]>([]);
   const [menuVisibleRecipeId, setMenuVisibleRecipeId] = useState<number | null>(null);
+  const contextUsername = userObject.user?.username;
+
+  const fetchProfile = useCallback(async () => {
+    if (!accessToken) return;
+
+    try {
+      const res = await fetch(`${API_BASE_URL}api/Users/me`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          Accept: "application/json",
+        },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data: User = await res.json();
+      setUser({
+        ...data,
+        username: contextUsername || data.username,
+      });
+    } catch (err) {
+      console.error("Failed to load profile:", err);
+    }
+  }, [accessToken, contextUsername]);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}api/Users/me`, {
-          headers: {
-            Authorization: `Bearer ${userObject.user?.token}`,
-            Accept: "application/json",
-          },
-        });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: User = await res.json();
-        setUser(data);
-      } catch (err) {
-        console.error("Failed to load profile:", err);
-      }
-    };
+    if (!contextUsername) return;
+    setUser((prev) => {
+      if (!prev || prev.username === contextUsername) return prev;
+      return {
+        ...prev,
+        username: contextUsername,
+      };
+    });
+  }, [contextUsername]);
 
-    if (accessToken) fetchProfile();
-  }, [accessToken]);
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [fetchProfile])
+  );
 
   const loadHistory = async () => {
     try {
@@ -141,7 +165,7 @@ export default function ProfilePage() {
       <TouchableOpacity
         onPress={() =>
           router.push({
-            pathname: "./[recipeId]/RecipeDetail",
+            pathname: "/(main)/Recipe/[recipeId]/RecipeDetail",
             params: { recipeId: item.recipeId.toString() },
           })
         }
@@ -161,12 +185,12 @@ export default function ProfilePage() {
     <TouchableOpacity
       onPress={() =>
         router.push({
-          pathname: "./[recipeId]/RecipeDetail",
+          pathname: "/(main)/Recipe/[recipeId]/RecipeDetail",
           params: { recipeId: item.recipeId.toString() },
         })
       }
     >
-      <View style={{ marginTop: 16, marginBottom: 16 }}>
+      <View style={{ marginTop: 16, marginBottom: 16, marginLeft: 12, marginRight: 12, position: "relative" }}>
         <RecipeCard {...item} />
         <View style={styles.historyItem}>
           <Text style={styles.historyMeta}>
@@ -197,7 +221,7 @@ export default function ProfilePage() {
           ) : (
             <View style={[styles.avatar, styles.avatarPlaceholder]}>
               <Text style={[styles.username]}>
-                {user.username.charAt(0).toUpperCase()}
+                {(contextUsername || user.username).charAt(0).toUpperCase()}
               </Text>
             </View>
           )}
@@ -214,7 +238,7 @@ export default function ProfilePage() {
             />
           )}
           {/* Username */}
-          <Text style={styles.username}>{user.username}</Text>
+          <Text style={styles.username}>{contextUsername || user.username}</Text>
           {/* Basic Info */}
           <View style={styles.infoBox}>
             <Text style={styles.label}>Name:</Text>

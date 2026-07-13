@@ -68,6 +68,10 @@ export default function CategoryManagement() {
     }
   };
 
+  const sortCategoriesByIdAsc = () => {
+    setCategories((prev) => [...prev].sort((a, b) => a.categoryId - b.categoryId));
+  };
+
   // Create empty category then navigate to AddCategoryForm
   const createCategory = async () => {
     try {
@@ -201,11 +205,13 @@ return (
       onSubmitEditing={searchCategory}
       returnKeyType="search"
   />
-  <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+  <TouchableOpacity onPress={searchCategory} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+    <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+  </TouchableOpacity>
 </View>
       {/* Search + Add New Category buttons */}
     <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
-        <Button title="Search" onPress={searchCategory} />
+        <Button title="Filter" onPress={sortCategoriesByIdAsc} />
       <Button title="Add New Category" onPress={createCategory} />
     </View>
 

@@ -74,6 +74,10 @@ export default function UserManagement() {
     }
   };
 
+  const sortUsersByIdAsc = () => {
+    setUserInfo((prev) => [...prev].sort((a, b) => a.id - b.id));
+  };
+
   const DeleteUsers = async (id: number) => {
     try {
       const res = await fetch(`${API_BASE_URL}api/Users/${id}`, {
@@ -148,12 +152,14 @@ export default function UserManagement() {
           onSubmitEditing={searchUsers}
           returnKeyType="search"
         />
-        <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+        <TouchableOpacity onPress={searchUsers} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+        </TouchableOpacity>
       </View>
 
       {/* Search + Add New User buttons */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
-        <Button title="Search" onPress={searchUsers} />
+        <Button title="Filter" onPress={sortUsersByIdAsc} />
         <Button title="Add New User" onPress={() => router.push("./AddNewEmployee")} />
       </View>
 

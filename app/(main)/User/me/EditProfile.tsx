@@ -2,6 +2,7 @@ import { useUser } from "@/components/userContext";
 import { User } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
 import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -15,9 +16,10 @@ import {
 } from "react-native";
 
 export default function EditProfile() {
-  const userObject = useUser();
-  const token = userObject.user?.token;
-
+  const { user, setUser } = useUser();
+  const token = user?.token;
+  const contextUsername = user?.username;
+  const router = useRouter();
   const [profile, setProfile] = useState<User | null>(null);
   const [username, setUsername] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -39,9 +41,12 @@ export default function EditProfile() {
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data: User = await res.json();
-        setProfile(data);
+        setProfile({
+          ...data,
+          username: contextUsername || data.username,
+        });
 
-        setUsername(data.username || "");
+        setUsername(contextUsername || data.username || "");
         setFirstName(data.firstName || "");
         setLastName(data.lastName || "");
         setEmail(data.email || "");
@@ -58,7 +63,12 @@ export default function EditProfile() {
     };
 
     if (token) fetchProfile();
-  }, [token]);
+  }, [token, contextUsername]);
+
+  useEffect(() => {
+    if (!contextUsername) return;
+    setUsername(contextUsername);
+  }, [contextUsername]);
 
   // Image picker
   const pickImage = async () => {
@@ -74,10 +84,13 @@ export default function EditProfile() {
     }
   };
   const parseResponse = async (res: Response) => {
+    const raw = await res.text();
+    if (!raw) return null;
+
     try {
-      return await res.json();
+      return JSON.parse(raw);
     } catch {
-      return await res.text();
+      return raw;
     }
   };
   
@@ -137,6 +150,19 @@ const saveAvatar = async () => {
     try {
       const updatedProfile = await saveProfileInfo();
       const updatedAvatar = await saveAvatar();
+
+      const responseUsername =
+        typeof updatedProfile === "object" && updatedProfile !== null && "username" in updatedProfile
+          ? String((updatedProfile as any).username || "")
+          : "";
+      const nextUsername = responseUsername || username;
+
+      if (user) {
+        await setUser({
+          ...user,
+          username: nextUsername,
+        });
+      }
   
       // If backend returned JSON user object, update state
       if (typeof updatedProfile === "object") setProfile(updatedProfile);
@@ -145,6 +171,7 @@ const saveAvatar = async () => {
       Alert.alert("Success", "Profile updated successfully!");
       console.log("Profile response:", updatedProfile);
       console.log("Avatar response:", updatedAvatar);
+      router.push("/(main)/User/me/profilePage");
     } catch (err) {
       console.error("Failed to update profile:", err);
       Alert.alert("Error", "Could not update profile.");

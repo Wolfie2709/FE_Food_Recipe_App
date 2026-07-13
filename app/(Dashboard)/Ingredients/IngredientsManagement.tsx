@@ -141,6 +141,10 @@ export default function IngredientsManagement() {
     }
   };
 
+  const sortIngredientsByIdAsc = () => {
+    setIngredient((prev) => [...prev].sort((a, b) => a.ingredientsId - b.ingredientsId));
+  };
+
   const renderItem: ListRenderItem<Ingredient> = ({ item }) => (
       <View style={styles.tableRow}>
       <View style={styles.tableCellId}>
@@ -198,12 +202,14 @@ export default function IngredientsManagement() {
     onSubmitEditing={searchIngredients}
     returnKeyType="search"
   />
-  <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+  <TouchableOpacity onPress={searchIngredients} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+    <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+  </TouchableOpacity>
 </View>
 
       {/* Search + Add New Ingredient buttons */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
-        <Button title="Search" onPress={searchIngredients} />
+        <Button title="Filter" onPress={sortIngredientsByIdAsc} />
         <Button title="Add New Ingredient" onPress={createIngredient} />
       </View>
 

@@ -7,7 +7,7 @@ import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } fr
 import { SafeAreaView } from "react-native-safe-area-context";
 
 type RecipeStep = {
-  stepId: number;
+  recipeStepId: number;
   name: string;
   description: string;
   pictureDirectory?: string;
@@ -17,6 +17,7 @@ export default function RecipeStepDetail() {
   const {user} = useUser();
   const { recipeStepId, recipeId } = useLocalSearchParams<{ recipeStepId: string; recipeId: string }>();
   const [step, setStep] = useState<RecipeStep | null>(null);
+  const [stepNumber, setStepNumber] = useState<number | null>(null);
 
   useEffect(() => {
     const payload: UpdateStepRequest = {
@@ -25,10 +26,15 @@ export default function RecipeStepDetail() {
     };
     const fetchStep = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}api/RecipeSteps/recipe/step-${recipeStepId}`);
+        const res = await fetch(`${API_BASE_URL}api/RecipeSteps/recipe-${recipeId}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        setStep(data);
+        const data: RecipeStep[] = await res.json();
+        const orderedSteps = [...data].sort((a, b) => a.recipeStepId - b.recipeStepId);
+        const currentStepIndex = orderedSteps.findIndex((item) => item.recipeStepId === Number(recipeStepId));
+        const currentStep = currentStepIndex >= 0 ? orderedSteps[currentStepIndex] : undefined;
+        if (!currentStep) throw new Error("Step not found in this recipe");
+        setStep(currentStep);
+        setStepNumber(currentStepIndex + 1);
 
         await fetch(`${API_BASE_URL}api/UserCookingSessions/step`, {
           method: "PUT",
@@ -44,7 +50,7 @@ export default function RecipeStepDetail() {
       }
     };
     fetchStep();
-  }, [recipeStepId]);
+  }, [recipeId, recipeStepId]);
 
   if (!step) return <Text>Loading step...</Text>;
 
@@ -71,14 +77,14 @@ export default function RecipeStepDetail() {
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         {/* Step number/title */}
-        <Text style={styles.stepNumber}>Step {step.stepId}</Text>
+        <Text style={styles.stepNumber}>Step {stepNumber ?? 1}</Text>
 
         {/* Step image */}
-        {(step.pictureDirectory || step.pictureDirectory) && (
+        {step.pictureDirectory && (
           <Image
             source={{
               uri: (() => {
-                const rawImage = step.pictureDirectory || step.pictureDirectory;
+                const rawImage = step.pictureDirectory;
                 if (!rawImage) return "";
                 return rawImage.startsWith("http") ? rawImage : `${URL}${rawImage}`;
               })(),

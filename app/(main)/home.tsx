@@ -76,7 +76,6 @@ export default function Home() {
   const [categories, setCategories] = useState<CategoryBoxDto[]>([]);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const [categoryRecipes, setCategoryRecipes] = useState<RecipeBox[]>([]);
-  console.log("Home sees user:", user);
 
   const loadData = async (pageToLoad: number) => {
     if (isLoading) return;
@@ -105,14 +104,7 @@ export default function Home() {
   };
 
   const hasLoaded = useRef(false);
-
-  useEffect(() => {
-    if (hasLoaded.current) return;
-    hasLoaded.current = true;
-    setData([]);
-    setPage(1);
-    loadData(1);
-  }, []);
+  const authDataLoadedForToken = useRef<string | null>(null);
 
   const loadHistory = async () => {
     try {
@@ -141,9 +133,6 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    loadHistory();
-  }, []);
 
   const loadWishlist = async () => {
     try {
@@ -172,9 +161,6 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    loadWishlist();
-  }, []);
 
   const loadCategoryRecipes = async (categoryId: number | null) => {
     if (categoryId === null) {
@@ -193,25 +179,38 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    loadCategoryRecipes(activeCategory);
-  }, [activeCategory]);
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}api/Categories/category/pagination?page=1&pageSize=10&type=recipe`, {
+        headers: { Authorization: `Bearer ${user?.token}` },
+      });
+      if (!res.ok) throw new Error("Failed to load categories");
+      const data: CategoryPagination = await res.json();
+      setCategories(Array.isArray(data.categoryList) ? data.categoryList : []);
+    } catch (err) {
+      console.error("Error loading categories:", err);
+    }
+  };
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await fetch(`${API_BASE_URL}api/Categories/category/pagination?page=1&pageSize=10&type=recipe`, {
-          headers: { Authorization: `Bearer ${user?.token}` },
-        });
-        if (!res.ok) throw new Error("Failed to load categories");
-        const data: CategoryPagination = await res.json();
-        setCategories(Array.isArray(data.categoryList) ? data.categoryList : []);
-      } catch (err) {
-        console.error("Error loading categories:", err);
+    const runHomeEffects = async () => {
+      if (!hasLoaded.current) {
+        hasLoaded.current = true;
+        setData([]);
+        setPage(1);
+        await loadData(1);
       }
+
+      if (user?.token && authDataLoadedForToken.current !== user.token) {
+        authDataLoadedForToken.current = user.token;
+        await Promise.all([loadHistory(), loadWishlist(), fetchCategories()]);
+      }
+
+      await loadCategoryRecipes(activeCategory);
     };
-    fetchCategories();
-  }, []);
+
+    runHomeEffects();
+  }, [activeCategory, user?.token]);
 
   const filteredRecipes = activeCategory ? categoryRecipes : recipes;
 
@@ -391,7 +390,7 @@ export default function Home() {
           />
         </View>
         {/* Categories */}
-        <View style={styles.section}>
+        <View style={[styles.section, { marginBottom: 20 }]}>
           <Text style={styles.sectionTitle}>Popular categories</Text>
           <View style={styles.categoryRow}>
             {categories.map((cat) => (
@@ -424,7 +423,7 @@ export default function Home() {
                   })
                 }
               >
-                <View style={{ width: itemWidth }}>
+                <View style={{ width: itemWidth , marginTop: 10}}>
                   <RecipeCard {...item} />
                 </View>
               </TouchableOpacity>

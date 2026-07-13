@@ -73,6 +73,10 @@ export default function RecipeManagement() {
     }
   };
 
+  const sortRecipesByIdAsc = () => {
+    setRecipes((prev) => [...prev].sort((a, b) => a.recipeId - b.recipeId));
+  };
+
   const createRecipe = async () => {
     try {
       if (!user?.token) {
@@ -220,12 +224,14 @@ export default function RecipeManagement() {
           onSubmitEditing={searchRecipes}
           returnKeyType="search"
         />
-        <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+        <TouchableOpacity onPress={searchRecipes} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <Image source={require("assets/images/Search.png")} style={styles.searchIcon} />
+        </TouchableOpacity>
       </View>
 
       {/* Search + Add New Recipe buttons */}
       <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: 10 }}>
-        <Button title="Filter" onPress={searchRecipes} />
+        <Button title="Filter" onPress={sortRecipesByIdAsc} />
         <Button title="Add New Recipe" onPress={createRecipe} />
       </View>
 

@@ -48,7 +48,7 @@ export default function SettingsPage() {
   // 🔹 Sign out
   const handleLogout = () => {
     setUser(null);
-    router.push("../../(auth)/login")
+    router.push("/(auth)/login");
   };
 
   return (
