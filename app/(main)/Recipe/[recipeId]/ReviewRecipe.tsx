@@ -77,6 +77,21 @@ export default function ReviewRecipe() {
     }
   };
 
+  const submitNoteAndReview = async () => {
+    try {
+      await submitNote();
+    } catch (err) {
+      console.error("Error submitting note (combined):", err);
+      // continue to try submitting review even if note failed
+    }
+
+    try {
+      await submitReview();
+    } catch (err) {
+      console.error("Error submitting review (combined):", err);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -163,7 +178,7 @@ export default function ReviewRecipe() {
       </TouchableOpacity> */}
 
       {/* Submit Button */}
-      <Button title="Submit Review" onPress={submitReview} />
+      <Button title="Submit Review" onPress={submitNoteAndReview} />
 
       <Button
         title="Back to home"

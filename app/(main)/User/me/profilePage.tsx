@@ -137,7 +137,7 @@ export default function ProfilePage() {
   };
 
   const renderRecentItem = ({ item }: { item: RecipeBox }) => (
-    <View style={{ marginTop: 16, marginBottom: 16, position: "relative" }}>
+    <View style={{ marginTop: 16, marginBottom: 16, marginLeft: 12, marginRight: 12, position: "relative" }}>
       <TouchableOpacity
         onPress={() =>
           router.push({
@@ -298,6 +298,7 @@ export default function ProfilePage() {
             <Text style={{ color: "#666", marginTop: 12, textAlign: "center" }}>
               No recipes yet.
             </Text>
+            
           }
         />
       ) : (
@@ -314,30 +315,53 @@ export default function ProfilePage() {
             </Text>
           }
         />
+        
       )}
+<View
+        pointerEvents="box-none"
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 9999,
+          elevation: 9999,
+        }}
+      >
+        {menuVisibleRecipeId !== null && (
+          <OverlayMenu
+            visible={true}
+            onClose={() => {
+              console.log("OverlayMenu onClose");
+              setMenuVisibleRecipeId(null);
+            }}
+            items={[
+              {
+                label: "Edit",
+                onPress: () => {
+                  console.log("OverlayMenu Edit pressed", menuVisibleRecipeId);
+                  handleEditRecipe(menuVisibleRecipeId!);
+                },
+              },
+              {
+                label: "Delete",
+                onPress: () => {
+                  console.log("OverlayMenu Delete pressed", menuVisibleRecipeId);
+                  handleDeleteRecipe(menuVisibleRecipeId!);
+                },
+                destructive: true,
+              },
+            ]}
+          />
+        )}
+      </View>
+
       <View>
         {/* Bottom navigation bar */}
         {user && <NavigationBar user={user} />}
       </View>
-      <OverlayMenu
-        visible={menuVisibleRecipeId !== null}
-        onClose={() => setMenuVisibleRecipeId(null)}
-        items={
-          menuVisibleRecipeId
-            ? [
-                {
-                  label: "Edit",
-                  onPress: () => handleEditRecipe(menuVisibleRecipeId),
-                },
-                {
-                  label: "Delete",
-                  onPress: () => handleDeleteRecipe(menuVisibleRecipeId),
-                  destructive: true,
-                },
-              ]
-            : []
-        }
-      />
+      
     </SafeAreaView>
   );
 }

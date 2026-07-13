@@ -349,17 +349,17 @@ const pickImage = async () => {
         console.error("No recipeId available to delete");
         return false;
       }
-      const res = await fetch(`${API_BASE_URL}api/Recipes/${recipeId}`, {
+      const res = await fetch(`${API_BASE_URL}api/Recipes/soft/recipe-${recipeId}`, {
         method: "DELETE",
         headers: { Authorization: user?.token ? `Bearer ${user.token}` : "" },
       });
       if (!res.ok) {
-        console.error("Hard delete failed");
+        console.error("Delete failed");
         return false;
       }
       return true;
     } catch (err) {
-      console.error("Error hard deleting recipe:", err);
+      console.error("Error deleting recipe:", err);
       return false;
     }
   };
