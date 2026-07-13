@@ -1,11 +1,13 @@
 import { useUser } from "@/components/userContext";
 import type { User } from "@/types";
 import { API_BASE_URL } from "@/utils/apiConfig";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function SettingsPage() {
   const { user, setUser } = useUser(); // ✅ fixed destructuring
+    const router = useRouter();
   const [userInfo, setUserInfo] = useState<User | null>(null);
   const [chartData, setChartData] = useState<number[]>([0, 0, 0, 0, 0]);
 
@@ -46,6 +48,7 @@ export default function SettingsPage() {
   // 🔹 Sign out
   const handleLogout = () => {
     setUser(null);
+    router.push("../../(auth)/login")
   };
 
   return (

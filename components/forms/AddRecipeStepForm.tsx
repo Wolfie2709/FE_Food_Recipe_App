@@ -208,14 +208,14 @@ export default function AddCookingSteps({ recipeId }: Props) {
       }
 
       console.log("All steps saved!");
-      if(user.role === "admin"){
+      if(user?.role === "admin") {
         router.push({
-          pathname:"/(Dashboard)/Recipe/RecipeManagement"
-        })
+          pathname: "../RecipeManagement",
+        });
       } else {
         router.push({
-          pathname:"/(main)/home"
-        })
+          pathname: "/(main)/User/me/profilePage",
+        });
       }
     } catch (err) {
       console.error("Error saving steps:", err);
